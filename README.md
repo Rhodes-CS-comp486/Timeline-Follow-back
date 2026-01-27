@@ -1,4 +1,6 @@
 # Timeline-Follow-back
+
+Planning
 - [Trello Board](https://trello.com/b/tcyX6Hem/senior-sem)
 - [Senior Sem](https://docs.google.com/document/d/1RZ7hgsHVpGZadd8hTEZ75BUZx71xfGUVh7zlhKFYYoE/edit?usp=sharing)
 - [Team Standards](https://docs.google.com/document/d/11vJnfsCzCGU9OZnrNdWIGgBXSqHma-FAt7PTO7oOGII/edit?usp=sharing)
