@@ -8,4 +8,4 @@ Planning
 - [Product Design](https://docs.google.com/document/d/1t0TvrdxhJAA1PJD-_1MGH9RVdClQIZkgSDIoP2J4ruE/edit?usp=sharing)
 
 Sprints
-- [Sprint 1](https://docs.google.com/document/d/10a8ML0ZlPlMTvZuAKKrouOHfeLp4OtrIf0Bou-fFjxg/edit?tab=t.0)
+- [Sprint 1](https://docs.google.com/document/d/10a8ML0ZlPlMTvZuAKKrouOHfeLp4OtrIf0Bou-fFjxg/edit?usp=sharing)
