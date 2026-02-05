@@ -1,0 +1,10 @@
+[
+    {
+        "user_id": 1,
+        "email": "megan@email.com",
+        "first_name": "Megan",
+        "last_name": "Bass",
+        "password": "1234",
+        "is_admin": false
+    }
+]

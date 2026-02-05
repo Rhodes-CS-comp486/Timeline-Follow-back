@@ -1,0 +1,9 @@
+[
+    {
+        "user_id": 1,
+        "entry_id": 1,
+        "money_spent": 25,
+        "num_drinks": 4,
+        "trigger": "friends"
+    }
+]
