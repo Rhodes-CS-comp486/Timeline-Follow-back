@@ -1,86 +1,52 @@
-import json
-import os
+from tinydb import TinyDB, Query
 from datetime import date
+import os
 
-DB_PATH = "db"
+os.makedirs("db", exist_ok=True)
 
-# ---------- FILE HANDLING ----------
-def load_table(filename):
-    with open(os.path.join(DB_PATH, filename), "r") as f:
-        return json.load(f)
+db = TinyDB("db/db.json")
 
-def save_table(filename, data):
-    with open(os.path.join(DB_PATH, filename), "w") as f:
-        json.dump(data, f, indent=4)
+users_table = db.table("users")
+calendar_table = db.table("calendar_entries")
+gambling_table = db.table("gambling")
+alcohol_table = db.table("alcohol")
 
-def get_next_id(records, key):
-    if not records:
-        return 1
-    return max(r[key] for r in records) + 1
-
-# ---------- USERS ----------
 def create_user(email, first_name, last_name, password, is_admin=False):
-    users = load_table("users.json")
+    User = Query()
 
-    if any(u["email"] == email for u in users):
+    if users_table.search(User.email == email):
         raise ValueError("Email already exists")
 
-    user_id = get_next_id(users, "user_id")
+    user_id = len(users_table) + 1
 
-    user = {
+    users_table.insert({
         "user_id": user_id,
         "email": email,
         "first_name": first_name,
         "last_name": last_name,
         "password": password,
         "is_admin": is_admin
-    }
+    })
 
-    users.append(user)
-    save_table("users.json", users)
-    return user
+    return user_id
 
-# ---------- CALENDAR ----------
 def create_calendar_entry(user_id, entry_type):
-    entries = load_table("calendar_entries.json")
+    entry_id = len(calendar_table) + 1
 
-    entry_id = get_next_id(entries, "entry_id")
-
-    entry = {
+    calendar_table.insert({
         "entry_id": entry_id,
         "user_id": user_id,
         "entry_date": str(date.today()),
         "entry_type": entry_type
-    }
+    })
 
-    entries.append(entry)
-    save_table("calendar_entries.json", entries)
-    return entry
+    return entry_id
 
-# ---------- ALCOHOL ----------
-def add_alcohol_entry(user_id, entry_id, money_spent, num_drinks, trigger):
-    alcohol = load_table("alcohol.json")
-
-    record = {
-        "user_id": user_id,
-        "entry_id": entry_id,
-        "money_spent": money_spent,
-        "num_drinks": num_drinks,
-        "trigger": trigger
-    }
-
-    alcohol.append(record)
-    save_table("alcohol.json", alcohol)
-    return record
-
-# ---------- GAMBLING ----------
 def add_gambling_entry(user_id, entry_id, amount_spent, amount_earned,
                        time_spent, gambling_type,
                        emotion_before, emotion_during, emotion_after):
 
-    gambling = load_table("gambling.json")
-
-    record = {
+    gambling_table.insert({
         "user_id": user_id,
         "entry_id": entry_id,
         "amount_spent": amount_spent,
@@ -90,8 +56,13 @@ def add_gambling_entry(user_id, entry_id, amount_spent, amount_earned,
         "emotion_before": emotion_before,
         "emotion_during": emotion_during,
         "emotion_after": emotion_after
-    }
+    })
 
-    gambling.append(record)
-    save_table("gambling.json", gambling)
-    return record
+def add_alcohol_entry(user_id, entry_id, money_spent, num_drinks, trigger):
+    alcohol_table.insert({
+        "user_id": user_id,
+        "entry_id": entry_id,
+        "money_spent": money_spent,
+        "num_drinks": num_drinks,
+        "trigger": trigger
+    })

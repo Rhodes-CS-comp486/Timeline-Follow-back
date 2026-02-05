@@ -1,20 +1,14 @@
 from database import *
 
 # Create user
-user = create_user("megan@email.com", "Megan", "Bass", "1234")
+user_id = create_user("megan@email.com", "Megan", "Bass", "1234")
 
-# Create calendar entry
-entry = create_calendar_entry(user["user_id"], "both")
+# Create entry
+entry_id = create_calendar_entry(user_id, "both")
 
-# Add gambling data
-add_gambling_entry(
-    user["user_id"], entry["entry_id"],
-    100, 20, "3 hours", "slots",
-    "stressed", "excited", "guilty"
-)
+# Add gambling details
+add_gambling_entry(user_id, entry_id, 100, 20, "2 hours", "slots",
+                   "stressed", "excited", "regret")
 
-# Add alcohol data
-add_alcohol_entry(
-    user["user_id"], entry["entry_id"],
-    25, 4, "friends"
-)
+# Add alcohol details
+add_alcohol_entry(user_id, entry_id, 30, 4, "friends")
