@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- this is all for formatting the webpage
+    it adds title to url, fonts from google api and css file
+    the css files and api calls are generated with the help of codex-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline Calendar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <div id="app"></div>
+
+    <template id="base-layout">
+    <!-- navigation panel on top-->
+        <div class="app-shell">
+            <nav class="top-nav" aria-label="Primary">
+                <a class="nav-btn" href="home.html">Home</a>
+                <a class="nav-btn is-active" href="calendar.html">Calendar</a>
+                <a class="nav-btn" href="#">Reports</a>
+                <a class="nav-btn" href="#">Dashboard</a>
+                <a class="nav-btn" href="#">Settings</a>
+            </nav>
+
+            <header class="page-header">
+                <h1>Timeline Follow-Back Calendar</h1>
+                <p class="subtitle">Track your alcohol and gambling behaviors</p>
+            </header>
+
+            <main class="app-main">
+                <aside class="sidebar">
+                    <div class="panel">
+                        <!-- this is a dynamic display, updated by app.js-->
+                        <div class="panel-title">Selected Day</div>
+                        <div class="selected-date" id="selectedDateLabel">Pick a day</div>
+                    </div>
+                    <div class="panel">
+                        <!-- app.js will display the months so the user can select-->
+                        <div class="panel-title">Quick Jump</div>
+                        <div class="month-pill-list" id="monthQuickJump"></div>
+                    </div>
+                    <div data-slot="sidebar-extra"></div>
+                </aside>
+
+                <section class="calendar-area">
+                    <div class="calendar-card">
+                        <div class="calendar-toolbar">
+                            <div class="month-controls">
+                                <!-- toggle bar to go to next month or previous-->
+                                <button class="icon-btn" id="prevMonth" type="button" aria-label="Previous month">&larr;</button>
+                                <div class="month-label" id="monthLabel" aria-live="polite"></div>
+                                <button class="icon-btn" id="nextMonth" type="button" aria-label="Next month">&rarr;</button>
+                            </div>
+                        </div>
+
+                        <div class="weekday-row" role="row">
+                            <span>Sun</span>
+                            <span>Mon</span>
+                            <span>Tue</span>
+                            <span>Wed</span>
+                            <span>Thu</span>
+                            <span>Fri</span>
+                            <span>Sat</span>
+                        </div>
+                        <!-- calendar grid again app.js will fill it up -->
+                        <div class="calendar-grid" id="calendarGrid" aria-live="polite"></div>
+                    </div>
+
+                    <div data-slot="below-calendar"></div>
+                </section>
+            </main>
+        </div>
+    </template>
+
+    <template id="calendar-page"></template>
+
+    <script src="../js/app.js"></script>
+</body>
+</html>
