@@ -20,8 +20,6 @@ const mountApp = () => {
             pageSlots.set(slot.dataset.slot, slot);
         });
 
-        // replace base layout with page slots
-        // as the calendar page is empty right now this logic is doing nothing
         baseFragment.querySelectorAll('[data-slot]').forEach((target) => {
             const name = target.dataset.slot;
             const source = pageSlots.get(name);
@@ -33,13 +31,13 @@ const mountApp = () => {
 
     app.replaceChildren(baseFragment);
 };
-// initialise the calendar  to create and control the dates
+// initialise the calendar to create and control the dates
 const initCalendar = () => {
     // define today at midnight
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // for current date/month/ year
+    // for current date/month/year
     const state = {
         viewYear: today.getFullYear(),
         viewMonth: today.getMonth(),
@@ -53,6 +51,12 @@ const initCalendar = () => {
     const selectedLabel = document.getElementById('selectedDateLabel');
     const quickJump = document.getElementById('monthQuickJump');
 
+    // New Modal Elements
+    const modal = document.getElementById('eventModal');
+    const modalTitle = document.getElementById('modalDateTitle');
+    const closeModalBtn = document.getElementById('closeModal');
+    const activityForm = document.getElementById('activityForm');
+
     if (!monthLabel || !grid || !prevBtn || !nextBtn || !selectedLabel || !quickJump) {
         return;
     }
@@ -62,7 +66,6 @@ const initCalendar = () => {
         'July', 'August', 'September', 'October', 'November', 'December',
     ];
 
-    // helper function to convert js dates
     const toISO = (date) => {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -70,7 +73,6 @@ const initCalendar = () => {
         return `${year}-${month}-${day}`;
     };
 
-    // format the date into readable UI
     const formatReadable = (date) => date.toLocaleDateString('en-US', {
         weekday: 'long',
         month: 'long',
@@ -78,7 +80,6 @@ const initCalendar = () => {
         year: 'numeric',
     });
 
-    // changing which month you're viewing
     const setView = (year, month) => {
         const target = new Date(year, month, 1);
         state.viewYear = target.getFullYear();
@@ -86,12 +87,10 @@ const initCalendar = () => {
         render();
     };
 
-    // change month +1= next month -1 = last month
     const changeMonth = (delta) => {
         setView(state.viewYear, state.viewMonth + delta);
     };
 
-    // to show calendar just for last 3 months
     const renderQuickJump = () => {
         const months = [];
         for (let i = 2; i >= 0; i -= 1) {
@@ -112,7 +111,6 @@ const initCalendar = () => {
         });
     };
 
-    // render the calendar on the grid
     const renderGrid = () => {
         grid.innerHTML = '';
 
@@ -124,9 +122,6 @@ const initCalendar = () => {
             const cellDate = new Date(state.viewYear, state.viewMonth, i - startDay + 1);
             cellDate.setHours(0, 0, 0, 0);
 
-            // show today's date
-            // disable future date selection
-            // add highlight for selected date
             const iso = toISO(cellDate);
             const isCurrentMonth = cellDate.getMonth() === state.viewMonth &&
                 cellDate.getFullYear() === state.viewYear;
@@ -134,7 +129,6 @@ const initCalendar = () => {
             const isFuture = cellDate.getTime() > today.getTime();
             const isSelected = state.selectedISO === iso;
 
-            // add button to click and select the date
             const button = document.createElement('button');
             button.type = 'button';
             button.className = 'day';
@@ -142,25 +136,25 @@ const initCalendar = () => {
             button.dataset.iso = iso;
             button.setAttribute('aria-label', formatReadable(cellDate));
 
-            // apply css based on condition
-            if (!isCurrentMonth) {
-                button.classList.add('day--muted');
-            }
-            if (isToday) {
-                button.classList.add('day--today');
-            }
+            if (!isCurrentMonth) button.classList.add('day--muted');
+            if (isToday) button.classList.add('day--today');
             if (isFuture) {
                 button.classList.add('day--future');
                 button.disabled = true;
             }
-            if (isSelected) {
-                button.classList.add('day--selected');
-            }
+            if (isSelected) button.classList.add('day--selected');
 
             if (!isFuture) {
                 button.addEventListener('click', () => {
                     state.selectedISO = iso;
                     selectedLabel.textContent = formatReadable(cellDate);
+
+                    // Added: Open the Modal when a valid day is clicked
+                    if (modal && modalTitle) {
+                        modalTitle.textContent = `Log Activity for ${iso}`;
+                        modal.style.display = 'flex';
+                    }
+
                     renderGrid();
                 });
             }
@@ -178,6 +172,53 @@ const initCalendar = () => {
         renderGrid();
         renderQuickJump();
     };
+
+    // Added: Event listener to close the popup window
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+    }
+
+    // Added: Event listener for the Activity Form submission
+    // Handle saving the event
+    if (activityForm) {
+        activityForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // 1. Grab the data
+            const payload = {
+                date: state.selectedISO,
+                drinks: document.getElementById('drinksInput').value,
+                money_spent: document.getElementById('moneyInput').value
+            };
+
+            // 2. Close the modal IMMEDIATELY for instant feedback
+            if (modal) {
+                modal.style.display = 'none';
+            }
+
+            // 3. Reset the form for next time
+            activityForm.reset();
+
+            // 4. Send data to backend in the background
+            try {
+                const response = await fetch('/api/log-activity', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    console.log(`Saved entry for ${state.selectedISO}!`);
+                } else {
+                    console.warn('Server did not save the entry.');
+                }
+            } catch (error) {
+                console.error('Error saving data:', error);
+            }
+        });
+    }
 
     prevBtn.addEventListener('click', () => changeMonth(-1));
     nextBtn.addEventListener('click', () => changeMonth(1));
