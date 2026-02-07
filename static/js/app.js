@@ -51,15 +51,43 @@ const initCalendar = () => {
     const selectedLabel = document.getElementById('selectedDateLabel');
     const quickJump = document.getElementById('monthQuickJump');
 
-    // New Modal Elements
+    // Popup Window Elements
     const modal = document.getElementById('eventModal');
     const modalTitle = document.getElementById('modalDateTitle');
     const closeModalBtn = document.getElementById('closeModal');
     const activityForm = document.getElementById('activityForm');
 
+    // Toggling Elements
+    const chkDrinking = document.getElementById('chkDrinking');
+    const chkGambling = document.getElementById('chkGambling');
+    const drinkingSection = document.getElementById('drinkingSection');
+    const gamblingSection = document.getElementById('gamblingSection');
+
     if (!monthLabel || !grid || !prevBtn || !nextBtn || !selectedLabel || !quickJump) {
         return;
     }
+
+    const toggleSection = (checkbox, section) => {
+        if (!checkbox || !section) return;
+
+        // Find every input inside this specific div
+        const inputs = section.querySelectorAll('input, select, textarea');
+
+        if (checkbox.checked) {
+            section.classList.remove('section-disabled'); // Removes the grey-out CSS
+            inputs.forEach(input => input.disabled = false); // Allows typing
+        }
+        else {
+            section.classList.add('section-disabled');    // Adds the grey-out CSS
+            inputs.forEach(input => input.disabled = true);  // Prevents typing
+        }
+    };
+    const resetFormState = () => {
+        if (activityForm) activityForm.reset();
+        // Force the sections back to their "locked" state
+        toggleSection(chkDrinking, drinkingSection);
+        toggleSection(chkGambling, gamblingSection);
+    };
 
     const monthNames = [
         'January', 'February', 'March', 'April', 'May', 'June',
@@ -152,6 +180,7 @@ const initCalendar = () => {
                     // Added: Open the Modal when a valid day is clicked
                     if (modal && modalTitle) {
                         modalTitle.textContent = `Log Activity for ${iso}`;
+                        resetFormState()
                         modal.style.display = 'flex';
                     }
 
@@ -173,6 +202,10 @@ const initCalendar = () => {
         renderQuickJump();
     };
 
+    /*
+        Everything related to event listeners
+     */
+
     // Added: Event listener to close the popup window
     if (closeModalBtn) {
         closeModalBtn.addEventListener('click', () => {
@@ -180,26 +213,47 @@ const initCalendar = () => {
         });
     }
 
+    // Listen for clicks on the Drinking checkbox
+    if (chkDrinking) {
+        chkDrinking.addEventListener('change', () => toggleSection(chkDrinking, drinkingSection));
+    }
+    // Listen for clicks on the Gambling checkbox
+    if (chkGambling) {
+        chkGambling.addEventListener('change', () => toggleSection(chkGambling, gamblingSection));
+    }
     // Added: Event listener for the Activity Form submission
     // Handle saving the event
     if (activityForm) {
         activityForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // 1. Grab the data
+            // Base payload is the date, else this payload does not exist
             const payload = {
-                date: state.selectedISO,
-                drinks: document.getElementById('drinksInput').value,
-                money_spent: document.getElementById('moneyInput').value
+                date: state.selectedISO
             };
 
-            // 2. Close the modal IMMEDIATELY for instant feedback
+            // Is drinking checked? If true then save data related to it
+            if (chkDrinking.checked) {
+                payload.drinks = document.getElementById('drinksInput').value;
+                payload.drinks_cost = document.getElementById('drinksCost').value;
+                payload.drink_trigger = document.getElementById('drinkTrigger').value;
+            }
+
+            // Same for gambling
+            if (chkGambling.checked) {
+                payload.money_spent = document.getElementById('moneyInputSpent').value;
+                payload.money_earned = document.getElementById('moneyInputEarned').value;
+                payload.time_spent = document.getElementById('timeSpent').value;
+                payload.emotion_before = document.getElementById('emotionBefore').value;
+                payload.emotion_during = document.getElementById('emotionDuring').value;
+                payload.emotion_after = document.getElementById('emotionAfter').value;
+            }
+
             if (modal) {
                 modal.style.display = 'none';
             }
 
-            // 3. Reset the form for next time
-            activityForm.reset();
+            resetFormState()
 
             // 4. Send data to backend in the background
             try {
@@ -224,6 +278,7 @@ const initCalendar = () => {
     nextBtn.addEventListener('click', () => changeMonth(1));
 
     render();
+    resetFormState()
 };
 
 mountApp();

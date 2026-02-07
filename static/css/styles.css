@@ -386,6 +386,10 @@ button:focus-visible {
     width: 90%;
     max-width: 400px;
     box-shadow: var(--shadow);
+    max-height: 90vh;       /* Never taller than 90% of view */
+    overflow-y: auto;       /* Scroll inside if too tall */
+    display: flex;
+    flex-direction: column;
 }
 
 .modal-input {
@@ -404,4 +408,12 @@ button:focus-visible {
 
 .modal-actions button {
     flex: 1;
+}
+
+/* Visual style for disabled sections */
+.section-disabled {
+    opacity: 0.3;              /* Makes it look faded/gray */
+    pointer-events: none;      /* Prevents clicking or typing */
+    user-select: none;         /* Prevents highlighting text */
+    filter: grayscale(100%);   /* Optional: Removes all color */
 }

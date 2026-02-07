@@ -19,7 +19,6 @@ def log_activity():
 
     # Printing in JSON style to verify
     print(f"JSON Data: {data}")
-
     return jsonify({
         "status": "success",
         "message": "Event logged successfully",
@@ -29,5 +28,5 @@ def log_activity():
 # This function saves the data from log_activity() to the db
 # Parameters: JSON format
 # Returns: True on success and False on failure
-def save_activity():
+def save_activity(activity: dict):
     pass

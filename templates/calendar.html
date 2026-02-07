@@ -62,19 +62,66 @@
         </div>
 
         <!-- This is the popup window to log events -->
-
         <div id="eventModal" class="modal-overlay" style="display: none;">
             <div class="modal-content">
                 <div class="panel-title" id="modalDateTitle">Log Activity</div>
+
                 <form id="activityForm">
-                    <div class="form-group">
-                        <label for="drinksInput">Drinks Consumed:</label>
-                        <input type="text" inputmode="numeric" id="drinksInput" placeholder="how many drinks (e.g. 5)" class="modal-input">
+                    <div class="category-toggles">
+                        <label>
+                            <input type="checkbox" id="chkDrinking"> Drinking
+                        </label>
+                        <label>
+                            <input type="checkbox" id="chkGambling"> Gambling
+                        </label>
                     </div>
-                    <div class="form-group">
-                        <label for="moneyInput">Money Gambled ($):</label>
-                        <input type="text" inputmode="decimal" id="moneyInput" placeholder="how much money (e.g. $100)" class="modal-input">
+
+                    <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+
+                    <div id="drinkingSection">
+                        <div class="form-group">
+                            <label for="drinksInput">Drinks Consumed:</label>
+                            <input type="text" inputmode="numeric" id="drinksInput" placeholder="how many drinks (e.g. 5)" class="modal-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="drinksCost">Cost of drinks:</label>
+                            <input type="text" inputmode="numeric" id="drinksCost" placeholder="how much money (e.g. $100)" class="modal-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="drinkTrigger">Drink Trigger:</label>
+                            <input type="text" inputmode="numeric" id="drinkTrigger" placeholder="smell, taste, social pressure" class="modal-input">
+                        </div>
                     </div>
+
+                    <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+
+                    <div id="gamblingSection">
+                        <div class="form-group">
+                            <label for="moneyInputSpent">Money Gambled:</label>
+                            <input type="text" inputmode="decimal" id="moneyInputSpent" placeholder="how much money (e.g. $100)" class="modal-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="moneyInputEarned">Money Earned:</label>
+                            <input type="text" inputmode="decimal" id="moneyInputEarned" placeholder="how much money (e.g. $100)" class="modal-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="timeSpent">Time Spent:</label>
+                            <input type="text" inputmode="decimal" id="timeSpent" placeholder="how much time (e.g. 1, 2, 10)" class="modal-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="emotionBefore">Emotion Before:</label>
+                            <input type="text" inputmode="decimal" id="emotionBefore" placeholder="e.g. sad, happy, anxious" class="modal-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="emotionDuring">Emotion During:</label>
+                            <input type="text" inputmode="decimal" id="emotionDuring" placeholder="e.g. sad, happy, anxious" class="modal-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="emotionAfter">Emotion After:</label>
+                            <input type="text" inputmode="decimal" id="emotionAfter" placeholder="e.g. sad, happy, anxious" class="modal-input">
+                        </div>
+                    </div>
+
                     <div class="modal-actions">
                         <button type="button" class="nav-btn" id="closeModal">Cancel</button>
                         <button type="submit" class="nav-btn is-active">Save Entry</button>
