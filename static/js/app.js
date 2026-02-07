@@ -234,6 +234,7 @@ const initCalendar = () => {
 
             // Is drinking checked? If true then save data related to it
             if (chkDrinking.checked) {
+                payload.type = "drinking";
                 payload.drinks = document.getElementById('drinksInput').value;
                 payload.drinks_cost = document.getElementById('drinksCost').value;
                 payload.drink_trigger = document.getElementById('drinkTrigger').value;
@@ -241,6 +242,7 @@ const initCalendar = () => {
 
             // Same for gambling
             if (chkGambling.checked) {
+                payload.type = "gambling";
                 payload.money_spent = document.getElementById('moneyInputSpent').value;
                 payload.money_earned = document.getElementById('moneyInputEarned').value;
                 payload.time_spent = document.getElementById('timeSpent').value;
@@ -255,11 +257,12 @@ const initCalendar = () => {
 
             resetFormState()
 
-            // 4. Send data to backend in the background
+            // Send data to backend in the background => route: log-activity
             try {
                 const response = await fetch('/api/log-activity', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    // sending the payload
                     body: JSON.stringify(payload)
                 });
 
