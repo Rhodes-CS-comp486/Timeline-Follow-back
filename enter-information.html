@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Enter Information</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<nav>
+    <a href="/">Calendar</a>
+</nav>
+
+<header>
+    <h1>Enter Information</h1>
+    <p>Create a user and log daily activity</p>
+</header>
+
+<main>
+<form id="entry-form">
+
+    <!-- ================= USER INFO ================= -->
+    <fieldset>
+        <legend>User Information</legend>
+
+        <label>Email</label><br>
+        <input type="email" id="email" required><br><br>
+
+        <label>First Name</label><br>
+        <input type="text" id="first-name" required><br><br>
+
+        <label>Last Name</label><br>
+        <input type="text" id="last-name" required><br><br>
+
+        <label>Password</label><br>
+        <input type="password" id="password" required><br><br>
+
+        <label>
+            <input type="checkbox" id="is-admin">
+            Admin User
+        </label>
+    </fieldset>
+
+    <br>
+
+    <!-- ================= CALENDAR ENTRY ================= -->
+    <fieldset>
+        <legend>Daily Entry</legend>
+
+        <label>Date</label><br>
+        <input type="date" id="entry-date" required><br><br>
+
+        <label>Entry Type</label><br>
+        <select id="entry-type" required>
+            <option value="">Select one</option>
+            <option value="gambling">Gambling</option>
+            <option value="alcohol">Alcohol</option>
+            <option value="both">Both</option>
+        </select>
+    </fieldset>
+
+    <br>
+
+    <!-- ================= GAMBLING ================= -->
+    <fieldset>
+        <legend>Gambling Details</legend>
+
+        <label>Amount Spent ($)</label><br>
+        <input type="number" id="amount-spent" step="0.01"><br><br>
+
+        <label>Amount Earned ($)</label><br>
+        <input type="number" id="amount-earned" step="0.01"><br><br>
+
+        <label>Time Spent</label><br>
+        <input type="text" id="time-spent"><br><br>
+
+        <label>Type of Gambling</label><br>
+        <input type="text" id="gambling-type"><br><br>
+
+        <label>Emotion Before</label><br>
+        <input type="text" id="emotion-before"><br><br>
+
+        <label>Emotion During</label><br>
+        <input type="text" id="emotion-during"><br><br>
+
+        <label>Emotion After</label><br>
+        <input type="text" id="emotion-after">
+    </fieldset>
+
+    <br>
+
+    <!-- ================= ALCOHOL ================= -->
+    <fieldset>
+        <legend>Alcohol Details</legend>
+
+        <label>Money Spent ($)</label><br>
+        <input type="number" id="money-spent" step="0.01"><br><br>
+
+        <label>Number of Drinks</label><br>
+        <input type="number" id="num-drinks"><br><br>
+
+        <label>Trigger</label><br>
+        <input type="text" id="trigger">
+    </fieldset>
+
+    <br>
+
+    <button type="submit">Save Entry</button>
+
+</form>
+</main>
+
+<script src="/js/app.js"></script>
+
+</body>
+</html>
