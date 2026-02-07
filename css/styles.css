@@ -1,0 +1,94 @@
+/* Generated with assistance from Claude AI */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+    background: #1a1a1a;
+    min-height: 100vh;
+    padding: 20px;
+    color: #e8e8e8;
+}
+
+header {
+    text-align: center;
+    padding: 40px 20px;
+    background: #2d2d2d;
+    border-radius: 16px;
+    margin-bottom: 30px;
+    border: 1px solid #3a3a3a;
+}
+
+header h1 {
+    font-size: 2.5em;
+    color: #d4a574;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+header p {
+    font-size: 1.1em;
+    color: #b8b8b8;
+    font-weight: 400;
+}
+
+main {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: #2d2d2d;
+    padding: 40px;
+    border-radius: 16px;
+    border: 1px solid #3a3a3a;
+}
+
+#calendar-container {
+    min-height: 600px;
+    padding: 20px;
+    background: #242424;
+    border-radius: 12px;
+    border: 1px solid #3a3a3a;
+}
+
+/* Warm accent colors for future use */
+.accent-primary {
+    color: #d4a574;
+}
+
+.accent-secondary {
+    color: #b8956f;
+}
+
+/* Button styling for future elements */
+button {
+    background: #d4a574;
+    color: #1a1a1a;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+button:hover {
+    background: #e0b682;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(212, 165, 116, 0.3);
+}
+
+/* Subtle text styles */
+.subtitle {
+    color: #b8b8b8;
+    font-size: 0.95em;
+}
+
+.instructions {
+    color: #999999;
+    font-size: 0.9em;
+    line-height: 1.6;
+}
