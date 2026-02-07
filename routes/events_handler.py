@@ -69,7 +69,7 @@ def save_activity(activity: dict):
                 amount_spent = activity.get("money_spent", None),
                 amount_earned = activity.get("money_earned", None),
                 time_spent = activity.get("time_spent", None),
-                gambling_type = activity.get("gambling_type", "Unknown"),
+                gambling_type = activity.get("gambling_type", None),
                 emotion_before = activity.get("emotion_before", None),
                 emotion_during = activity.get("emotion_during", None),
                 emotion_after = activity.get("emotion_after", None)

@@ -243,6 +243,7 @@ const initCalendar = () => {
             // Same for gambling
             if (chkGambling.checked) {
                 payload.type = "gambling";
+                payload.gambling_type = document.getElementById('gamblingType').value;
                 payload.money_spent = document.getElementById('moneyInputSpent').value;
                 payload.money_earned = document.getElementById('moneyInputEarned').value;
                 payload.time_spent = document.getElementById('timeSpent').value;
