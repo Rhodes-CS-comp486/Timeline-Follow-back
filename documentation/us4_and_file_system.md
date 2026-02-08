@@ -20,7 +20,7 @@
 * func: index() is usually the name of the function used to render the main website's html.
 * routes: To connect your backend flask function to your frontend JS and HTML indicate the route that the JS is fetching data to.
 ```python
-# the fetch function indicate the route "/api/log-activity"
+# the fetch function indicate the route "/api/log-activity" (this is in the JS code)
  await fetch('/api/log-activity', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
