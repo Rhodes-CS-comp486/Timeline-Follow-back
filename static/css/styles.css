@@ -363,3 +363,57 @@ button:focus-visible {
     align-items: center;
     justify-content: center;
 }
+
+/* Modal Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Modal Box */
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: var(--shadow);
+    max-height: 90vh;       /* Never taller than 90% of view */
+    overflow-y: auto;       /* Scroll inside if too tall */
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0 20px 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.modal-actions button {
+    flex: 1;
+}
+
+/* Visual style for disabled sections */
+.section-disabled {
+    opacity: 0.3;              /* Makes it look faded/gray */
+    pointer-events: none;      /* Prevents clicking or typing */
+    user-select: none;         /* Prevents highlighting text */
+    filter: grayscale(100%);   /* Optional: Removes all color */
+}

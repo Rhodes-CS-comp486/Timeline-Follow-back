@@ -20,8 +20,6 @@ const mountApp = () => {
             pageSlots.set(slot.dataset.slot, slot);
         });
 
-        // replace base layout with page slots
-        // as the calendar page is empty right now this logic is doing nothing
         baseFragment.querySelectorAll('[data-slot]').forEach((target) => {
             const name = target.dataset.slot;
             const source = pageSlots.get(name);
@@ -33,13 +31,13 @@ const mountApp = () => {
 
     app.replaceChildren(baseFragment);
 };
-// initialise the calendar  to create and control the dates
+// initialise the calendar to create and control the dates
 const initCalendar = () => {
     // define today at midnight
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // for current date/month/ year
+    // for current date/month/year
     const state = {
         viewYear: today.getFullYear(),
         viewMonth: today.getMonth(),
@@ -53,16 +51,49 @@ const initCalendar = () => {
     const selectedLabel = document.getElementById('selectedDateLabel');
     const quickJump = document.getElementById('monthQuickJump');
 
+    // Popup Window Elements
+    const modal = document.getElementById('eventModal');
+    const modalTitle = document.getElementById('modalDateTitle');
+    const closeModalBtn = document.getElementById('closeModal');
+    const activityForm = document.getElementById('activityForm');
+
+    // Toggling Elements
+    const chkDrinking = document.getElementById('chkDrinking');
+    const chkGambling = document.getElementById('chkGambling');
+    const drinkingSection = document.getElementById('drinkingSection');
+    const gamblingSection = document.getElementById('gamblingSection');
+
     if (!monthLabel || !grid || !prevBtn || !nextBtn || !selectedLabel || !quickJump) {
         return;
     }
+
+    const toggleSection = (checkbox, section) => {
+        if (!checkbox || !section) return;
+
+        // Find every input inside this specific div
+        const inputs = section.querySelectorAll('input, select, textarea');
+
+        if (checkbox.checked) {
+            section.classList.remove('section-disabled'); // Removes the grey-out CSS
+            inputs.forEach(input => input.disabled = false); // Allows typing
+        }
+        else {
+            section.classList.add('section-disabled');    // Adds the grey-out CSS
+            inputs.forEach(input => input.disabled = true);  // Prevents typing
+        }
+    };
+    const resetFormState = () => {
+        if (activityForm) activityForm.reset();
+        // Force the sections back to their "locked" state
+        toggleSection(chkDrinking, drinkingSection);
+        toggleSection(chkGambling, gamblingSection);
+    };
 
     const monthNames = [
         'January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December',
     ];
 
-    // helper function to convert js dates
     const toISO = (date) => {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -70,7 +101,6 @@ const initCalendar = () => {
         return `${year}-${month}-${day}`;
     };
 
-    // format the date into readable UI
     const formatReadable = (date) => date.toLocaleDateString('en-US', {
         weekday: 'long',
         month: 'long',
@@ -78,7 +108,6 @@ const initCalendar = () => {
         year: 'numeric',
     });
 
-    // changing which month you're viewing
     const setView = (year, month) => {
         const target = new Date(year, month, 1);
         state.viewYear = target.getFullYear();
@@ -86,12 +115,10 @@ const initCalendar = () => {
         render();
     };
 
-    // change month +1= next month -1 = last month
     const changeMonth = (delta) => {
         setView(state.viewYear, state.viewMonth + delta);
     };
 
-    // to show calendar just for last 3 months
     const renderQuickJump = () => {
         const months = [];
         for (let i = 2; i >= 0; i -= 1) {
@@ -112,7 +139,6 @@ const initCalendar = () => {
         });
     };
 
-    // render the calendar on the grid
     const renderGrid = () => {
         grid.innerHTML = '';
 
@@ -124,9 +150,6 @@ const initCalendar = () => {
             const cellDate = new Date(state.viewYear, state.viewMonth, i - startDay + 1);
             cellDate.setHours(0, 0, 0, 0);
 
-            // show today's date
-            // disable future date selection
-            // add highlight for selected date
             const iso = toISO(cellDate);
             const isCurrentMonth = cellDate.getMonth() === state.viewMonth &&
                 cellDate.getFullYear() === state.viewYear;
@@ -134,7 +157,6 @@ const initCalendar = () => {
             const isFuture = cellDate.getTime() > today.getTime();
             const isSelected = state.selectedISO === iso;
 
-            // add button to click and select the date
             const button = document.createElement('button');
             button.type = 'button';
             button.className = 'day';
@@ -142,25 +164,26 @@ const initCalendar = () => {
             button.dataset.iso = iso;
             button.setAttribute('aria-label', formatReadable(cellDate));
 
-            // apply css based on condition
-            if (!isCurrentMonth) {
-                button.classList.add('day--muted');
-            }
-            if (isToday) {
-                button.classList.add('day--today');
-            }
+            if (!isCurrentMonth) button.classList.add('day--muted');
+            if (isToday) button.classList.add('day--today');
             if (isFuture) {
                 button.classList.add('day--future');
                 button.disabled = true;
             }
-            if (isSelected) {
-                button.classList.add('day--selected');
-            }
+            if (isSelected) button.classList.add('day--selected');
 
             if (!isFuture) {
                 button.addEventListener('click', () => {
                     state.selectedISO = iso;
                     selectedLabel.textContent = formatReadable(cellDate);
+
+                    // Added: Open the Modal when a valid day is clicked
+                    if (modal && modalTitle) {
+                        modalTitle.textContent = `Log Activity for ${iso}`;
+                        resetFormState()
+                        modal.style.display = 'flex';
+                    }
+
                     renderGrid();
                 });
             }
@@ -179,10 +202,87 @@ const initCalendar = () => {
         renderQuickJump();
     };
 
+    /*
+        Everything related to event listeners
+     */
+
+    // Added: Event listener to close the popup window
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+    }
+
+    // Listen for clicks on the Drinking checkbox
+    if (chkDrinking) {
+        chkDrinking.addEventListener('change', () => toggleSection(chkDrinking, drinkingSection));
+    }
+    // Listen for clicks on the Gambling checkbox
+    if (chkGambling) {
+        chkGambling.addEventListener('change', () => toggleSection(chkGambling, gamblingSection));
+    }
+    // Added: Event listener for the Activity Form submission
+    // Handle saving the event
+    if (activityForm) {
+        activityForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Base payload is the date, else this payload does not exist
+            const payload = {
+                date: state.selectedISO
+            };
+
+            // Is drinking checked? If true then save data related to it
+            if (chkDrinking.checked) {
+                payload.type = "drinking";
+                payload.drinks = document.getElementById('drinksInput').value;
+                payload.drinks_cost = document.getElementById('drinksCost').value;
+                payload.drink_trigger = document.getElementById('drinkTrigger').value;
+            }
+
+            // Same for gambling
+            if (chkGambling.checked) {
+                payload.type = "gambling";
+                payload.gambling_type = document.getElementById('gamblingType').value;
+                payload.money_spent = document.getElementById('moneyInputSpent').value;
+                payload.money_earned = document.getElementById('moneyInputEarned').value;
+                payload.time_spent = document.getElementById('timeSpent').value;
+                payload.emotion_before = document.getElementById('emotionBefore').value;
+                payload.emotion_during = document.getElementById('emotionDuring').value;
+                payload.emotion_after = document.getElementById('emotionAfter').value;
+            }
+
+            if (modal) {
+                modal.style.display = 'none';
+            }
+
+            resetFormState()
+
+            // Send data to backend in the background => route: log-activity
+            try {
+                const response = await fetch('/api/log-activity', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    // sending the payload
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    console.log(`Saved entry for ${state.selectedISO}!`);
+                } else {
+                    console.warn('Server did not save the entry.');
+                }
+            } catch (error) {
+                console.error('Error saving data:', error);
+            }
+        });
+    }
+
     prevBtn.addEventListener('click', () => changeMonth(-1));
     nextBtn.addEventListener('click', () => changeMonth(1));
 
     render();
+    resetFormState()
 };
 
 mountApp();

@@ -10,14 +10,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
-<!-- main body of the home page including the links-->>
 <body>
     <div class="app-shell">
         <nav class="top-nav" aria-label="Primary">
-            <a class="nav-btn is-active" href="home.html">Home</a>
-            <a class="nav-btn" href="calendar.html">Calendar</a>
+            <a class="nav-btn is-active" href="{{ url_for('home') }}">Home</a>
+            <a class="nav-btn" href="{{ url_for('calendar') }}">Calendar</a>
             <a class="nav-btn" href="#">Reports</a>
             <a class="nav-btn" href="#">Dashboard</a>
             <a class="nav-btn" href="#">Settings</a>
@@ -27,8 +26,6 @@
             <h1>Timeline Follow-Back</h1>
             <p class="subtitle">Track your alcohol and gambling behaviors</p>
         </header>
-
-
     </div>
 </body>
 </html>
