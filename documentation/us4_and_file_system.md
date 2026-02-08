@@ -11,3 +11,24 @@
 
 ### My modification:
 * Apart from the file organization changes I added code to **“app.js”** to handle behaviors related to the popup window to add events and the **“events_bp”** blueprint.
+
+
+---
+
+### Flask routes and functions:
+
+* func: index() is usually the name of the function used to render the main website's html.
+* routes: To connect your backend flask function to your frontend JS and HTML indicate the route that the JS is fetching data to.
+```python
+# the fetch function indicate the route "/api/log-activity"
+ await fetch('/api/log-activity', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    // sending the payload
+                    body: JSON.stringify(payload)
+                });
+                
+# now in our blueprint python file if we want to fetch that data indicate the same (relative is okay) path:
+@events_handler_bp.route('/log-activity', methods=['POST'])
+def log_activity():
+    pass
