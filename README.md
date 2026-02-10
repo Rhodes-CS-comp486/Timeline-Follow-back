@@ -9,3 +9,4 @@ Planning
 
 Sprints
 - [Sprint 1](https://docs.google.com/document/d/10a8ML0ZlPlMTvZuAKKrouOHfeLp4OtrIf0Bou-fFjxg/edit?usp=sharing)
+- [Sprint 2](https://docs.google.com/document/d/10DOS5v4IT1fR6m0kvhi1vDr2VwHIyLmCBo4GbKtfjGE/edit?usp=sharing)
