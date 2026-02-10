@@ -254,7 +254,7 @@ button {
 }
 
 .day {
-    min-height: 56px;
+    min-height: 100px;
     border-radius: 16px;
     border: 1px solid transparent;
     background: #f7f8f7;
