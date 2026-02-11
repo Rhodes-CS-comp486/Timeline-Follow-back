@@ -102,6 +102,10 @@ body::after {
     box-shadow: var(--shadow);
 }
 
+.logo {
+    margin-bottom: 12px;
+}
+
 .page-header h1 {
     font-family: var(--font-heading);
     font-size: 28px;
@@ -112,6 +116,14 @@ body::after {
 .subtitle {
     color: var(--muted);
     font-size: 15px;
+}
+
+.description {
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 520px;
+    margin: 12px auto 0;
+    line-height: 1.6;
 }
 
 button {
@@ -270,14 +282,21 @@ button {
     transform: translateY(-1px);
 }
 
+.day--empty {
+    background: transparent;
+    border: none;
+    cursor: default;
+    pointer-events: none;
+}
+
 .day--muted {
     color: var(--muted);
     background: #f0f1f0;
 }
 
 .day--today {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 2px var(--ring);
+    border: 2px solid var(--accent);
+    box-shadow: none;
 }
 
 .day--selected {
@@ -298,6 +317,69 @@ button {
 .day:disabled:hover {
     border-color: transparent;
     transform: none;
+}
+
+/* Holiday styling */
+.day--holiday {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.day-number {
+    font-weight: 600;
+}
+
+.holiday-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #c05e1a;
+    line-height: 1.2;
+    text-align: center;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.day--selected .holiday-label {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.day--future.day--holiday .holiday-label {
+    color: #9aa0a6;
+}
+
+/* Entry summary sidebar */
+.entry-summary {
+    margin-top: 8px;
+}
+
+.entry-empty {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.entry-section {
+    margin-bottom: 12px;
+}
+
+.entry-section-title {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--primary-strong);
+    margin-bottom: 4px;
+}
+
+.entry-row {
+    font-size: 14px;
+    padding: 2px 0;
+}
+
+.entry-label {
+    font-weight: 600;
 }
 
 button:focus-visible {
