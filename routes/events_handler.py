@@ -70,9 +70,8 @@ def save_activity(activity: dict):
                 amount_earned = activity.get("money_earned", None),
                 time_spent = activity.get("time_spent", None),
                 gambling_type = activity.get("gambling_type", None),
-                emotion_before = activity.get("emotion_before", None),
-                emotion_during = activity.get("emotion_during", None),
-                emotion_after = activity.get("emotion_after", None)
+                money_intended = activity.get("money_intended", None),
+                drinks_while_gambling = activity.get("drinks_while_gambling", None)
             )
 
         elif entry_type == "drinking":

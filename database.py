@@ -58,9 +58,8 @@ def add_gambling_entry(
     amount_earned,
     time_spent,
     gambling_type,
-    emotion_before,
-    emotion_during,
-    emotion_after
+    money_intended,
+    drinks_while_gambling
 ):
 
     gambling_table.insert({
@@ -70,9 +69,8 @@ def add_gambling_entry(
         "amount_earned": float(amount_earned),
         "time_spent": time_spent,
         "gambling_type": gambling_type,
-        "emotion_before": emotion_before,
-        "emotion_during": emotion_during,
-        "emotion_after": emotion_after
+        "money_intended": money_intended,
+        "drinks_while_gambling": drinks_while_gambling
     })
 
 
