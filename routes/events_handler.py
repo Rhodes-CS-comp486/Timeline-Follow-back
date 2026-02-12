@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from database_old import create_calendar_entry, add_gambling_entry, add_alcohol_entry
+from database.db_helper import create_calendar_entry, add_gambling_entry, add_alcohol_entry
 
 # Create a blueprint to handle events, this will be called in app.py
 events_handler_bp = Blueprint('events_handler', __name__)
@@ -52,41 +52,40 @@ def save_activity(activity: dict):
 
         # Set this to default user if there's no user
         if not user_id:
-            user_id = "default"
-
-        # Debug here
-        #print(activity)
-        #print("Debug:", user_id, entry_date, entry_type)
+            user_id = 1
 
         # create calendar entry
         entry_id = create_calendar_entry(user_id, entry_type, entry_date)
+
+        if not entry_id:
+            raise Exception("Failed to create CalendarEntry")
 
         # Extract all the information from our form
         if entry_type == "gambling":
             add_gambling_entry(
                 user_id = user_id,
                 entry_id = entry_id,
-                amount_spent = activity.get("money_spent", None),
-                amount_earned = activity.get("money_earned", None),
-                time_spent = activity.get("time_spent", None),
-                gambling_type = activity.get("gambling_type", None),
-                emotion_before = activity.get("emotion_before", None),
-                emotion_during = activity.get("emotion_during", None),
-                emotion_after = activity.get("emotion_after", None)
+                amount_spent = activity.get("money_spent", 0),
+                amount_earned = activity.get("money_earned", 0),
+                time_spent = activity.get("time_spent"),
+                gambling_type = activity.get("gambling_type"),
+                emotion_before = activity.get("emotion_before"),
+                emotion_during = activity.get("emotion_during"),
+                emotion_after = activity.get("emotion_after")
             )
 
         elif entry_type == "drinking":
             add_alcohol_entry(
                 user_id = user_id,
                 entry_id = entry_id,
-                money_spent = activity.get("drinks_cost", None),
-                num_drinks = activity.get("drinks", None),
-                trigger = activity.get("drink_trigger", None)
+                money_spent = activity.get("drinks_cost", 0),
+                num_drinks = activity.get("drinks", 0),
+                trigger = activity.get("drink_trigger")
             )
 
         # If we reached here, everything inserted correctly
         return True
 
     except Exception as e:
-        print(f"Database Save Error: {e}")
+        print(f"Postgres Save Error: {e}")
         return False

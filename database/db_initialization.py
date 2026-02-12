@@ -27,14 +27,16 @@ class CalendarEntry(db.Model):
 # create a gambling table that stores all gambling information
 class Gambling(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    entry_id = db.Column(db.Integer, db.ForeignKey('calendar_entry.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     gambling_questions = db.Column(db.JSON)
 
 # create a drinking table that stores all drinking information
 class Drinking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    entry_id = db.Column(db.Integer, db.ForeignKey('calendar_entry.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    drink_questions = db.Column(db.JSON)
+    drinking_questions = db.Column(db.JSON)
 
 
 

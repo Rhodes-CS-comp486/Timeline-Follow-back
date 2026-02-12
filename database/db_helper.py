@@ -34,6 +34,10 @@ def add_gambling_entry(
     emotion_during,
     emotion_after
 ):
+    # Ensure entry_id is an int, not an object
+    if hasattr(entry_id, 'id'):
+        entry_id = entry_id.id
+
     # Create a dictionary "aka JSON"
     gambling_json_content = {
         "user_id": user_id,  # Redundant consider removing
@@ -50,6 +54,7 @@ def add_gambling_entry(
     new_gambling_entry = Gambling(
         user_id=user_id,
         entry_id=entry_id,
+        id=entry_id,
         gambling_questions=gambling_json_content
     )
 
@@ -62,6 +67,10 @@ def add_alcohol_entry(
     num_drinks,
     trigger
 ):
+    # Ensure entry_id is an int, not an object
+    if hasattr(entry_id, 'id'):
+        entry_id = entry_id.id
+
     drinking_json_content = {
         "user_id": user_id,
         "entry_id": entry_id,
@@ -71,6 +80,7 @@ def add_alcohol_entry(
     }
 
     new_alcohol_entry = Drinking(user_id=user_id,
+                                 id=entry_id,
                                  entry_id=entry_id,
                                  drinking_questions=drinking_json_content)
 
@@ -82,7 +92,7 @@ def commit_to_db(new_entry):
     try:
         db.session.add(new_entry)
         db.session.commit()
-        print("Successfully commited to database")
+        print(f"Successfully commited {new_entry} to database")
         return new_entry
     # This super cool rollback makes sure nothing is commited if this goes wrong
     except Exception as e:

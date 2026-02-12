@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 from flask import Flask, render_template
 from database.db_initialization import db
 import os
+from sqlalchemy import inspect, text
 
 # To create and import BP use the following convention
 from routes.events_handler import events_handler_bp
@@ -31,16 +32,19 @@ db.init_app(app)
 with app.app_context():
     '''
     print(f"--- CONNECTION CHECK ---")
-    print(f"Database: {database.engine.url.database}")
-    print(f"Host: {database.engine.url.host}")
-    print(f"Username: {database.engine.url.username}")
+    print(f"Database: {db.engine.url.database}")
+    print(f"Host: {db.engine.url.host}")
+    print(f"Username: {db.engine.url.username}")
     print("Create new database columns and rows")
     '''
     db.create_all()
     '''
     # This reflects the database schema and prints table names
-    inspector = inspect(database.engine)
-    print(f"Tables found: {inspector.get_table_names()}")'''
+    inspector = inspect(db.engine)
+    print(f"Tables found: {inspector.get_table_names()}")
+    print("Database synced! Models now match the Postgres schema.")
+    '''
+
 
 
 
