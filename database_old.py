@@ -1,10 +1,10 @@
 from tinydb import TinyDB, Query
 import os
 
-# Create db folder if missing
-os.makedirs("db", exist_ok=True)
+# Create database folder if missing
+os.makedirs("database", exist_ok=True)
 
-db = TinyDB("db/db.json")
+db = TinyDB("database/database.json")
 
 # Tables
 users_table = db.table("users")
