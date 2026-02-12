@@ -35,6 +35,17 @@
                             <p class="entry-empty">Select a date to view its entry.</p>
                         </div>
                     </div>
+                    <div class="panel legend-panel">
+                        <div class="panel-title">Legend</div>
+                        <div class="legend-row">
+                            <span class="legend-marker marker--drinking" aria-hidden="true"></span>
+                            <span>Drinking logged</span>
+                        </div>
+                        <div class="legend-row">
+                            <span class="legend-marker marker--gambling" aria-hidden="true"></span>
+                            <span>Gambling logged</span>
+                        </div>
+                    </div>
                 </aside>
 
                 <section class="calendar-area">
@@ -63,12 +74,17 @@
 
                 <form id="activityForm">
                     <div class="category-toggles">
-                        <label>
-                            <input type="checkbox" id="chkDrinking"> Did you drink alcohol today?
-                        </label>
-                        <label>
-                            <input type="checkbox" id="chkGambling"> Did you gamble today?
-                        </label>
+                        <details class="type-dropdown">
+                            <summary>Select activities</summary>
+                            <div class="type-options">
+                                <label>
+                                    <input type="checkbox" id="chkDrinking"> Drinking
+                                </label>
+                                <label>
+                                    <input type="checkbox" id="chkGambling"> Gambling
+                                </label>
+                            </div>
+                        </details>
                     </div>
 
                     <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
@@ -112,6 +128,8 @@
                     <div class="modal-actions">
                         <button type="button" class="nav-btn" id="closeModal">Cancel</button>
                         <button type="submit" class="nav-btn is-active">Save Entry</button>
+                        <button type="button" class="nav-btn is-danger" id="deleteDrinking" disabled>Delete Drinking</button>
+                        <button type="button" class="nav-btn is-danger" id="deleteGambling" disabled>Delete Gambling</button>
                     </div>
                 </form>
             </div>

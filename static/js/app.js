@@ -97,6 +97,8 @@ const initCalendar = () => {
 
     // In-memory store for saved entries (keyed by ISO date)
     const entries = {};
+    // In-memory store for activity indicators (keyed by ISO date)
+    const indicators = {};
 
     // Popup Window Elements
     const modal = document.getElementById('eventModal');
@@ -109,6 +111,9 @@ const initCalendar = () => {
     const chkGambling = document.getElementById('chkGambling');
     const drinkingSection = document.getElementById('drinkingSection');
     const gamblingSection = document.getElementById('gamblingSection');
+    const deleteDrinkingBtn = document.getElementById('deleteDrinking');
+    const deleteGamblingBtn = document.getElementById('deleteGambling');
+    const dropdownSummary = document.querySelector('.type-dropdown summary');
 
     if (!monthLabel || !grid || !prevBtn || !nextBtn || !selectedLabel) {
         return;
@@ -122,18 +127,31 @@ const initCalendar = () => {
 
         if (checkbox.checked) {
             section.classList.remove('section-disabled'); // Removes the grey-out CSS
+            section.classList.remove('section-hidden');
             inputs.forEach(input => input.disabled = false); // Allows typing
         }
         else {
             section.classList.add('section-disabled');    // Adds the grey-out CSS
+            section.classList.add('section-hidden');
             inputs.forEach(input => input.disabled = true);  // Prevents typing
         }
     };
+    const updateDropdownLabel = () => {
+        if (!dropdownSummary) return;
+        const labels = [];
+        if (chkDrinking && chkDrinking.checked) labels.push('Drinking');
+        if (chkGambling && chkGambling.checked) labels.push('Gambling');
+        dropdownSummary.textContent = labels.length ? `Activities: ${labels.join(', ')}` : 'Select activities';
+    };
+
     const resetFormState = () => {
         if (activityForm) activityForm.reset();
         // Force the sections back to their "locked" state
         toggleSection(chkDrinking, drinkingSection);
         toggleSection(chkGambling, gamblingSection);
+        if (deleteDrinkingBtn) deleteDrinkingBtn.disabled = true;
+        if (deleteGamblingBtn) deleteGamblingBtn.disabled = true;
+        updateDropdownLabel();
     };
 
     const monthNames = [
@@ -177,24 +195,22 @@ const initCalendar = () => {
         const entry = entries[state.selectedISO];
         let html = '';
 
-        if (entry.drinks) {
+        if (entry.drinking) {
             html += '<div class="entry-section">';
             html += '<div class="entry-section-title">Drinking</div>';
-            html += `<div class="entry-row"><span class="entry-label">Drinks:</span> ${entry.drinks}</div>`;
-            if (entry.drinks_cost) html += `<div class="entry-row"><span class="entry-label">Cost:</span> ${entry.drinks_cost}</div>`;
-            if (entry.drink_trigger) html += `<div class="entry-row"><span class="entry-label">Trigger:</span> ${entry.drink_trigger}</div>`;
+            html += `<div class="entry-row"><span class="entry-label">Drinks:</span> ${entry.drinking.drinks ?? ''}</div>`;
             html += '</div>';
         }
 
-        if (entry.gambling_type) {
+        if (entry.gambling) {
             html += '<div class="entry-section">';
             html += '<div class="entry-section-title">Gambling</div>';
-            html += `<div class="entry-row"><span class="entry-label">Type:</span> ${entry.gambling_type}</div>`;
-            if (entry.time_spent) html += `<div class="entry-row"><span class="entry-label">Time Spent:</span> ${entry.time_spent}</div>`;
-            if (entry.money_intended) html += `<div class="entry-row"><span class="entry-label">Intended to Wager:</span> ${entry.money_intended}</div>`;
-            if (entry.money_spent) html += `<div class="entry-row"><span class="entry-label">Actually Wagered:</span> ${entry.money_spent}</div>`;
-            if (entry.money_earned) html += `<div class="entry-row"><span class="entry-label">Won/Lost:</span> ${entry.money_earned}</div>`;
-            if (entry.drinks_while_gambling) html += `<div class="entry-row"><span class="entry-label">Drinks While Gambling:</span> ${entry.drinks_while_gambling}</div>`;
+            html += `<div class="entry-row"><span class="entry-label">Type:</span> ${entry.gambling.gambling_type ?? ''}</div>`;
+            if (entry.gambling.time_spent) html += `<div class="entry-row"><span class="entry-label">Time Spent:</span> ${entry.gambling.time_spent}</div>`;
+            if (entry.gambling.money_intended) html += `<div class="entry-row"><span class="entry-label">Intended to Wager:</span> ${entry.gambling.money_intended}</div>`;
+            if (entry.gambling.money_spent !== undefined) html += `<div class="entry-row"><span class="entry-label">Actually Wagered:</span> ${entry.gambling.money_spent}</div>`;
+            if (entry.gambling.money_earned !== undefined) html += `<div class="entry-row"><span class="entry-label">Won/Lost:</span> ${entry.gambling.money_earned}</div>`;
+            if (entry.gambling.drinks_while_gambling) html += `<div class="entry-row"><span class="entry-label">Drinks While Gambling:</span> ${entry.gambling.drinks_while_gambling}</div>`;
             html += '</div>';
         }
 
@@ -254,7 +270,7 @@ const initCalendar = () => {
 
             // Show X indicators for no-drinking / no-gambling entries
             const entry = entries[iso];
-            if (entry) {
+            if (entry && (entry.no_drinking || entry.no_gambling)) {
                 button.classList.add('day--holiday');
                 if (entry.no_drinking) {
                     const redX = document.createElement('span');
@@ -270,6 +286,26 @@ const initCalendar = () => {
                 }
             }
 
+            // Show activity markers for logged entries
+            const indicator = indicators[iso];
+            if (indicator && (indicator.drinking || indicator.gambling)) {
+                const markerWrap = document.createElement('div');
+                markerWrap.className = 'activity-markers';
+                if (indicator.drinking) {
+                    const marker = document.createElement('span');
+                    marker.className = 'activity-marker marker--drinking';
+                    marker.setAttribute('aria-hidden', 'true');
+                    markerWrap.appendChild(marker);
+                }
+                if (indicator.gambling) {
+                    const marker = document.createElement('span');
+                    marker.className = 'activity-marker marker--gambling';
+                    marker.setAttribute('aria-hidden', 'true');
+                    markerWrap.appendChild(marker);
+                }
+                button.appendChild(markerWrap);
+            }
+
             if (isToday) button.classList.add('day--today');
             if (isFuture) {
                 button.classList.add('day--future');
@@ -278,7 +314,7 @@ const initCalendar = () => {
             if (isSelected) button.classList.add('day--selected');
 
             if (!isFuture) {
-                button.addEventListener('click', () => {
+                button.addEventListener('click', async () => {
                     // Toggle selection: clicking the same date unselects it
                     if (state.selectedISO === iso) {
                         state.selectedISO = null;
@@ -290,12 +326,13 @@ const initCalendar = () => {
 
                     state.selectedISO = iso;
                     selectedLabel.textContent = formatReadable(cellDate);
+                    await loadEntryForDate(iso);
                     renderSidebar();
 
                     // Added: Open the Modal when a valid day is clicked
                     if (modal && modalTitle) {
                         modalTitle.textContent = `Log Activity for ${iso}`;
-                        resetFormState()
+                        setFormFromEntry(entries[iso]);
                         modal.style.display = 'flex';
                         modal.scrollTop = 0;
                         const content = modal.querySelector('.modal-content');
@@ -320,6 +357,98 @@ const initCalendar = () => {
         renderSidebar();
     };
 
+    const setFormFromEntry = (entry) => {
+        if (!activityForm) return;
+        activityForm.reset();
+
+        const drinking = entry && entry.drinking ? entry.drinking : null;
+        const gambling = entry && entry.gambling ? entry.gambling : null;
+
+        if (chkDrinking) chkDrinking.checked = !!drinking;
+        if (chkGambling) chkGambling.checked = !!gambling;
+
+        toggleSection(chkDrinking, drinkingSection);
+        toggleSection(chkGambling, gamblingSection);
+        updateDropdownLabel();
+
+        if (drinking) {
+            const drinksInput = document.getElementById('drinksInput');
+            if (drinksInput) drinksInput.value = drinking.drinks ?? '';
+        }
+
+        if (gambling) {
+            const gamblingType = document.getElementById('gamblingType');
+            const timeSpent = document.getElementById('timeSpent');
+            const moneyIntended = document.getElementById('moneyIntended');
+            const moneyInputSpent = document.getElementById('moneyInputSpent');
+            const moneyInputEarned = document.getElementById('moneyInputEarned');
+            const drinksWhileGambling = document.getElementById('drinksWhileGambling');
+
+            if (gamblingType) gamblingType.value = gambling.gambling_type ?? '';
+            if (timeSpent) timeSpent.value = gambling.time_spent ?? '';
+            if (moneyIntended) moneyIntended.value = gambling.money_intended ?? '';
+            if (moneyInputSpent) moneyInputSpent.value = gambling.money_spent ?? '';
+            if (moneyInputEarned) moneyInputEarned.value = gambling.money_earned ?? '';
+            if (drinksWhileGambling) drinksWhileGambling.value = gambling.drinks_while_gambling ?? '';
+        }
+
+        if (deleteDrinkingBtn) deleteDrinkingBtn.disabled = !drinking;
+        if (deleteGamblingBtn) deleteGamblingBtn.disabled = !gambling;
+    };
+
+    const loadEntryForDate = async (iso) => {
+        if (!iso) return;
+        try {
+            const response = await fetch(`/api/entry?date=${iso}`);
+            if (!response.ok) {
+                entries[iso] = { drinking: null, gambling: null };
+                return;
+            }
+            const data = await response.json();
+            entries[iso] = {
+                drinking: data.drinking || null,
+                gambling: data.gambling || null,
+                no_drinking: false,
+                no_gambling: false
+            };
+            indicators[iso] = {
+                drinking: !!data.drinking,
+                gambling: !!data.gambling
+            };
+        } catch (error) {
+            console.warn('Unable to load entry details.', error);
+        }
+    };
+
+    const loadIndicators = async () => {
+        try {
+            const response = await fetch('/api/calendar-entries');
+            if (!response.ok) {
+                return;
+            }
+            const data = await response.json();
+            if (!data || !Array.isArray(data.entries)) {
+                return;
+            }
+            data.entries.forEach((entry) => {
+                if (!entry || !entry.entry_date) {
+                    return;
+                }
+                const iso = entry.entry_date;
+                if (!indicators[iso]) {
+                    indicators[iso] = { drinking: false, gambling: false };
+                }
+                if (entry.entry_type === 'drinking') {
+                    indicators[iso].drinking = true;
+                } else if (entry.entry_type === 'gambling') {
+                    indicators[iso].gambling = true;
+                }
+            });
+        } catch (error) {
+            console.warn('Unable to load calendar indicators.', error);
+        }
+    };
+
     /*
         Everything related to event listeners
      */
@@ -342,11 +471,17 @@ const initCalendar = () => {
 
     // Listen for clicks on the Drinking checkbox
     if (chkDrinking) {
-        chkDrinking.addEventListener('change', () => toggleSection(chkDrinking, drinkingSection));
+        chkDrinking.addEventListener('change', () => {
+            toggleSection(chkDrinking, drinkingSection);
+            updateDropdownLabel();
+        });
     }
     // Listen for clicks on the Gambling checkbox
     if (chkGambling) {
-        chkGambling.addEventListener('change', () => toggleSection(chkGambling, gamblingSection));
+        chkGambling.addEventListener('change', () => {
+            toggleSection(chkGambling, gamblingSection);
+            updateDropdownLabel();
+        });
     }
     // Added: Event listener for the Activity Form submission
     // Handle saving the event
@@ -361,19 +496,21 @@ const initCalendar = () => {
 
             // Is drinking checked? If true then save data related to it
             if (chkDrinking.checked) {
-                payload.type = "drinking";
-                payload.drinks = document.getElementById('drinksInput').value;
+                payload.drinking = {
+                    drinks: document.getElementById('drinksInput').value
+                };
             }
 
             // Same for gambling
             if (chkGambling.checked) {
-                payload.type = "gambling";
-                payload.gambling_type = document.getElementById('gamblingType').value;
-                payload.time_spent = document.getElementById('timeSpent').value;
-                payload.money_intended = document.getElementById('moneyIntended').value;
-                payload.money_spent = document.getElementById('moneyInputSpent').value;
-                payload.money_earned = document.getElementById('moneyInputEarned').value;
-                payload.drinks_while_gambling = document.getElementById('drinksWhileGambling').value;
+                payload.gambling = {
+                    gambling_type: document.getElementById('gamblingType').value,
+                    time_spent: document.getElementById('timeSpent').value,
+                    money_intended: document.getElementById('moneyIntended').value,
+                    money_spent: document.getElementById('moneyInputSpent').value,
+                    money_earned: document.getElementById('moneyInputEarned').value,
+                    drinks_while_gambling: document.getElementById('drinksWhileGambling').value
+                };
             }
 
             // Track whether the user did NOT drink or gamble
@@ -381,7 +518,20 @@ const initCalendar = () => {
             payload.no_gambling = !chkGambling.checked;
 
             // Store the entry locally so the sidebar can display it
-            entries[state.selectedISO] = { ...payload };
+            entries[state.selectedISO] = {
+                drinking: payload.drinking || null,
+                gambling: payload.gambling || null,
+                no_drinking: payload.no_drinking,
+                no_gambling: payload.no_gambling
+            };
+            indicators[state.selectedISO] = {
+                drinking: !!payload.drinking,
+                gambling: !!payload.gambling
+            };
+            indicators[state.selectedISO] = {
+                drinking: chkDrinking.checked,
+                gambling: chkGambling.checked
+            };
 
             if (modal) {
                 modal.style.display = 'none';
@@ -411,11 +561,62 @@ const initCalendar = () => {
         });
     }
 
+    const handleDelete = async (entryType) => {
+        if (!state.selectedISO) return;
+        const confirmed = window.confirm(`Delete ${entryType} entry for ${state.selectedISO}?`);
+        if (!confirmed) return;
+
+        try {
+            const response = await fetch('/api/delete-entry', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    date: state.selectedISO,
+                    entry_type: entryType
+                })
+            });
+
+            if (!response.ok) {
+                console.warn('Unable to delete entry.');
+                return;
+            }
+
+            const current = entries[state.selectedISO] || {};
+            if (entryType === 'drinking') {
+                current.drinking = null;
+                if (deleteDrinkingBtn) deleteDrinkingBtn.disabled = true;
+            } else if (entryType === 'gambling') {
+                current.gambling = null;
+                if (deleteGamblingBtn) deleteGamblingBtn.disabled = true;
+            }
+
+            entries[state.selectedISO] = current;
+            indicators[state.selectedISO] = {
+                drinking: !!current.drinking,
+                gambling: !!current.gambling
+            };
+
+            renderSidebar();
+            renderGrid();
+        } catch (error) {
+            console.warn('Error deleting entry.', error);
+        }
+    };
+
     prevBtn.addEventListener('click', () => changeMonth(-1));
     nextBtn.addEventListener('click', () => changeMonth(1));
 
-    render();
-    resetFormState()
+    loadIndicators().then(() => {
+        render();
+        resetFormState();
+    });
+
+    if (deleteDrinkingBtn) {
+        deleteDrinkingBtn.addEventListener('click', () => handleDelete('drinking'));
+    }
+    if (deleteGamblingBtn) {
+        deleteGamblingBtn.addEventListener('click', () => handleDelete('gambling'));
+    }
 };
 
 mountApp();
