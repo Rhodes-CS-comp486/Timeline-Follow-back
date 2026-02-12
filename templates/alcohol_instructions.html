@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alcohol Instructions - Timeline Follow-Back</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="app-shell">
+        <nav class="top-nav" aria-label="Primary">
+            <a class="nav-btn" href="{{ url_for('home') }}">Home</a>
+            <a class="nav-btn" href="{{ url_for('gambling_instructions') }}">Gambling Instructions</a>
+            <a class="nav-btn is-active" href="{{ url_for('alcohol_instructions') }}">Alcohol Instructions</a>
+            <a class="nav-btn" href="{{ url_for('calendar') }}">Calendar</a>
+            <a class="nav-btn" href="#">Reports</a>
+            <a class="nav-btn" href="#">Dashboard</a>
+            <a class="nav-btn" href="#">Settings</a>
+        </nav>
+
+        <header class="page-header">
+            <h1>Timeline Followback Instructions for Alcohol Use</h1>
+        </header>
+
+        <main class="instructions-content panel">
+            <p>To get an idea of what your alcohol use was like in the last past days, we would like you to fill out
+            the attached calendar.</p>
+
+            <h2>To Start</h2>
+
+            <ol>
+                <li>Write in TODAY'S DATE and YESTERDAY'S DATE at the top of the calendar.</li>
+                <li>Put an X on TODAY'S DATE, but do NOT enter a number of drinks for "today" or any day after today.</li>
+                <li>Starting with YESTERDAY, go through the calendar and write the number of standard drinks that
+                you drank for each day on the calendar. For any day where you drank no alcohol, write "0."</li>
+                <li>Below is a Standard Drink Conversion Chart that will make it easier for you to record your drinking.</li>
+            </ol>
+
+            <h2>What to Fill In</h2>
+
+            <ul>
+                <li>When you did drink, you would write in the total number of standard drinks you had on that day.</li>
+                <li>When you did not drink, uncheck "Did you drink alcohol today?" and a red X will appear on that day's box on the calendar. You still need to submit the entry even if you did not drink that day.</li>
+                <li><strong>THE IMPORTANT THING IS TO WRITE SOMETHING IN ON EACH DAY, EVEN IF IT IS A "0."</strong></li>
+            </ul>
+
+            <h2>We Want You to Record Your Drinking Using Standard Drinks</h2>
+
+            <p>To help you, we want you to use a Standard Drink conversion:</p>
+
+            <p><strong>1 Standard Drink =</strong></p>
+            <ul>
+                <li>One 12 oz. beer (5%)</li>
+                <li>One 5 oz. glass of wine (11&ndash;12%)</li>
+                <li>1&frac12; oz. of hard liquor or spirits straight (40%)</li>
+                <li>1&frac12; oz. of hard liquor or spirits in a mixed drink (40%)</li>
+            </ul>
+
+            <p><strong>For example:</strong></p>
+            <ul>
+                <li>
+                    <p class="instructions-example">If you had six 12-oz. beers, write 6 in for that day.</p>
+                </li>
+                <li>
+                    <p class="instructions-example">If you drank more than one kind of alcoholic beverage in a day, such as two 12-oz. beers and three
+                    5-oz. glasses of wine, you would write 5 in for that day.</p>
+                </li>
+                <li>
+                    <p class="instructions-note">Holidays are marked on the calendar to help you recall your drinking. You can also think about how
+                    much you drank on personal holidays and events such as birthdays, vacations, and parties.</p>
+                </li>
+            </ul>
+
+            <h2>Your Best Estimate</h2>
+
+            <ul>
+                <li>Filling out the calendar is not hard!</li>
+                <li>If you are not sure whether you drank three or six drinks or whether you drank on a Thursday or a
+                Friday, give it your best estimate.</li>
+                <li>We recognize people will not have perfect recall, just try to be as accurate as possible.</li>
+            </ul>
+        </main>
+    </div>
+</body>
+</html>

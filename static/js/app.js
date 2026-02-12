@@ -190,12 +190,11 @@ const initCalendar = () => {
             html += '<div class="entry-section">';
             html += '<div class="entry-section-title">Gambling</div>';
             html += `<div class="entry-row"><span class="entry-label">Type:</span> ${entry.gambling_type}</div>`;
-            if (entry.money_spent) html += `<div class="entry-row"><span class="entry-label">Money Spent:</span> ${entry.money_spent}</div>`;
-            if (entry.money_earned) html += `<div class="entry-row"><span class="entry-label">Money Earned:</span> ${entry.money_earned}</div>`;
             if (entry.time_spent) html += `<div class="entry-row"><span class="entry-label">Time Spent:</span> ${entry.time_spent}</div>`;
-            if (entry.emotion_before) html += `<div class="entry-row"><span class="entry-label">Before:</span> ${entry.emotion_before}</div>`;
-            if (entry.emotion_during) html += `<div class="entry-row"><span class="entry-label">During:</span> ${entry.emotion_during}</div>`;
-            if (entry.emotion_after) html += `<div class="entry-row"><span class="entry-label">After:</span> ${entry.emotion_after}</div>`;
+            if (entry.money_intended) html += `<div class="entry-row"><span class="entry-label">Intended to Wager:</span> ${entry.money_intended}</div>`;
+            if (entry.money_spent) html += `<div class="entry-row"><span class="entry-label">Actually Wagered:</span> ${entry.money_spent}</div>`;
+            if (entry.money_earned) html += `<div class="entry-row"><span class="entry-label">Won/Lost:</span> ${entry.money_earned}</div>`;
+            if (entry.drinks_while_gambling) html += `<div class="entry-row"><span class="entry-label">Drinks While Gambling:</span> ${entry.drinks_while_gambling}</div>`;
             html += '</div>';
         }
 
@@ -251,6 +250,24 @@ const initCalendar = () => {
                 label.className = 'holiday-label';
                 label.textContent = holidayName;
                 button.appendChild(label);
+            }
+
+            // Show X indicators for no-drinking / no-gambling entries
+            const entry = entries[iso];
+            if (entry) {
+                button.classList.add('day--holiday');
+                if (entry.no_drinking) {
+                    const redX = document.createElement('span');
+                    redX.className = 'no-drink-x';
+                    redX.textContent = 'X';
+                    button.appendChild(redX);
+                }
+                if (entry.no_gambling) {
+                    const blueX = document.createElement('span');
+                    blueX.className = 'no-gamble-x';
+                    blueX.textContent = 'X';
+                    button.appendChild(blueX);
+                }
             }
 
             if (isToday) button.classList.add('day--today');
@@ -346,21 +363,22 @@ const initCalendar = () => {
             if (chkDrinking.checked) {
                 payload.type = "drinking";
                 payload.drinks = document.getElementById('drinksInput').value;
-                payload.drinks_cost = document.getElementById('drinksCost').value;
-                payload.drink_trigger = document.getElementById('drinkTrigger').value;
             }
 
             // Same for gambling
             if (chkGambling.checked) {
                 payload.type = "gambling";
                 payload.gambling_type = document.getElementById('gamblingType').value;
+                payload.time_spent = document.getElementById('timeSpent').value;
+                payload.money_intended = document.getElementById('moneyIntended').value;
                 payload.money_spent = document.getElementById('moneyInputSpent').value;
                 payload.money_earned = document.getElementById('moneyInputEarned').value;
-                payload.time_spent = document.getElementById('timeSpent').value;
-                payload.emotion_before = document.getElementById('emotionBefore').value;
-                payload.emotion_during = document.getElementById('emotionDuring').value;
-                payload.emotion_after = document.getElementById('emotionAfter').value;
+                payload.drinks_while_gambling = document.getElementById('drinksWhileGambling').value;
             }
+
+            // Track whether the user did NOT drink or gamble
+            payload.no_drinking = !chkDrinking.checked;
+            payload.no_gambling = !chkGambling.checked;
 
             // Store the entry locally so the sidebar can display it
             entries[state.selectedISO] = { ...payload };
@@ -371,6 +389,7 @@ const initCalendar = () => {
 
             resetFormState()
             renderSidebar();
+            renderGrid();
 
             // Send data to backend in the background => route: log-activity
             try {

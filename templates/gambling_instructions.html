@@ -14,6 +14,7 @@
         <nav class="top-nav" aria-label="Primary">
             <a class="nav-btn" href="{{ url_for('home') }}">Home</a>
             <a class="nav-btn is-active" href="{{ url_for('gambling_instructions') }}">Gambling Instructions</a>
+            <a class="nav-btn" href="{{ url_for('alcohol_instructions') }}">Alcohol Instructions</a>
             <a class="nav-btn" href="{{ url_for('calendar') }}">Calendar</a>
             <a class="nav-btn" href="#">Reports</a>
             <a class="nav-btn" href="#">Dashboard</a>
@@ -21,7 +22,7 @@
         </nav>
 
         <header class="page-header">
-            <h1>Instructions for Completing the Gambling Timeline Followback</h1>
+            <h1>Timeline Followback Instructions for Gambling</h1>
         </header>
 
         <main class="instructions-content panel">
@@ -42,7 +43,7 @@
 
             <ol>
                 <li>Every day on the calendar needs to be completed.</li>
-                <li>On those days that you did not gamble at all, mark a "0" or an "X" in that day's box.</li>
+                <li>On those days that you did not gamble at all, uncheck "Did you gamble today?" and a blue X will appear on that day's box on the calendar. You still need to submit the entry even if you did not gamble that day.</li>
                 <li>For each day that you gambled, please give the following information:
                     <ul>
                         <li>

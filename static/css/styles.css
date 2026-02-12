@@ -351,6 +351,29 @@ button {
     color: #9aa0a6;
 }
 
+/* No-activity X indicators on calendar days */
+.no-drink-x {
+    font-size: 12px;
+    font-weight: 700;
+    color: #d32f2f;
+    line-height: 1;
+}
+
+.no-gamble-x {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1565c0;
+    line-height: 1;
+}
+
+.day--selected .no-drink-x {
+    color: #ff8a80;
+}
+
+.day--selected .no-gamble-x {
+    color: #82b1ff;
+}
+
 /* Entry summary sidebar */
 .entry-summary {
     margin-top: 8px;

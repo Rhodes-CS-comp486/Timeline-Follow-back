@@ -27,6 +27,14 @@ def gambling_instructions():
     """ Renders gambling instructions view """
     return render_template('gambling_instructions.html')
 
+# This function loads the alcohol_instructions.html
+# Parameters: N/A
+# Returns: The rendered alcohol_instructions.html file
+@app.route('/alcohol_instructions.html')
+def alcohol_instructions():
+    """ Renders alcohol instructions view """
+    return render_template('alcohol_instructions.html')
+
 # This function loads the calendar.html
 # Parameters: N/A
 # Returns: The rendered calendar.html file

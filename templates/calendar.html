@@ -20,6 +20,7 @@
             <nav class="top-nav" aria-label="Primary">
                 <a class="nav-btn" href="{{ url_for('home') }}">Home</a>
                 <a class="nav-btn" href="{{ url_for('gambling_instructions') }}">Gambling Instructions</a>
+                <a class="nav-btn" href="{{ url_for('alcohol_instructions') }}">Alcohol Instructions</a>
                 <a class="nav-btn is-active" href="{{ url_for('calendar') }}">Calendar</a>
                 <a class="nav-btn" href="#">Reports</a>
                 <a class="nav-btn" href="#">Dashboard</a>
@@ -63,10 +64,10 @@
                 <form id="activityForm">
                     <div class="category-toggles">
                         <label>
-                            <input type="checkbox" id="chkDrinking"> Drinking
+                            <input type="checkbox" id="chkDrinking"> Did you drink alcohol today?
                         </label>
                         <label>
-                            <input type="checkbox" id="chkGambling"> Gambling
+                            <input type="checkbox" id="chkGambling"> Did you gamble today?
                         </label>
                     </div>
 
@@ -74,16 +75,8 @@
 
                     <div id="drinkingSection">
                         <div class="form-group">
-                            <label for="drinksInput">Drinks Consumed:</label>
-                            <input type="text" inputmode="numeric" id="drinksInput" placeholder="how many drinks (e.g. 5)" class="modal-input">
-                        </div>
-                        <div class="form-group">
-                            <label for="drinksCost">Cost of drinks:</label>
-                            <input type="text" inputmode="numeric" id="drinksCost" placeholder="how much money (e.g. $100)" class="modal-input">
-                        </div>
-                        <div class="form-group">
-                            <label for="drinkTrigger">Drink Trigger:</label>
-                            <input type="text" inputmode="numeric" id="drinkTrigger" placeholder="smell, taste, social pressure" class="modal-input">
+                            <label for="drinksInput">How many standard drinks did you consume? (Refer to the <a href="{{ url_for('alcohol_instructions') }}">Alcohol Instructions</a> page for what a standard drink is.)</label>
+                            <input type="text" inputmode="numeric" id="drinksInput" placeholder="e.g. 0, 3, 5" class="modal-input">
                         </div>
                     </div>
 
@@ -91,32 +84,28 @@
 
                     <div id="gamblingSection">
                         <div class="form-group">
-                            <label for="gamblingType">Gambling Type:</label>
-                            <input type="text" inputmode="decimal" id="gamblingType" placeholder="e.g. sports betting, roulette, blackjack" class="modal-input">
+                            <label for="gamblingType">What type of gambling did you engage in?</label>
+                            <input type="text" id="gamblingType" placeholder="e.g. sports betting, roulette, blackjack" class="modal-input">
                         </div>
                         <div class="form-group">
-                            <label for="moneyInputSpent">Money Gambled:</label>
-                            <input type="text" inputmode="decimal" id="moneyInputSpent" placeholder="how much money (e.g. $100)" class="modal-input">
+                            <label for="timeSpent">How long were you gambling that day?</label>
+                            <input type="text" id="timeSpent" placeholder="e.g. 1.5 hours" class="modal-input">
                         </div>
                         <div class="form-group">
-                            <label for="moneyInputEarned">Money Earned:</label>
-                            <input type="text" inputmode="decimal" id="moneyInputEarned" placeholder="how much money (e.g. $100)" class="modal-input">
+                            <label for="moneyIntended">How much did you intend to gamble with?</label>
+                            <input type="text" inputmode="decimal" id="moneyIntended" placeholder="e.g. $100" class="modal-input">
                         </div>
                         <div class="form-group">
-                            <label for="timeSpent">Time Spent:</label>
-                            <input type="text" inputmode="decimal" id="timeSpent" placeholder="how much time (e.g. 1, 2, 10)" class="modal-input">
+                            <label for="moneyInputSpent">How much did you actually wager (not including wins)?</label>
+                            <input type="text" inputmode="decimal" id="moneyInputSpent" placeholder="e.g. $300" class="modal-input">
                         </div>
                         <div class="form-group">
-                            <label for="emotionBefore">Emotion Before:</label>
-                            <input type="text" inputmode="decimal" id="emotionBefore" placeholder="e.g. sad, happy, anxious" class="modal-input">
+                            <label for="moneyInputEarned">How much did you end up winning or losing?</label>
+                            <input type="text" inputmode="decimal" id="moneyInputEarned" placeholder="e.g. +$50 or -$25" class="modal-input">
                         </div>
                         <div class="form-group">
-                            <label for="emotionDuring">Emotion During:</label>
-                            <input type="text" inputmode="decimal" id="emotionDuring" placeholder="e.g. sad, happy, anxious" class="modal-input">
-                        </div>
-                        <div class="form-group">
-                            <label for="emotionAfter">Emotion After:</label>
-                            <input type="text" inputmode="decimal" id="emotionAfter" placeholder="e.g. sad, happy, anxious" class="modal-input">
+                            <label for="drinksWhileGambling">How many drinks did you have while gambling?</label>
+                            <input type="text" inputmode="numeric" id="drinksWhileGambling" placeholder="e.g. 0, 2, 5" class="modal-input">
                         </div>
                     </div>
 
