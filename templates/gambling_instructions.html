@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gambling Instructions - Timeline Follow-Back</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="app-shell">
+        <nav class="top-nav" aria-label="Primary">
+            <a class="nav-btn" href="{{ url_for('home') }}">Home</a>
+            <a class="nav-btn is-active" href="{{ url_for('gambling_instructions') }}">Gambling Instructions</a>
+            <a class="nav-btn" href="{{ url_for('calendar') }}">Calendar</a>
+            <a class="nav-btn" href="#">Reports</a>
+            <a class="nav-btn" href="#">Dashboard</a>
+            <a class="nav-btn" href="#">Settings</a>
+        </nav>
+
+        <header class="page-header">
+            <h1>Instructions for Completing the Gambling Timeline Followback</h1>
+        </header>
+
+        <main class="instructions-content panel">
+            <p>We would like you to remember the details of your gambling over the past 3 months. We don't
+            ask you to do this to make you feel ashamed or guilty about your gambling. We aren't trying to
+            keep you stuck rehashing events you wish to move past. We ask you to review your gambling
+            like this because we find that this information will help us learn about your gambling in a level
+            of detail that allows us to work together to really empower you to make lasting changes.</p>
+
+            <p>Completing this may feel like a challenging task. But there are some strategies to help you
+            remember. Many people find their gambling behavior follows a predictable pattern, making it
+            less difficult to complete this assignment as they had imagined. We have found that the calendars
+            we give you are very useful in helping people remember their gambling activity.</p>
+
+            <p><strong>Please read the full instructions and tips below before completing the calendar.</strong></p>
+
+            <h2>Gambling Calendar</h2>
+
+            <ol>
+                <li>Every day on the calendar needs to be completed.</li>
+                <li>On those days that you did not gamble at all, mark a "0" or an "X" in that day's box.</li>
+                <li>For each day that you gambled, please give the following information:
+                    <ul>
+                        <li>
+                            <strong>The type of Gambling you did.</strong>
+                            <p class="instructions-example">EXAMPLE: slot machines, poker, roulette, horse track, sports, lottery</p>
+                        </li>
+                        <li>
+                            <strong>The amount of Time spent gambling.</strong>
+                            <p class="instructions-note">NOTE: This item asks how long did you gamble for on this occasion? If you are someone
+                            who sports bets, you may find it more helpful to list the amount of time you spend
+                            researching and strategizing bets in addition to the minutes it takes to place the bets to better
+                            capture the impact of your behavior on your day. Put your answers in hours. If you gambled
+                            for one hour and a half you would write 1.5</p>
+                        </li>
+                        <li>
+                            <strong>The amount of money you Intend (wanted) to wager.</strong>
+                            <p class="instructions-note">NOTE: This means, how much money did you plan to bet during the gambling session. Did you
+                            set a limit for how much you would wager? For example, if you went to the casino thinking that
+                            you would only gamble $100, then you would write $100 on the calendar. If you only intended to
+                            gamble with free play or money from an incentive, please list the amount you intended to spend
+                            and put a * next to the amount of free play. If for example you intended to bet $40 of free play
+                            and $40 your own money you would write $40*/$40 for that day.</p>
+                        </li>
+                        <li>
+                            <strong>The amount of money Risked.</strong>
+                            <p class="instructions-note">NOTE: This means, the total amount of money that wasn't money you won that you gambled
+                            with during the gambling session. This means take the dollar amount you walked in with in
+                            your pocket or that was available funds within your account/ through free play/ incentives
+                            and add it to any money withdrawn from an ATM or credit card, any money that you
+                            borrowed (from friends, family, or the casino) that you put into play. For example if you
+                            walked into a casino with $100 and then borrowed $200 from a friend, you would write $300
+                            on the calendar for the amount risked. If you had $300 available in credits in your online
+                            gambling account, spent that and then added an additional $200 to the account you would
+                            write $500.</p>
+                        </li>
+                        <li>
+                            <strong>The amount of money Won or Lost.</strong>
+                            <p class="instructions-note">NOTE: This means the amount of total winnings or losses at the end of the gambling session.
+                            Therefore, if you began an evening of gambling with $100 and ended up with $150 when you
+                            finished, then you would write +$50 for that day. However, if you ended up with only $75 at
+                            the end of the same gambling session you would write -$25 for that day.</p>
+                        </li>
+                        <li>
+                            <strong>Did you drink any alcoholic Drinks while gambling.</strong>
+                            <p class="instructions-note">If you consumed any alcohol drinks with gambling please write yes. If you did not drink at all
+                            please write no.</p>
+                        </li>
+                    </ul>
+                </li>
+            </ol>
+
+            <h2>Helpful Hints</h2>
+            <p>It may be useful to remember specific times when:</p>
+            <ol>
+                <li>You didn't gamble for long periods of time.</li>
+                <li>You gambled in a very regular, scheduled, or consistent way.
+                    <p class="instructions-example">For example, during January you played poker with friends every Tuesday night.</p>
+                </li>
+                <li>It is helpful to mark on the calendar days that are special such as birthdays, paydays, anniversary, etc.</li>
+                <li>To think about the typical amount and way you gamble and the day/days you gambled the
+                most. If there ends up being a day you know you gambled but aren't sure how much, it's
+                probably going to have been less than your maximum day and somewhere close to your average.</li>
+                <li>It may be helpful to use your financial records or to look back at your online accounts to
+                see records of money spent and wins/losses. Some people find reviewing social media
+                posts or the pictures they have saved on their phone can serve as a record of wins,
+                vacations, or other life events that might correspond to gambling or not gambling.</li>
+            </ol>
+        </main>
+    </div>
+</body>
+</html>

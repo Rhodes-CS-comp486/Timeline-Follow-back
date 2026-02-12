@@ -19,6 +19,14 @@ def home():
     """ Renders home view """
     return render_template('home.html')
 
+# This function loads the gambling_instructions.html
+# Parameters: N/A
+# Returns: The rendered gambling_instructions.html file
+@app.route('/gambling_instructions.html')
+def gambling_instructions():
+    """ Renders gambling instructions view """
+    return render_template('gambling_instructions.html')
+
 # This function loads the calendar.html
 # Parameters: N/A
 # Returns: The rendered calendar.html file
