@@ -93,6 +93,12 @@ body::after {
     color: var(--primary-strong);
 }
 
+.nav-btn.is-danger {
+    border-color: rgba(211, 47, 47, 0.35);
+    background: rgba(211, 47, 47, 0.12);
+    color: #a52727;
+}
+
 .page-header {
     text-align: center;
     padding: 28px 20px;
@@ -274,6 +280,8 @@ button {
     font-size: 15px;
     cursor: pointer;
     transition: border 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+    position: relative;
+    padding: 10px;
 }
 
 .day:hover {
@@ -351,6 +359,81 @@ button {
     color: #9aa0a6;
 }
 
+/* Activity markers */
+.activity-markers {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    display: flex;
+    gap: 6px;
+}
+
+.activity-marker,
+.legend-marker {
+    display: inline-block;
+    border-radius: 50%;
+}
+
+.activity-marker {
+    width: 12px;
+    height: 12px;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9);
+}
+
+.legend-marker {
+    width: 13px;
+    height: 13px;
+    box-shadow: 0 0 0 2px rgba(27, 31, 35, 0.12);
+}
+
+.marker--drinking {
+    background: var(--accent);
+}
+
+.marker--gambling {
+    background: #026a81;
+}
+
+.day--selected .marker--drinking {
+    background: #ffd2b3;
+}
+
+.day--selected .marker--gambling {
+    background: #9aa2ff;
+}
+
+/* Activity selector dropdown */
+.type-dropdown {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 8px 12px;
+    background: #f8f9f7;
+}
+
+.type-dropdown summary {
+    list-style: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.type-dropdown summary::-webkit-details-marker {
+    display: none;
+}
+
+.type-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 0 4px;
+    color: var(--text);
+}
+
+.type-options label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 /* No-activity X indicators on calendar days */
 .no-drink-x {
     font-size: 12px;
@@ -372,6 +455,21 @@ button {
 
 .day--selected .no-gamble-x {
     color: #82b1ff;
+}
+
+/* Legend */
+.legend-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.legend-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--muted);
 }
 
 /* Entry summary sidebar */
@@ -509,10 +607,12 @@ button:focus-visible {
 .modal-actions {
     display: flex;
     gap: 12px;
+    flex-wrap: wrap;
 }
 
 .modal-actions button {
-    flex: 1;
+    flex: 1 1 45%;
+    min-width: 140px;
 }
 
 /* Instructions page */
@@ -575,4 +675,8 @@ button:focus-visible {
     pointer-events: none;      /* Prevents clicking or typing */
     user-select: none;         /* Prevents highlighting text */
     filter: grayscale(100%);   /* Optional: Removes all color */
+}
+
+.section-hidden {
+    display: none;
 }
