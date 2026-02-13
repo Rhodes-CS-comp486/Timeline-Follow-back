@@ -1,3 +1,5 @@
+import datetime
+
 from database.db_initialization import User, Gambling, Drinking, db, CalendarEntry
 """
     NOTE USING THESE HELPER FUNCTIONS COMMITS THE ENTRIES TO THE DB !!!
@@ -27,7 +29,7 @@ def create_user(email : str, first_name : str, last_name : str, password, userna
 #             entry_type -> str (e.g., 'drinking' or 'gambling')
 #             entry_date -> datetime/str (The date of the activity)
 # Returns: The entry object if commit is successful, False or None if it fails
-def create_calendar_entry(user_id, entry_type, entry_date):
+def create_calendar_entry(user_id : int, entry_type : str, entry_date):
     new_entry = CalendarEntry(
         user_id=user_id,
         entry_type=entry_type,
@@ -47,15 +49,15 @@ def create_calendar_entry(user_id, entry_type, entry_date):
 #             emotion_after   -> str
 # Returns: The entry object if valid, None if failure
 def add_gambling_entry(
-    user_id,
-    entry_id,
-    amount_spent,
-    amount_earned,
-    time_spent,
-    gambling_type,
-    emotion_before,
-    emotion_during,
-    emotion_after
+    user_id : int,
+    entry_id :int,
+    amount_spent : float,
+    amount_earned : float,
+    time_spent :str,
+    gambling_type : str,
+    emotion_before : str,
+    emotion_during : str,
+    emotion_after : str
 ):
     # Ensure entry_id is an int, not an object
     if hasattr(entry_id, 'id'):
@@ -91,11 +93,11 @@ def add_gambling_entry(
 #             trigger     -> str
 # Returns: The entry object if valid, None if failure
 def add_alcohol_entry(
-    user_id,
-    entry_id,
-    money_spent,
-    num_drinks,
-    trigger
+    user_id : int,
+    entry_id: int,
+    money_spent : float,
+    num_drinks : int,
+    trigger : str
 ):
     # Ensure entry_id is an int, not an object
     if hasattr(entry_id, 'id'):
