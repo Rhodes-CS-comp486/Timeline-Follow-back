@@ -13,8 +13,8 @@
     <div class="app-shell">
         <nav class="top-nav" aria-label="Primary">
             <a class="nav-btn" href="{{ url_for('home') }}">Home</a>
-            <a class="nav-btn" href="{{ url_for('gambling_instructions') }}">Gambling Instructions</a>
-            <a class="nav-btn is-active" href="{{ url_for('alcohol_instructions') }}">Alcohol Instructions</a>
+            <a class="nav-btn" href="{{ url_for('instructions.gambling_instructions') }}">Gambling Instructions</a>
+            <a class="nav-btn is-active" href="{{ url_for('instructions.alcohol_instructions') }}">Alcohol Instructions</a>
             <a class="nav-btn" href="{{ url_for('calendar') }}">Calendar</a>
             <a class="nav-btn" href="#">Reports</a>
             <a class="nav-btn" href="#">Dashboard</a>
@@ -28,16 +28,6 @@
         <main class="instructions-content panel">
             <p>To get an idea of what your alcohol use was like in the last past days, we would like you to fill out
             the attached calendar.</p>
-
-            <h2>To Start</h2>
-
-            <ol>
-                <li>Write in TODAY'S DATE and YESTERDAY'S DATE at the top of the calendar.</li>
-                <li>Put an X on TODAY'S DATE, but do NOT enter a number of drinks for "today" or any day after today.</li>
-                <li>Starting with YESTERDAY, go through the calendar and write the number of standard drinks that
-                you drank for each day on the calendar. For any day where you drank no alcohol, write "0."</li>
-                <li>Below is a Standard Drink Conversion Chart that will make it easier for you to record your drinking.</li>
-            </ol>
 
             <h2>What to Fill In</h2>
 

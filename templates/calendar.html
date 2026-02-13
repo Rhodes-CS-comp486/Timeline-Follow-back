@@ -19,8 +19,8 @@
         <div class="app-shell">
             <nav class="top-nav" aria-label="Primary">
                 <a class="nav-btn" href="{{ url_for('home') }}">Home</a>
-                <a class="nav-btn" href="{{ url_for('gambling_instructions') }}">Gambling Instructions</a>
-                <a class="nav-btn" href="{{ url_for('alcohol_instructions') }}">Alcohol Instructions</a>
+                <a class="nav-btn" href="{{ url_for('instructions.gambling_instructions') }}">Gambling Instructions</a>
+                <a class="nav-btn" href="{{ url_for('instructions.alcohol_instructions') }}">Alcohol Instructions</a>
                 <a class="nav-btn is-active" href="{{ url_for('calendar') }}">Calendar</a>
                 <a class="nav-btn" href="#">Reports</a>
                 <a class="nav-btn" href="#">Dashboard</a>
@@ -75,7 +75,7 @@
 
                     <div id="drinkingSection">
                         <div class="form-group">
-                            <label for="drinksInput">How many standard drinks did you consume? (Refer to the <a href="{{ url_for('alcohol_instructions') }}">Alcohol Instructions</a> page for what a standard drink is.)</label>
+                            <label for="drinksInput">How many standard drinks did you consume? (Refer to the <a href="{{ url_for('instructions.alcohol_instructions') }}">Alcohol Instructions</a> page for what a standard drink is.)</label>
                             <input type="text" inputmode="numeric" id="drinksInput" placeholder="e.g. 0, 3, 5" class="modal-input">
                         </div>
                     </div>
