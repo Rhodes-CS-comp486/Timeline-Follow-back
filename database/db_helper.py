@@ -44,20 +44,18 @@ def create_calendar_entry(user_id : int, entry_type : str, entry_date):
 #             amount_earned   -> float
 #             time_spent      -> str
 #             gambling_type   -> str
-#             emotion_before  -> str
-#             emotion_during  -> str
-#             emotion_after   -> str
+#             num_drinks      -> int
+#             amount_intended_spent -> float
 # Returns: The entry object if valid, None if failure
 def add_gambling_entry(
     user_id : int,
     entry_id :int,
+    amount_intended_spent: float,
     amount_spent : float,
     amount_earned : float,
     time_spent :str,
     gambling_type : str,
-    emotion_before : str,
-    emotion_during : str,
-    emotion_after : str
+    num_drinks : int
 ):
     # Ensure entry_id is an int, not an object
     if hasattr(entry_id, 'id'):
@@ -69,11 +67,10 @@ def add_gambling_entry(
         "entry_id": entry_id,
         "amount_spent": float(amount_spent),
         "amount_earned": float(amount_earned),
+        "amount_intended_spent": float(amount_intended_spent),
         "time_spent": time_spent,
         "gambling_type": gambling_type,
-        "emotion_before": emotion_before,
-        "emotion_during": emotion_during,
-        "emotion_after": emotion_after
+        "num_drinks": int(num_drinks),
     }
 
     new_gambling_entry = Gambling(
@@ -88,16 +85,12 @@ def add_gambling_entry(
 # This function creates a drinking entry in the database and commits it
 # Parameters: user_id     -> int (Foreign Key from User table)
 #             entry_id    -> int/obj (Foreign Key from CalendarEntry)
-#             money_spent -> float
 #             num_drinks  -> int
-#             trigger     -> str
 # Returns: The entry object if valid, None if failure
 def add_alcohol_entry(
     user_id : int,
     entry_id: int,
-    money_spent : float,
     num_drinks : int,
-    trigger : str
 ):
     # Ensure entry_id is an int, not an object
     if hasattr(entry_id, 'id'):
@@ -106,9 +99,7 @@ def add_alcohol_entry(
     drinking_json_content = {
         "user_id": user_id,
         "entry_id": entry_id,
-        "money_spent": float(money_spent),
         "num_drinks": int(num_drinks),
-        "trigger": trigger
     }
 
     new_alcohol_entry = Drinking(user_id=user_id,

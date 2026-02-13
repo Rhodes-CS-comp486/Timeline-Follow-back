@@ -6,11 +6,13 @@ from sqlalchemy import inspect, text
 
 # To create and import BP use the following convention
 from routes.events_handler import events_handler_bp
+from routes.instructions import instructions_bp
 
 app = Flask(__name__)
 
 # Register new BP
 app.register_blueprint(events_handler_bp, url_prefix='/api')
+app.register_blueprint(instructions_bp)
 
 
 # ------------- This part is for DB initialization and connection ----------------
