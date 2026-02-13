@@ -2,11 +2,13 @@ from flask import Flask, render_template
 
 # To create and import BP use the following convention
 from routes.events_handler import events_handler_bp
+from routes.instructions import instructions_bp
 
 app = Flask(__name__)
 
 # Register new BP
 app.register_blueprint(events_handler_bp, url_prefix='/api')
+app.register_blueprint(instructions_bp)
 
 # The default route is to home.html
 @app.route('/')
@@ -18,22 +20,6 @@ app.register_blueprint(events_handler_bp, url_prefix='/api')
 def home():
     """ Renders home view """
     return render_template('home.html')
-
-# This function loads the gambling_instructions.html
-# Parameters: N/A
-# Returns: The rendered gambling_instructions.html file
-@app.route('/gambling_instructions.html')
-def gambling_instructions():
-    """ Renders gambling instructions view """
-    return render_template('gambling_instructions.html')
-
-# This function loads the alcohol_instructions.html
-# Parameters: N/A
-# Returns: The rendered alcohol_instructions.html file
-@app.route('/alcohol_instructions.html')
-def alcohol_instructions():
-    """ Renders alcohol instructions view """
-    return render_template('alcohol_instructions.html')
 
 # This function loads the calendar.html
 # Parameters: N/A
