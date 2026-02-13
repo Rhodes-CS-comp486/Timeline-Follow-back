@@ -1,5 +1,4 @@
 from flask import Blueprint, request, jsonify
-from database import create_calendar_entry, add_gambling_entry, add_alcohol_entry
 
 # Create a blueprint to handle events, this will be called in app.py
 events_handler_bp = Blueprint('events_handler', __name__)
@@ -40,52 +39,14 @@ def log_activity():
 # Returns: True on success and False on failure
 def save_activity(activity: dict):
     """
-        Saves the data from log_activity() to the db
+        Saves the data from log_activity() to the db.
+        TODO: Implement Postgres storage.
         Parameters: JSON format (dict)
         Returns: True on success and False on failure
         """
     try:
-        # Get important entries needed to create calendar entry
-        user_id = activity.get("user_id")
-        entry_date = activity.get("date")
-        entry_type = activity.get("type")
-
-        # Set this to default user if there's no user
-        if not user_id:
-            user_id = "default"
-
-        # Debug here
-        #print(activity)
-        #print("Debug:", user_id, entry_date, entry_type)
-
-        # create calendar entry
-        entry_id = create_calendar_entry(user_id, entry_type, entry_date)
-
-        # Extract all the information from our form
-        if entry_type == "gambling":
-            add_gambling_entry(
-                user_id = user_id,
-                entry_id = entry_id,
-                amount_spent = activity.get("money_spent", None),
-                amount_earned = activity.get("money_earned", None),
-                time_spent = activity.get("time_spent", None),
-                gambling_type = activity.get("gambling_type", None),
-                money_intended = activity.get("money_intended", None),
-                drinks_while_gambling = activity.get("drinks_while_gambling", None)
-            )
-
-        elif entry_type == "drinking":
-            add_alcohol_entry(
-                user_id = user_id,
-                entry_id = entry_id,
-                money_spent = activity.get("drinks_cost", None),
-                num_drinks = activity.get("drinks", None),
-                trigger = activity.get("drink_trigger", None)
-            )
-
-        # If we reached here, everything inserted correctly
+        print(f"Activity received (Postgres save not yet implemented): {activity}")
         return True
-
     except Exception as e:
-        print(f"Database Save Error: {e}")
+        print(f"Save Error: {e}")
         return False
