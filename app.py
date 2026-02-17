@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, url_for
 from database.db_initialization import db
 import os
 from sqlalchemy import inspect, text
@@ -7,12 +7,14 @@ from sqlalchemy import inspect, text
 # To create and import BP use the following convention
 from routes.events_handler import events_handler_bp
 from routes.instructions import instructions_bp
+from routes.auth import auth_bp
 
 app = Flask(__name__)
 
 # Register new BP
 app.register_blueprint(events_handler_bp, url_prefix='/api')
 app.register_blueprint(instructions_bp)
+app.register_blueprint(auth_bp)
 
 
 # ------------- This part is for DB initialization and connection ----------------
@@ -52,8 +54,11 @@ with app.app_context():
 
 # The default route is to home.html
 @app.route('/')
-@app.route('/home.html')
+def index():
+    """ Redirects to login page """
+    return redirect(url_for('auth.login'))
 
+@app.route('/home.html')
 # This function just loads the home.html file
 # Parameters: N/A
 # Returns: The rendered home.html file
