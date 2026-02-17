@@ -1,6 +1,6 @@
 import re
 
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from database.db_initialization import User
@@ -106,6 +106,8 @@ def login():
 
         if error:
             return render_template('login.html', error=error)
+
+        session['user_id'] = user.id
 
         return redirect(url_for('home'))
 
