@@ -23,8 +23,8 @@ db_url = os.getenv("DATABASE_URL")
 secret_session_key = os.getenv("SECRET_KEY")
 
 # make sure it actually exists in .env
-if not db_url:
-    raise ValueError("No DATABASE_URL found in environment variables!")
+if not db_url or not secret_session_key:
+    raise ValueError("No DATABASE_URL or SECRET_KEY found in environment variables!")
 
 # connect to our flask app with config
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
