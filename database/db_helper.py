@@ -76,7 +76,6 @@ def add_gambling_entry(
     new_gambling_entry = Gambling(
         user_id=user_id,
         entry_id=entry_id,
-        id=entry_id,
         gambling_questions=gambling_json_content
     )
 
@@ -103,7 +102,6 @@ def add_alcohol_entry(
     }
 
     new_alcohol_entry = Drinking(user_id=user_id,
-                                 id=entry_id,
                                  entry_id=entry_id,
                                  drinking_questions=drinking_json_content)
 
