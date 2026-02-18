@@ -4,17 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2741ce3f-01f2-4117-b858-472f8a605bbe" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/comp485-project.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/config_helper.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config/questions.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/db_helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/database/db_helper.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/events_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/events_handler.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/calendar.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/calendar.html" afterDir="false" />
-    </list>
+    <list default="true" id="2741ce3f-01f2-4117-b858-472f8a605bbe" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -201,7 +191,7 @@
       <workItem from="1770927524947" duration="312000" />
       <workItem from="1771362673542" duration="204000" />
       <workItem from="1771362907929" duration="113000" />
-      <workItem from="1771385927353" duration="932000" />
+      <workItem from="1771385927353" duration="1277000" />
     </task>
     <servers />
   </component>
