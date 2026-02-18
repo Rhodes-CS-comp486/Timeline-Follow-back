@@ -35,6 +35,19 @@
                             <p class="entry-empty">Select a date to view its entry.</p>
                         </div>
                     </div>
+                    <div class="panel">
+                        <div class="panel-title">Marker legend</div>
+                        <div class="legend-list">
+                            <div class="legend-item">
+                                <span class="calendar-marker marker-drinking" aria-hidden="true"></span>
+                                <span>Drinking logged</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="calendar-marker marker-gambling" aria-hidden="true"></span>
+                                <span>Gambling logged</span>
+                            </div>
+                        </div>
+                    </div>
                 </aside>
 
                 <section class="calendar-area">
@@ -62,16 +75,20 @@
                 <div class="panel-title" id="modalDateTitle">Log Activity</div>
 
                 <form id="activityForm">
-                    <div class="category-toggles">
-                        <label>
-                            <input type="checkbox" id="chkDrinking"> Did you drink alcohol today?
-                        </label>
-                        <label>
-                            <input type="checkbox" id="chkGambling"> Did you gamble today?
-                        </label>
+                    <div class="form-group">
+                        <label>What would you like to log?</label>
+                        <div class="activity-choice-group" role="group" aria-label="Select activity type">
+                            <label class="activity-choice">
+                                <input type="checkbox" id="activityDrinkingToggle" class="activity-choice-input">
+                                <span class="activity-choice-pill">Drinking</span>
+                            </label>
+                            <label class="activity-choice">
+                                <input type="checkbox" id="activityGamblingToggle" class="activity-choice-input">
+                                <span class="activity-choice-pill">Gambling</span>
+                            </label>
+                        </div>
+                        <p class="form-note">Questions appear based on your selection.</p>
                     </div>
-
-                    <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
 
                     <div id="drinkingSection">
                         <div class="form-group">
@@ -79,8 +96,6 @@
                             <input type="text" inputmode="numeric" id="drinksInput" placeholder="e.g. 0, 3, 5" class="modal-input">
                         </div>
                     </div>
-
-                    <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
 
                     <div id="gamblingSection">
                         <div class="form-group">
@@ -109,9 +124,13 @@
                         </div>
                     </div>
 
-                    <div class="modal-actions">
+                    <div class="modal-actions modal-actions--primary">
                         <button type="button" class="nav-btn" id="closeModal">Cancel</button>
                         <button type="submit" class="nav-btn is-active">Save Entry</button>
+                    </div>
+                    <div class="modal-actions modal-actions--danger">
+                        <button type="button" class="nav-btn danger-btn" id="deleteDrinkingBtn">Delete Drinking</button>
+                        <button type="button" class="nav-btn danger-btn" id="deleteGamblingBtn">Delete Gambling</button>
                     </div>
                 </form>
             </div>

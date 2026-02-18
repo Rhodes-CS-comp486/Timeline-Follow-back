@@ -10,6 +10,8 @@
     --ring: rgba(31, 138, 112, 0.25);
     --border: rgba(27, 31, 35, 0.12);
     --shadow: 0 24px 40px rgba(20, 24, 32, 0.12);
+    --marker-drinking: #d14974;
+    --marker-gambling: #02006c;
     --font-heading: "Space Grotesk", sans-serif;
     --font-body: "Source Sans 3", sans-serif;
 }
@@ -85,6 +87,12 @@ body::after {
 .nav-btn:hover {
     background: #f3f4f2;
     transform: translateY(-1px);
+}
+
+.nav-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .nav-btn.is-active {
@@ -267,11 +275,16 @@ button {
 
 .day {
     min-height: 100px;
+    padding: 10px;
     border-radius: 16px;
     border: 1px solid transparent;
     background: #f7f8f7;
     font-weight: 600;
     font-size: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
     cursor: pointer;
     transition: border 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
@@ -321,10 +334,6 @@ button {
 
 /* Holiday styling */
 .day--holiday {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
     gap: 4px;
 }
 
@@ -337,7 +346,7 @@ button {
     font-weight: 600;
     color: #c05e1a;
     line-height: 1.2;
-    text-align: center;
+    text-align: left;
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -351,32 +360,51 @@ button {
     color: #9aa0a6;
 }
 
-/* No-activity X indicators on calendar days */
-.no-drink-x {
-    font-size: 12px;
-    font-weight: 700;
-    color: #d32f2f;
-    line-height: 1;
+.day-marker-row {
+    margin-top: auto;
+    min-height: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.no-gamble-x {
-    font-size: 12px;
-    font-weight: 700;
-    color: #1565c0;
-    line-height: 1;
+.calendar-marker {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    border: 1px solid rgba(0, 0, 0, 0.2);
 }
 
-.day--selected .no-drink-x {
-    color: #ff8a80;
+.marker-drinking {
+    background: var(--marker-drinking);
 }
 
-.day--selected .no-gamble-x {
-    color: #82b1ff;
+.marker-gambling {
+    background: var(--marker-gambling);
+}
+
+.day--selected .calendar-marker {
+    border-color: rgba(255, 255, 255, 0.85);
 }
 
 /* Entry summary sidebar */
 .entry-summary {
     margin-top: 8px;
+}
+
+.legend-list {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
 }
 
 .entry-empty {
@@ -489,7 +517,7 @@ button:focus-visible {
     padding: 30px;
     border-radius: 20px;
     width: 90%;
-    max-width: 400px;
+    max-width: 540px;
     box-shadow: var(--shadow);
     max-height: 90vh;       /* Never taller than 90% of view */
     overflow-y: auto;       /* Scroll inside if too tall */
@@ -500,10 +528,54 @@ button:focus-visible {
 .modal-input {
     width: 100%;
     padding: 12px;
-    margin: 10px 0 20px 0;
+    margin: 10px 0 8px 0;
     border: 1px solid var(--border);
     border-radius: 8px;
     font-size: 16px;
+}
+
+.activity-choice-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.activity-choice {
+    display: inline-flex;
+}
+
+.activity-choice-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.activity-choice-pill {
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: #f3f5f4;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.activity-choice-input:checked + .activity-choice-pill {
+    background: rgba(31, 138, 112, 0.16);
+    border-color: rgba(31, 138, 112, 0.45);
+    color: var(--primary-strong);
+}
+
+.activity-choice-input:focus-visible + .activity-choice-pill {
+    box-shadow: 0 0 0 3px var(--ring);
+}
+
+.form-note {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 10px;
 }
 
 .modal-actions {
@@ -511,8 +583,26 @@ button:focus-visible {
     gap: 12px;
 }
 
+.modal-actions--primary {
+    margin-top: 10px;
+}
+
+.modal-actions--danger {
+    margin-top: 8px;
+}
+
 .modal-actions button {
     flex: 1;
+}
+
+.danger-btn {
+    background: rgba(177, 20, 20, 0.08);
+    border: 1px solid rgba(177, 20, 20, 0.28);
+    color: #8d1a1a;
+}
+
+.danger-btn:hover {
+    background: rgba(177, 20, 20, 0.14);
 }
 
 /* Instructions page */
@@ -571,10 +661,14 @@ button:focus-visible {
 
 /* Visual style for disabled sections */
 .section-disabled {
-    opacity: 0.3;              /* Makes it look faded/gray */
-    pointer-events: none;      /* Prevents clicking or typing */
-    user-select: none;         /* Prevents highlighting text */
-    filter: grayscale(100%);   /* Optional: Removes all color */
+    opacity: 0.38;
+    pointer-events: none;
+    user-select: none;
+    filter: grayscale(100%);
+}
+
+.section-hidden {
+    display: none;
 }
 
 /* ── Auth pages ──────────────────────────────────────────── */
