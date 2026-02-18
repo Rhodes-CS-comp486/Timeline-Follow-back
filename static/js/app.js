@@ -360,17 +360,16 @@ const initCalendar = () => {
             date: state.selectedISO
         };
 
-        // Determine entry type
-        if (chkDrinking.checked && !chkGambling.checked) {
-            payload.type = "drinking";
-        }
-        else if (chkGambling.checked && !chkDrinking.checked) {
-            payload.type = "gambling";
-        }
-        else {
-            alert("Please select either drinking or gambling.");
+
+        if (!chkDrinking.checked && !chkGambling.checked) {
+            alert("Please select drinking and/or gambling.");
             return;
         }
+
+        // Store flags instead of forcing single type
+        payload.drinking_logged = chkDrinking.checked;
+        payload.gambling_logged = chkGambling.checked;
+
 
         // Collect ALL enabled inputs dynamically
         const enabledInputs = activityForm.querySelectorAll(
@@ -383,7 +382,11 @@ const initCalendar = () => {
         });
 
         // Store locally for sidebar display
-        entries[state.selectedISO] = { ...payload };
+        if (!entries[state.selectedISO]) {
+            entries[state.selectedISO] = {};
+        }
+
+        Object.assign(entries[state.selectedISO], payload);
 
         if (modal) modal.style.display = 'none';
 

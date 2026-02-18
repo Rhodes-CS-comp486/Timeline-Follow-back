@@ -38,38 +38,45 @@ def log_activity():
 # Returns: True on success and False on failure
 def save_activity(activity: dict):
     try:
-        # Get important entries needed to create calendar entry
         user_id = session.get('user_id')
         entry_date = activity.get("date")
-        entry_type = activity.get("type")
 
-        # Set this to default user if there's no user
+        drinking_logged = activity.get("drinking_logged")
+        gambling_logged = activity.get("gambling_logged")
+
         if not user_id:
             user_id = 1
 
-        # create calendar entry
-        entry_id = create_calendar_entry(user_id, entry_type, entry_date)
+        if not entry_date:
+            raise Exception("Missing date")
 
-        print(f"Check calendar entry info: {user_id}, {entry_date}, {entry_type}")
+        if not drinking_logged and not gambling_logged:
+            raise Exception("No activity selected")
+
+        # Changed this so calendar entry no longer needs submission type (eg gambling or drinking)
+        entry_id = create_calendar_entry(user_id, entry_date)
 
         if not entry_id:
             raise Exception("Failed to create CalendarEntry")
 
+        print(f"Created calendar entry: {user_id}, {entry_date}")
 
-        # Remove metadata fields we don't want inside the question JSON
+        # Remove metadata fields
         activity_payload = {
             k: v for k, v in activity.items()
-            if k not in ["date", "type"]
+            if k not in ["date", "drinking_logged", "gambling_logged"]
         }
 
-        if entry_type == "gambling":
+        # Add gambling if selected
+        if gambling_logged:
             add_gambling_entry(
                 user_id=user_id,
                 entry_id=entry_id,
                 activity_data=activity_payload
             )
 
-        elif entry_type == "drinking":
+        # Add drinking if selected
+        if drinking_logged:
             add_alcohol_entry(
                 user_id=user_id,
                 entry_id=entry_id,

@@ -26,13 +26,11 @@ def create_user(email : str, first_name : str, last_name : str, password, userna
 
 # This function creates a calendar entry in the database and returns the entry object (or its ID)
 # Parameters: user_id    -> int (Foreign Key from the User table)
-#             entry_type -> str (e.g., 'drinking' or 'gambling')
 #             entry_date -> datetime/str (The date of the activity)
 # Returns: The entry object if commit is successful, False or None if it fails
-def create_calendar_entry(user_id : int, entry_type : str, entry_date):
+def create_calendar_entry(user_id : int, entry_date):
     new_entry = CalendarEntry(
         user_id=user_id,
-        entry_type=entry_type,
         entry_date=entry_date
     )
     return commit_to_db(new_entry)
