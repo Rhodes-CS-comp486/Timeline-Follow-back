@@ -55,24 +55,25 @@ def save_activity(activity: dict):
         if not entry_id:
             raise Exception("Failed to create CalendarEntry")
 
-        # Extract all the information from our form
+
+        # Remove metadata fields we don't want inside the question JSON
+        activity_payload = {
+            k: v for k, v in activity.items()
+            if k not in ["date", "type"]
+        }
+
         if entry_type == "gambling":
             add_gambling_entry(
-                user_id = user_id,
-                entry_id = entry_id,
-                amount_spent = activity.get("money_spent"),
-                amount_earned = activity.get("money_earned"),
-                time_spent = activity.get("time_spent"),
-                gambling_type = activity.get("gambling_type"),
-                amount_intended_spent= activity.get("money_intended"),
-                num_drinks = activity.get("drinks_while_gambling"),
+                user_id=user_id,
+                entry_id=entry_id,
+                activity_data=activity_payload
             )
 
         elif entry_type == "drinking":
             add_alcohol_entry(
-                user_id = user_id,
-                entry_id = entry_id,
-                num_drinks = activity.get("drinks"),
+                user_id=user_id,
+                entry_id=entry_id,
+                activity_data=activity_payload
             )
 
         return True

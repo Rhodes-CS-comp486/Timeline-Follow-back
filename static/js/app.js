@@ -351,65 +351,62 @@ const initCalendar = () => {
     // Added: Event listener for the Activity Form submission
     // Handle saving the event
     if (activityForm) {
-        activityForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+    activityForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-            // Base payload is the date, else this payload does not exist
-            const payload = {
-                date: state.selectedISO
-            };
+        if (!state.selectedISO) return;
 
-            // Is drinking checked? If true then save data related to it
-            if (chkDrinking.checked) {
-                payload.type = "drinking";
-                payload.drinks = document.getElementById('drinksInput').value;
-            }
+        const payload = {
+            date: state.selectedISO
+        };
 
-            // Same for gambling
-            if (chkGambling.checked) {
-                payload.type = "gambling";
-                payload.gambling_type = document.getElementById('gamblingType').value;
-                payload.time_spent = document.getElementById('timeSpent').value;
-                payload.money_intended = document.getElementById('moneyIntended').value;
-                payload.money_spent = document.getElementById('moneyInputSpent').value;
-                payload.money_earned = document.getElementById('moneyInputEarned').value;
-                payload.drinks_while_gambling = document.getElementById('drinksWhileGambling').value;
-            }
+        // Determine entry type
+        if (chkDrinking.checked && !chkGambling.checked) {
+            payload.type = "drinking";
+        }
+        else if (chkGambling.checked && !chkDrinking.checked) {
+            payload.type = "gambling";
+        }
+        else {
+            alert("Please select either drinking or gambling.");
+            return;
+        }
 
-            // Track whether the user did NOT drink or gamble
-            payload.no_drinking = !chkDrinking.checked;
-            payload.no_gambling = !chkGambling.checked;
+        // Collect ALL enabled inputs dynamically
+        const enabledInputs = activityForm.querySelectorAll(
+            'input:not([disabled]), select:not([disabled]), textarea:not([disabled])'
+        );
 
-            // Store the entry locally so the sidebar can display it
-            entries[state.selectedISO] = { ...payload };
-
-            if (modal) {
-                modal.style.display = 'none';
-            }
-
-            resetFormState()
-            renderSidebar();
-            renderGrid();
-
-            // Send data to backend in the background => route: log-activity
-            try {
-                const response = await fetch('/api/log-activity', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    // sending the payload
-                    body: JSON.stringify(payload)
-                });
-
-                if (response.ok) {
-                    console.log(`Saved entry for ${state.selectedISO}!`);
-                } else {
-                    console.warn('Server did not save the entry.');
-                }
-            } catch (error) {
-                console.error('Error saving data:', error);
-            }
+        enabledInputs.forEach(input => {
+            if (!input.name) return; // Skip inputs without name attribute
+            payload[input.name] = input.value;
         });
-    }
+
+        // Store locally for sidebar display
+        entries[state.selectedISO] = { ...payload };
+
+        if (modal) modal.style.display = 'none';
+
+        resetFormState();
+        renderSidebar();
+        renderGrid();
+
+        try {
+            const response = await fetch('/api/log-activity', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                console.warn('Server did not save the entry.');
+            }
+        } catch (error) {
+            console.error('Error saving data:', error);
+        }
+    });
+}
+
 
     prevBtn.addEventListener('click', () => changeMonth(-1));
     nextBtn.addEventListener('click', () => changeMonth(1));
