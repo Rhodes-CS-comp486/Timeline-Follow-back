@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from database.db_helper import create_calendar_entry, add_gambling_entry, add_alcohol_entry
 
 
@@ -39,7 +39,7 @@ def log_activity():
 def save_activity(activity: dict):
     try:
         # Get important entries needed to create calendar entry
-        user_id = activity.get("user_id")
+        user_id = session.get('user_id')
         entry_date = activity.get("date")
         entry_type = activity.get("type")
 

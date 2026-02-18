@@ -2,7 +2,6 @@ from dotenv import load_dotenv
 from flask import Flask, render_template, redirect, url_for
 from database.db_initialization import db
 import os
-from sqlalchemy import inspect, text
 
 # To create and import BP use the following convention
 from routes.events_handler import events_handler_bp
@@ -21,14 +20,16 @@ app.register_blueprint(auth_bp)
 load_dotenv()
 # load the DATABASE_URL from .env
 db_url = os.getenv("DATABASE_URL")
+secret_session_key = os.getenv("SECRET_KEY")
 
 # make sure it actually exists in .env
-if not db_url:
-    raise ValueError("No DATABASE_URL found in environment variables!")
+if not db_url or not secret_session_key:
+    raise ValueError("No DATABASE_URL or SECRET_KEY found in environment variables!")
 
 # connect to our flask app with config
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = secret_session_key
 
 db.init_app(app)
 
@@ -71,7 +72,6 @@ def home():
 # Returns: The rendered calendar.html file
 @app.route('/calendar.html')
 def calendar():
-    """ Renders calendar view """
     return render_template('calendar.html')
 
 if __name__ == '__main__':
