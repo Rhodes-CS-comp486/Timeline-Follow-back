@@ -1,290 +1,138 @@
-from datetime import datetime
+from flask import Blueprint, request, jsonify, session
+from database.db_helper import create_calendar_entry, add_gambling_entry, add_alcohol_entry
 
-from flask import Blueprint, jsonify, request, session
-from sqlalchemy import func
-
-from database.db_initialization import CalendarEntry, Drinking, Gambling, db
 
 # Create a blueprint to handle events, this will be called in app.py
 events_handler_bp = Blueprint('events_handler', __name__)
 
-
-def get_user_id():
-    user_id = session.get('user_id')
-    return user_id if user_id else 1
-
-
-def parse_iso_date(date_value: str):
-    if not date_value or not isinstance(date_value, str):
-        return None
-    try:
-        return datetime.strptime(date_value, '%Y-%m-%d')
-    except ValueError:
-        return None
-
-
-def clean_value(value):
-    if value is None:
-        return None
-    if isinstance(value, str):
-        trimmed = value.strip()
-        return trimmed if trimmed else None
-    return value
-
-
-def find_calendar_entry(user_id: int, entry_type: str, entry_date: datetime):
-    return CalendarEntry.query.filter(
-        CalendarEntry.user_id == user_id,
-        CalendarEntry.entry_type == entry_type,
-        func.date(CalendarEntry.entry_date) == entry_date.date(),
-    ).first()
-
-
-def ensure_calendar_entry(user_id: int, entry_type: str, entry_date: datetime):
-    existing = find_calendar_entry(user_id, entry_type, entry_date)
-    if existing:
-        return existing
-
-    created = CalendarEntry(
-        user_id=user_id,
-        entry_type=entry_type,
-        entry_date=entry_date,
-    )
-    db.session.add(created)
-    db.session.flush()
-    return created
-
-
-def upsert_drinking(user_id: int, entry_date: datetime, data: dict):
-    entry = ensure_calendar_entry(user_id, 'drinking', entry_date)
-    drinks = clean_value(data.get('drinks'))
-
-    drinking_record = Drinking.query.filter_by(entry_id=entry.id).first()
-    drinking_payload = {
-        'user_id': user_id,
-        'entry_id': entry.id,
-        'num_drinks': drinks,
-    }
-
-    if drinking_record:
-        drinking_record.drinking_questions = drinking_payload
-    else:
-        db.session.add(
-            Drinking(
-                user_id=user_id,
-                entry_id=entry.id,
-                drinking_questions=drinking_payload,
-            )
-        )
-
-
-def upsert_gambling(user_id: int, entry_date: datetime, data: dict):
-    entry = ensure_calendar_entry(user_id, 'gambling', entry_date)
-
-    gambling_payload = {
-        'user_id': user_id,
-        'entry_id': entry.id,
-        'gambling_type': clean_value(data.get('gambling_type')),
-        'time_spent': clean_value(data.get('time_spent')),
-        'amount_intended_spent': clean_value(data.get('money_intended')),
-        'amount_spent': clean_value(data.get('money_spent')),
-        'amount_earned': clean_value(data.get('money_earned')),
-        'num_drinks': clean_value(data.get('drinks_while_gambling')),
-    }
-
-    gambling_record = Gambling.query.filter_by(entry_id=entry.id).first()
-    if gambling_record:
-        gambling_record.gambling_questions = gambling_payload
-    else:
-        db.session.add(
-            Gambling(
-                user_id=user_id,
-                entry_id=entry.id,
-                gambling_questions=gambling_payload,
-            )
-        )
-
-
-def serialize_entry_by_date(user_id: int, entry_date: datetime):
-    date_key = entry_date.date().isoformat()
-    result = {
-        'date': date_key,
-        'drinking': None,
-        'gambling': None,
-    }
-
-    rows = CalendarEntry.query.filter(
-        CalendarEntry.user_id == user_id,
-        func.date(CalendarEntry.entry_date) == entry_date.date(),
-    ).all()
-
-    for row in rows:
-        if row.entry_type == 'drinking':
-            drinking = Drinking.query.filter_by(entry_id=row.id).first()
-            num_drinks = None
-            if drinking and drinking.drinking_questions:
-                num_drinks = drinking.drinking_questions.get('num_drinks')
-            result['drinking'] = {
-                'id': row.id,
-                'drinks': num_drinks,
-            }
-        elif row.entry_type == 'gambling':
-            gambling = Gambling.query.filter_by(entry_id=row.id).first()
-            payload = gambling.gambling_questions if gambling and gambling.gambling_questions else {}
-            result['gambling'] = {
-                'id': row.id,
-                'gambling_type': payload.get('gambling_type'),
-                'time_spent': payload.get('time_spent'),
-                'money_intended': payload.get('amount_intended_spent'),
-                'money_spent': payload.get('amount_spent'),
-                'money_earned': payload.get('amount_earned'),
-                'drinks_while_gambling': payload.get('num_drinks'),
-            }
-
-    return result
-
-
-def normalize_legacy_payload(data: dict):
-    activities = data.get('activities')
-    if isinstance(activities, dict):
-        return activities
-
-    legacy_type = data.get('type')
-    if legacy_type == 'drinking':
-        return {
-            'drinking': {
-                'drinks': data.get('drinks'),
-            }
-        }
-    if legacy_type == 'gambling':
-        return {
-            'gambling': {
-                'gambling_type': data.get('gambling_type'),
-                'time_spent': data.get('time_spent'),
-                'money_intended': data.get('money_intended'),
-                'money_spent': data.get('money_spent'),
-                'money_earned': data.get('money_earned'),
-                'drinks_while_gambling': data.get('drinks_while_gambling'),
-            }
-        }
-    return {}
-
-
+# This function retrieves data from the frontend to backend under a JSON format
+# Parameters: N/A
+# Returns: A JSON file containing all answers to the input fields
 @events_handler_bp.route('/log-activity', methods=['POST'])
 def log_activity():
     data = request.get_json()
+    # Error handling
     if not data:
-        return jsonify({'status': 'error', 'message': 'No data received'}), 400
+        return jsonify({"status": "error", "message": "No data received"}), 400
 
-    user_id = get_user_id()
-    entry_date = parse_iso_date(data.get('date'))
-    if not entry_date:
-        return jsonify({'status': 'error', 'message': 'Invalid or missing date'}), 400
+    # save entry to database
+    success = save_activity(data)
 
-    activities = normalize_legacy_payload(data)
-    if not activities:
-        return jsonify({'status': 'error', 'message': 'No activity selected'}), 400
+    # Printing in JSON style to verify
+    print(f"JSON Data: {data}")
 
-    try:
-        if activities.get('drinking'):
-            upsert_drinking(user_id, entry_date, activities.get('drinking') or {})
-
-        if activities.get('gambling'):
-            upsert_gambling(user_id, entry_date, activities.get('gambling') or {})
-
-        db.session.commit()
+    # checking success
+    if success:
         return jsonify({
-            'status': 'success',
-            'message': 'Activity saved successfully',
-            'entry': serialize_entry_by_date(user_id, entry_date),
+            "status": "success",
+            "message": "Activity logged successfully"
         }), 200
-    except Exception as exc:
-        db.session.rollback()
-        print(f'Save Error: {exc}')
+    else:
         return jsonify({
-            'status': 'error',
-            'message': 'Failed to save activity. Check server logs for details.',
+            "status": "error",
+            "message": "Failed to save activity. Check server logs for details."
         }), 500
 
-
-@events_handler_bp.route('/delete-activity', methods=['POST'])
-def delete_activity():
-    data = request.get_json()
-    if not data:
-        return jsonify({'status': 'error', 'message': 'No data received'}), 400
-
-    entry_date = parse_iso_date(data.get('date'))
-    entry_type = data.get('type')
-    if not entry_date or entry_type not in {'drinking', 'gambling'}:
-        return jsonify({'status': 'error', 'message': 'Invalid date or type'}), 400
-
-    user_id = get_user_id()
-    entry = find_calendar_entry(user_id, entry_type, entry_date)
-    if not entry:
-        return jsonify({'status': 'error', 'message': 'Entry not found'}), 404
-
+# This function saves the data from log_activity() to the database
+# Parameters: JSON format
+# Returns: True on success and False on failure
+def save_activity(activity: dict):
     try:
-        if entry_type == 'drinking':
-            Drinking.query.filter_by(entry_id=entry.id).delete()
-        else:
-            Gambling.query.filter_by(entry_id=entry.id).delete()
+        # Get important entries needed to create calendar entry
+        user_id = session.get('user_id')
+        entry_date = activity.get("date")
+        entry_type = activity.get("type")
 
-        db.session.delete(entry)
-        db.session.commit()
+        # Set this to default user if there's no user
+        if not user_id:
+            user_id = 1
 
-        return jsonify({
-            'status': 'success',
-            'message': f'{entry_type.title()} entry deleted',
-            'entry': serialize_entry_by_date(user_id, entry_date),
-        }), 200
-    except Exception as exc:
-        db.session.rollback()
-        print(f'Delete Error: {exc}')
-        return jsonify({'status': 'error', 'message': 'Failed to delete entry'}), 500
+        # create calendar entry
+        entry_id = create_calendar_entry(user_id, entry_type, entry_date)
 
+        print(f"Check calendar entry info: {user_id}, {entry_date}, {entry_type}")
 
+        if not entry_id:
+            raise Exception("Failed to create CalendarEntry")
+
+        # Extract all the information from our form
+        if entry_type == "gambling":
+            add_gambling_entry(
+                user_id = user_id,
+                entry_id = entry_id,
+                amount_spent = float(activity.get("money_spent", "0").replace('$', '').replace(',', '')),
+                amount_earned = float(activity.get("money_earned", "0").replace('$', '').replace(',', '')),
+                time_spent = activity.get("time_spent"),
+                gambling_type = activity.get("gambling_type"),
+                amount_intended_spent= float(activity.get("money_intended", "0").replace('$', '').replace(',', '')),
+                num_drinks = activity.get("drinks_while_gambling"),
+            )
+
+        elif entry_type == "drinking":
+            add_alcohol_entry(
+                user_id = user_id,
+                entry_id = entry_id,
+                num_drinks = activity.get("drinks"),
+            )
+
+        return True
+
+    except Exception as e:
+        print(f"Save Error: {e}")
+        return False
+
+# This function retrieves all saved calendar entries for a user with full details and returns them as JSON
+# Called by: Frontend (app.js) on page load to populate the calendar with existing entries
+# Parameters: user_id from session (or query param as fallback)
+# Returns: JSON array of events with:
+#   - id, date (YYYY-MM-DD format), type (drinking/gambling)
+#   - For drinking entries: drinks (number of drinks consumed)
+#   - For gambling entries: gambling_type, time_spent, money_intended, money_spent, money_earned, drinks_while_gambling
+# This enables the "load events on startup" functionality and populates the sidebar with entry details
+# Queries both CalendarEntry table and related Drinking/Gambling tables to get complete entry information
 @events_handler_bp.route('/calendar-events', methods=['GET'])
 def get_calendar_events():
-    user_id = get_user_id()
+    user_id = session.get('user_id')
+
+    if not user_id:
+        user_id = request.args.get('user_id', default=1, type=int)
 
     try:
-        rows = CalendarEntry.query.filter_by(user_id=user_id).order_by(
-            CalendarEntry.entry_date
-        ).all()
+        from database.db_helper import get_calendar_entries_for_user
+        from database.db_initialization import Drinking, Gambling
 
-        grouped = {}
-        for row in rows:
-            date_key = row.entry_date.date().isoformat()
-            if date_key not in grouped:
-                grouped[date_key] = {
-                    'date': date_key,
-                    'drinking': None,
-                    'gambling': None,
-                }
+        entries = get_calendar_entries_for_user(user_id)
 
-            if row.entry_type == 'drinking':
-                drinking = Drinking.query.filter_by(entry_id=row.id).first()
-                num_drinks = None
+        events = []
+        for e in entries:
+            event = {
+                "id": e.id,
+                "date": e.entry_date.isoformat().split('T')[0],  # Just YYYY-MM-DD
+                "type": e.entry_type
+            }
+
+            # Fetch drinking details if it's a drinking entry
+            if e.entry_type == "drinking":
+                drinking = Drinking.query.filter_by(entry_id=e.id).first()
                 if drinking and drinking.drinking_questions:
-                    num_drinks = drinking.drinking_questions.get('num_drinks')
-                grouped[date_key]['drinking'] = {
-                    'id': row.id,
-                    'drinks': num_drinks,
-                }
-            elif row.entry_type == 'gambling':
-                gambling = Gambling.query.filter_by(entry_id=row.id).first()
-                payload = gambling.gambling_questions if gambling and gambling.gambling_questions else {}
-                grouped[date_key]['gambling'] = {
-                    'id': row.id,
-                    'gambling_type': payload.get('gambling_type'),
-                    'time_spent': payload.get('time_spent'),
-                    'money_intended': payload.get('amount_intended_spent'),
-                    'money_spent': payload.get('amount_spent'),
-                    'money_earned': payload.get('amount_earned'),
-                    'drinks_while_gambling': payload.get('num_drinks'),
-                }
+                    event["drinks"] = drinking.drinking_questions.get("num_drinks")
 
-        return jsonify(list(grouped.values())), 200
+            # Fetch gambling details if it's a gambling entry
+            elif e.entry_type == "gambling":
+                gambling = Gambling.query.filter_by(entry_id=e.id).first()
+                if gambling and gambling.gambling_questions:
+                    gq = gambling.gambling_questions
+                    event["gambling_type"] = gq.get("gambling_type")
+                    event["time_spent"] = gq.get("time_spent")
+                    event["money_intended"] = gq.get("amount_intended_spent")
+                    event["money_spent"] = gq.get("amount_spent")
+                    event["money_earned"] = gq.get("amount_earned")
+                    event["drinks_while_gambling"] = gq.get("num_drinks")
+
+            events.append(event)
+
+        return jsonify(events), 200
+
     except Exception as exc:
-        print(f'Error retrieving calendar events: {exc}')
-        return jsonify({'status': 'error', 'message': 'Failed to retrieve events'}), 500
+        print(f"Error retrieving calendar events: {exc}")
+        return jsonify({"status": "error", "message": "Failed to retrieve events"}), 500
