@@ -74,40 +74,33 @@
                     <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
 
                     <div id="drinkingSection">
+                    {% for q in questions.drinking %}
                         <div class="form-group">
-                            <label for="drinksInput">How many standard drinks did you consume? (Refer to the <a href="{{ url_for('instructions.alcohol_instructions') }}">Alcohol Instructions</a> page for what a standard drink is.)</label>
-                            <input type="text" inputmode="numeric" id="drinksInput" placeholder="e.g. 0, 3, 5" class="modal-input">
+                            <label for="{{ q.id }}">{{ q.label }}</label>
+                            <input
+                                type="{{ q.type }}"
+                                id="{{ q.id }}"
+                                name="{{ q.id }}"
+                                placeholder="{{ q.placeholder }}"
+                                class="modal-input">
                         </div>
+                    {% endfor %}
                     </div>
-
-                    <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
 
                     <div id="gamblingSection">
-                        <div class="form-group">
-                            <label for="gamblingType">What type of gambling did you engage in?</label>
-                            <input type="text" id="gamblingType" placeholder="e.g. sports betting, roulette, blackjack" class="modal-input">
-                        </div>
-                        <div class="form-group">
-                            <label for="timeSpent">How long were you gambling that day?</label>
-                            <input type="text" id="timeSpent" placeholder="e.g. 1.5 hours" class="modal-input">
-                        </div>
-                        <div class="form-group">
-                            <label for="moneyIntended">How much did you intend to gamble with?</label>
-                            <input type="text" inputmode="decimal" id="moneyIntended" placeholder="e.g. $100" class="modal-input">
-                        </div>
-                        <div class="form-group">
-                            <label for="moneyInputSpent">How much did you actually wager (not including wins)?</label>
-                            <input type="text" inputmode="decimal" id="moneyInputSpent" placeholder="e.g. $300" class="modal-input">
-                        </div>
-                        <div class="form-group">
-                            <label for="moneyInputEarned">How much did you end up winning or losing?</label>
-                            <input type="text" inputmode="decimal" id="moneyInputEarned" placeholder="e.g. +$50 or -$25" class="modal-input">
-                        </div>
-                        <div class="form-group">
-                            <label for="drinksWhileGambling">How many drinks did you have while gambling?</label>
-                            <input type="text" inputmode="numeric" id="drinksWhileGambling" placeholder="e.g. 0, 2, 5" class="modal-input">
-                        </div>
+                        {% for q in questions.gambling %}
+                            <div class="form-group">
+                                <label for="{{ q.id }}">{{ q.label }}</label>
+                                <input
+                                    type="{{ q.type }}"
+                                    id="{{ q.id }}"
+                                    name="{{ q.id }}"
+                                    placeholder="{{ q.placeholder }}"
+                                    class="modal-input">
+                            </div>
+                        {% endfor %}
                     </div>
+
 
                     <div class="modal-actions">
                         <button type="button" class="nav-btn" id="closeModal">Cancel</button>

@@ -3,6 +3,9 @@ from flask import Flask, render_template, redirect, url_for
 from database.db_initialization import db
 import os
 
+# helper function to load questions from JSON
+from config.config_helper import load_questions
+
 # To create and import BP use the following convention
 from routes.events_handler import events_handler_bp
 from routes.instructions import instructions_bp
@@ -72,7 +75,8 @@ def home():
 # Returns: The rendered calendar.html file
 @app.route('/calendar.html')
 def calendar():
-    return render_template('calendar.html')
+    questions = load_questions()
+    return render_template('calendar.html', questions=questions)
 
 if __name__ == '__main__':
     app.run(debug=True)
