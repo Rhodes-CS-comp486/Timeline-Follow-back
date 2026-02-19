@@ -12,4 +12,4 @@ Sprints
 - [Sprint 2](https://docs.google.com/document/d/10DOS5v4IT1fR6m0kvhi1vDr2VwHIyLmCBo4GbKtfjGE/edit?usp=sharing)
 
 Slideshows
-- [Mid-semester Slideshow](https://docs.google.com/presentation/d/1oa4ge7Kv9xXsgHoBk9u0-2Guwie36OXVhX3_5XdY81g/edit?usp=sharing)
+- [Mid-Semester Slideshow](https://docs.google.com/presentation/d/1oa4ge7Kv9xXsgHoBk9u0-2Guwie36OXVhX3_5XdY81g/edit?usp=sharing)
