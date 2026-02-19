@@ -88,3 +88,59 @@ def save_activity(activity: dict):
     except Exception as e:
         print(f"Save Error: {e}")
         return False
+
+# This function retrieves all saved calendar entries for a user with full details and returns them as JSON
+# Called by: Frontend (app.js) on page load to populate the calendar with existing entries
+# Parameters: user_id from session (or query param as fallback)
+# Returns: JSON array of events with:
+#   - id, date (YYYY-MM-DD format), type (drinking/gambling)
+#   - For drinking entries: drinks (number of drinks consumed)
+#   - For gambling entries: gambling_type, time_spent, money_intended, money_spent, money_earned, drinks_while_gambling
+# This enables the "load events on startup" functionality and populates the sidebar with entry details
+# Queries both CalendarEntry table and related Drinking/Gambling tables to get complete entry information
+@events_handler_bp.route('/calendar-events', methods=['GET'])
+def get_calendar_events():
+    user_id = session.get('user_id')
+
+    if not user_id:
+        user_id = request.args.get('user_id', default=1, type=int)
+
+    try:
+        from database.db_helper import get_calendar_entries_for_user
+        from database.db_initialization import Drinking, Gambling
+
+        entries = get_calendar_entries_for_user(user_id)
+
+        events = []
+        for e in entries:
+            event = {
+                "id": e.id,
+                "date": e.entry_date.isoformat().split('T')[0],  # Just YYYY-MM-DD
+                "type": e.entry_type
+            }
+
+            # Fetch drinking details if it's a drinking entry
+            if e.entry_type == "drinking":
+                drinking = Drinking.query.filter_by(entry_id=e.id).first()
+                if drinking and drinking.drinking_questions:
+                    event["drinks"] = drinking.drinking_questions.get("num_drinks")
+
+            # Fetch gambling details if it's a gambling entry
+            elif e.entry_type == "gambling":
+                gambling = Gambling.query.filter_by(entry_id=e.id).first()
+                if gambling and gambling.gambling_questions:
+                    gq = gambling.gambling_questions
+                    event["gambling_type"] = gq.get("gambling_type")
+                    event["time_spent"] = gq.get("time_spent")
+                    event["money_intended"] = gq.get("amount_intended_spent")
+                    event["money_spent"] = gq.get("amount_spent")
+                    event["money_earned"] = gq.get("amount_earned")
+                    event["drinks_while_gambling"] = gq.get("num_drinks")
+
+            events.append(event)
+
+        return jsonify(events), 200
+
+    except Exception as exc:
+        print(f"Error retrieving calendar events: {exc}")
+        return jsonify({"status": "error", "message": "Failed to retrieve events"}), 500
