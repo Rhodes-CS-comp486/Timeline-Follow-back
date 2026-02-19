@@ -98,22 +98,6 @@ const initCalendar = () => {
     // In-memory store for saved entries (keyed by ISO date)
     const entries = {};
 
-    // Fetch calendar events from the backend and populate entries
-    fetch('/api/calendar-events')
-        .then(response => response.json())
-        .then(events => {
-            // Populate the entries object with fetched data
-            events.forEach(event => {
-            const dateKey = event.date.split('T')[0]; // Convert to YYYY-MM-DD
-            entries[dateKey] = event;
-            });
-            console.log("Events loaded from database:", entries);
-            console.log("Total events:", Object.keys(entries).length);
-        })
-        .catch(error => {
-        console.error("Error fetching calendar events:", error);
-        });
-
     // Popup Window Elements
     const modal = document.getElementById('eventModal');
     const modalTitle = document.getElementById('modalDateTitle');
