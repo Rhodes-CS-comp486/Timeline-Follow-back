@@ -78,15 +78,6 @@ def add_alcohol_entry(
 
     return commit_to_db(new_alcohol_entry)
 
-# This function retrieves all calendar entries for a specific user from the database
-# Parameters: user_id -> int (Foreign Key from User table)
-# Returns: List of CalendarEntry objects ordered by date, or empty list if none found
-# Used by: events_handler.py's get_calendar_events() to fetch entries for display on calendar
-def get_calendar_entries_for_user(user_id: int):
-    return CalendarEntry.query.filter_by(user_id=user_id).order_by(
-        CalendarEntry.entry_date
-    ).all()
-
 # This function adds any object to the session and commits it to Postgres
 # Parameters: new_entry -> db.Model object (User, CalendarEntry, Gambling, etc.)
 # Returns: The committed object if successful, None if failure
