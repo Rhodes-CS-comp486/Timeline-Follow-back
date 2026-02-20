@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, session
-from database.db_helper import create_calendar_entry, add_gambling_entry, add_alcohol_entry
+from database.db_helper import create_calendar_entry, add_gambling_entry, add_alcohol_entry, get_calendar_entries_for_user
 from pathlib import Path
 import json
 
@@ -8,7 +8,7 @@ import json
 events_handler_bp = Blueprint('events_handler', __name__)
 
 # Read the questions.json
-with open(Path("config\questions.json"), "r", encoding="utf-8") as f:
+with open(Path(__file__).parent.parent / "config" / "questions.json", "r", encoding="utf-8") as f:
     qSchema = json.load(f)
 
 # This function retrieves data from the frontend to backend under a JSON format
