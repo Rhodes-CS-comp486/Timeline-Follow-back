@@ -139,21 +139,33 @@ def get_calendar_events():
             }
 
             # Fetch drinking details if it's a drinking entry
-            if e.entry_type == "drinking":
+            if not e.entry_type or e.entry_type == "drinking":
                 drinking = Drinking.query.filter_by(entry_id=e.id).first()
-                if drinking:
-                    event.update(extract_fields(qSchema["drinking"], drinking.drinking_questions))
+                if drinking and drinking.drinking_questions:
+                    print(f"DEBUG - drinking_questions: {drinking.drinking_questions}")
+                    extracted = extract_fields(qSchema["drinking"], drinking.drinking_questions)
+                    print(f"DEBUG - extracted fields: {extracted}")
+                    event.update(extracted)
+                    print(f"DEBUG - final event object: {event}")
 
-            # Fetch gambling details if it's a gambling entry
-            elif e.entry_type == "gambling":
+
+            if not e.entry_type or e.entry_type == "gambling":
+
                 gambling = Gambling.query.filter_by(entry_id=e.id).first()
-                if gambling:
-                    event.update(
-                        extract_fields(
-                            qSchema["gambling"],
-                            gambling.gambling_questions
-                        )
-                    )
+
+                print(f"DEBUG - Found gambling record: {gambling}")
+
+                print(f"DEBUG - gambling.gambling_questions: {gambling.gambling_questions if gambling else 'N/A'}")
+
+                if gambling and gambling.gambling_questions:
+                    print(f"DEBUG - gambling_questions: {gambling.gambling_questions}")
+                    extracted = extract_fields(qSchema["gambling"], gambling.gambling_questions)
+                    print(f"DEBUG - extracted fields: {extracted}")
+                    event.update(extracted)
+                    if not  e.entry_type:
+                        event["type"] = "gambling"
+
+                    print(f"DEBUG - final event object: {event}")
 
             events.append(event)
 

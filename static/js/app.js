@@ -100,25 +100,34 @@ const initCalendar = () => {
 
     // Fetch calendar events from the backend and populate entries
     // Fetch calendar events from the backend and populate entries
-fetch('/api/calendar-events')
-    .then(response => response.json())
-    .then(events => {
-        events.forEach(event => {
-            const dateKey = event.date; // already YYYY-MM-DD
+    fetch('/api/calendar-events')
+        .then(response => response.json())
+        .then(events => {
+               if (!Array.isArray(events)) {
+                    console.error("calendar-events failed:", events);
+                    return;
+                }
 
-            if (!entries[dateKey]) {
-                entries[dateKey] = [];
-            }
+            events.forEach(event => {
 
-            entries[dateKey].push(event);
+                const dateKey = event.date; // already YYYY-MM-DD
+
+                if (!entries[dateKey]) {
+                    entries[dateKey] = [];
+                }
+
+                entries[dateKey].push(event);
+            });
+
+            console.log("Events loaded from database:", entries);
+            console.log("Total events:", Object.keys(entries).length);
+
+            // Only render once fetch completes
+            render();
+        })
+        .catch(error => {
+            console.error("Error fetching calendar events:", error);
         });
-
-        console.log("Events loaded from database:", entries);
-        console.log("Total events:", Object.keys(entries).length);
-    })
-    .catch(error => {
-        console.error("Error fetching calendar events:", error);
-    });
 
 
     // Popup Window Elements
@@ -197,29 +206,37 @@ fetch('/api/calendar-events')
             return;
         }
 
-        const entry = entries[state.selectedISO];
+        console.log("renderSidebar called");
+        console.log("selectedISO:", state.selectedISO);
+        console.log("entries[selectedISO]:", entries[state.selectedISO]);
+        console.log("is array:", Array.isArray(entries[state.selectedISO]));
+
+        const dayEntries = entries[state.selectedISO];
+        if (!Array.isArray(dayEntries) || dayEntries.length === 0) {
+            entrySummary.innerHTML = '<p class="entry-empty">No activity logged for this date.</p>';
+            return;
+        }
+
         let html = '';
-
-        if (entry.drinks) {
-            html += '<div class="entry-section">';
-            html += '<div class="entry-section-title">Drinking</div>';
-            html += `<div class="entry-row"><span class="entry-label">Drinks:</span> ${entry.drinks}</div>`;
-            if (entry.drinks_cost) html += `<div class="entry-row"><span class="entry-label">Cost:</span> ${entry.drinks_cost}</div>`;
-            if (entry.drink_trigger) html += `<div class="entry-row"><span class="entry-label">Trigger:</span> ${entry.drink_trigger}</div>`;
-            html += '</div>';
-        }
-
-        if (entry.gambling_type) {
-            html += '<div class="entry-section">';
-            html += '<div class="entry-section-title">Gambling</div>';
-            html += `<div class="entry-row"><span class="entry-label">Type:</span> ${entry.gambling_type}</div>`;
-            if (entry.time_spent) html += `<div class="entry-row"><span class="entry-label">Time Spent:</span> ${entry.time_spent}</div>`;
-            if (entry.money_intended) html += `<div class="entry-row"><span class="entry-label">Intended to Wager:</span> ${entry.money_intended}</div>`;
-            if (entry.money_spent) html += `<div class="entry-row"><span class="entry-label">Actually Wagered:</span> ${entry.money_spent}</div>`;
-            if (entry.money_earned) html += `<div class="entry-row"><span class="entry-label">Won/Lost:</span> ${entry.money_earned}</div>`;
-            if (entry.drinks_while_gambling) html += `<div class="entry-row"><span class="entry-label">Drinks While Gambling:</span> ${entry.drinks_while_gambling}</div>`;
-            html += '</div>';
-        }
+        dayEntries.forEach(entry => {
+            if (entry.num_drinks) {  // Changed from entry.drinks
+                html += `<div class="entry-section">`;
+                html += `<div class="entry-section-title" style="color: var(--primary);">Drinking</div>`;
+                html += `<div class="entry-row"><span class="entry-label">Drinks:</span> ${entry.num_drinks}</div>`;
+                html += `</div>`;
+            }
+            if (entry.gambling_type) {
+                html += `<div class="entry-section">`;
+                html += `<div class="entry-section-title">Gambling</div>`;
+                html += `<div class="entry-row"><span class="entry-label">Type:</span> ${entry.gambling_type}</div>`;
+                if (entry.time_spent) html += `<div class="entry-row"><span class="entry-label">Time Spent:</span> ${entry.time_spent}</div>`;
+                if (entry.money_intended) html += `<div class="entry-row"><span class="entry-label">Intended:</span> $${entry.money_intended}</div>`;
+                if (entry.money_spent) html += `<div class="entry-row"><span class="entry-label">Wagered:</span> $${entry.money_spent}</div>`;
+                if (entry.money_earned) html += `<div class="entry-row"><span class="entry-label">Won/Lost:</span> $${entry.money_earned}</div>`;
+                if (entry.drinks_while_gambling) html += `<div class="entry-row"><span class="entry-label">Drinks While Gambling:</span> ${entry.drinks_while_gambling}</div>`;
+                html += `</div>`;
+            }
+        });
 
         if (!html) {
             entrySummary.innerHTML = '<p class="entry-empty">No activity logged for this date.</p>';
@@ -276,16 +293,19 @@ fetch('/api/calendar-events')
             }
 
             // Show X indicators for no-drinking / no-gambling entries
-            const entry = entries[iso];
-            if (entry) {
+            const dayEntries = entries[iso];
+
+            if (Array.isArray(dayEntries)) {
                 button.classList.add('day--holiday');
-                if (entry.no_drinking) {
+
+                if (dayEntries.some(e => e.no_drinking)) {
                     const redX = document.createElement('span');
                     redX.className = 'no-drink-x';
                     redX.textContent = 'X';
                     button.appendChild(redX);
                 }
-                if (entry.no_gambling) {
+
+                if (dayEntries.some(e => e.no_gambling)) {
                     const blueX = document.createElement('span');
                     blueX.className = 'no-gamble-x';
                     blueX.textContent = 'X';
@@ -437,7 +457,6 @@ fetch('/api/calendar-events')
     prevBtn.addEventListener('click', () => changeMonth(-1));
     nextBtn.addEventListener('click', () => changeMonth(1));
 
-    render();
     resetFormState()
 };
 
