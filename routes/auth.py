@@ -112,3 +112,11 @@ def login():
         return redirect(url_for('home'))
 
     return render_template('login.html', error=None)
+
+
+@auth_bp.route('/logout')
+def logout():
+    # Clear all session data so the user is fully signed out.
+    session.clear()
+    # Send the user back to the login screen after logout.
+    return redirect(url_for('auth.login'))
