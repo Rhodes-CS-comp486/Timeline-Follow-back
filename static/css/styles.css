@@ -351,6 +351,35 @@ button {
     color: #9aa0a6;
 }
 
+.day--has-markers {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.activity-markers {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.activity-marker {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.marker-drinking {
+    background: #02006c;
+}
+
+.marker-gambling {
+    background: #d97706;
+}
+
 /* No-activity X indicators on calendar days */
 .no-drink-x {
     font-size: 12px;
@@ -377,6 +406,28 @@ button {
 /* Entry summary sidebar */
 .entry-summary {
     margin-top: 8px;
+}
+
+.marker-legend {
+    margin-top: 20px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+}
+
+.legend-title {
+    font-family: var(--font-heading);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 6px;
 }
 
 .entry-empty {
@@ -513,6 +564,12 @@ button:focus-visible {
 
 .modal-actions button {
     flex: 1;
+}
+
+.modal-mode-text {
+    margin: 8px 0 14px;
+    color: var(--muted);
+    font-size: 13px;
 }
 
 /* Instructions page */

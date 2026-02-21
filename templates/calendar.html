@@ -34,6 +34,17 @@
                         <div class="entry-summary" id="entrySummary">
                             <p class="entry-empty">Select a date to view its entry.</p>
                         </div>
+                        <div class="marker-legend" aria-label="Marker legend">
+                            <div class="legend-title">Marker Legend</div>
+                            <div class="legend-item">
+                                <span class="activity-marker marker-drinking"></span>
+                                <span>Drinking</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="activity-marker marker-gambling"></span>
+                                <span>Gambling</span>
+                            </div>
+                        </div>
                     </div>
                 </aside>
 
@@ -102,9 +113,11 @@
                     </div>
 
 
+                    <p class="modal-mode-text" id="modalModeText"></p>
                     <div class="modal-actions">
                         <button type="button" class="nav-btn" id="closeModal">Cancel</button>
-                        <button type="submit" class="nav-btn is-active">Save Entry</button>
+                        <button type="button" class="nav-btn" id="deleteEntryBtn" style="display: none;">Delete Entry</button>
+                        <button type="submit" class="nav-btn is-active" id="saveEntryBtn">Save Entry</button>
                     </div>
                 </form>
             </div>
