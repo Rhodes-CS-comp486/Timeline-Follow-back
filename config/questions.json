@@ -1,7 +1,7 @@
 {
   "drinking": [
     {
-      "id": "drinks",
+      "id": "num_drinks",
       "label": "How many standard drinks did you consume?",
       "type": "number",
       "placeholder": "e.g. 0, 3, 5"

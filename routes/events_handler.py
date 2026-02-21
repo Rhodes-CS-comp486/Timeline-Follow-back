@@ -1,9 +1,15 @@
 from flask import Blueprint, request, jsonify, session
-from database.db_helper import create_calendar_entry, add_gambling_entry, add_alcohol_entry
+from database.db_helper import create_calendar_entry, add_gambling_entry, add_alcohol_entry, get_calendar_entries_for_user
+from pathlib import Path
+import json
 
 
 # Create a blueprint to handle events, this will be called in app.py
 events_handler_bp = Blueprint('events_handler', __name__)
+
+# Read the questions.json
+with open(Path(__file__).parent.parent / "config" / "questions.json", "r", encoding="utf-8") as f:
+    qSchema = json.load(f)
 
 # This function retrieves data from the frontend to backend under a JSON format
 # Parameters: N/A
@@ -89,6 +95,19 @@ def save_activity(activity: dict):
         print(f"Save Error: {e}")
         return False
 
+def extract_fields(schema_section, answers_dict):
+    """
+    schema_section: list of question definitions
+    answers_dict: stored answers (from DB)
+    """
+    result = {}
+    for q in schema_section:
+        qid = q["id"]
+        if answers_dict and qid in answers_dict:
+            result[qid] = answers_dict[qid]
+    return result
+
+
 # This function retrieves all saved calendar entries for a user with full details and returns them as JSON
 # Called by: Frontend (app.js) on page load to populate the calendar with existing entries
 # Parameters: user_id from session (or query param as fallback)
@@ -120,22 +139,33 @@ def get_calendar_events():
             }
 
             # Fetch drinking details if it's a drinking entry
-            if e.entry_type == "drinking":
+            if not e.entry_type or e.entry_type == "drinking":
                 drinking = Drinking.query.filter_by(entry_id=e.id).first()
                 if drinking and drinking.drinking_questions:
-                    event["drinks"] = drinking.drinking_questions.get("num_drinks")
+                    print(f"DEBUG - drinking_questions: {drinking.drinking_questions}")
+                    extracted = extract_fields(qSchema["drinking"], drinking.drinking_questions)
+                    print(f"DEBUG - extracted fields: {extracted}")
+                    event.update(extracted)
+                    print(f"DEBUG - final event object: {event}")
 
-            # Fetch gambling details if it's a gambling entry
-            elif e.entry_type == "gambling":
+
+            if not e.entry_type or e.entry_type == "gambling":
+
                 gambling = Gambling.query.filter_by(entry_id=e.id).first()
+
+                print(f"DEBUG - Found gambling record: {gambling}")
+
+                print(f"DEBUG - gambling.gambling_questions: {gambling.gambling_questions if gambling else 'N/A'}")
+
                 if gambling and gambling.gambling_questions:
-                    gq = gambling.gambling_questions
-                    event["gambling_type"] = gq.get("gambling_type")
-                    event["time_spent"] = gq.get("time_spent")
-                    event["money_intended"] = gq.get("amount_intended_spent")
-                    event["money_spent"] = gq.get("amount_spent")
-                    event["money_earned"] = gq.get("amount_earned")
-                    event["drinks_while_gambling"] = gq.get("num_drinks")
+                    print(f"DEBUG - gambling_questions: {gambling.gambling_questions}")
+                    extracted = extract_fields(qSchema["gambling"], gambling.gambling_questions)
+                    print(f"DEBUG - extracted fields: {extracted}")
+                    event.update(extracted)
+                    if not  e.entry_type:
+                        event["type"] = "gambling"
+
+                    print(f"DEBUG - final event object: {event}")
 
             events.append(event)
 
