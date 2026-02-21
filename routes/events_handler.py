@@ -15,6 +15,7 @@ with open(Path(__file__).parent.parent / "config" / "questions.json", "r", encod
 
 
 def parse_iso_day(day_str: str):
+    # Normalize incoming YYYY-MM-DD string to midnight for range queries. was facing errors so had to add
     try:
         parsed = datetime.strptime(day_str, "%Y-%m-%d")
         return parsed.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -23,6 +24,7 @@ def parse_iso_day(day_str: str):
 
 
 def get_entries_for_user_day(user_id: int, day_str: str):
+    # Cross-database safe "same day" lookup using [start, next_day) instead of DATE().
     start_of_day = parse_iso_day(day_str)
     if not start_of_day:
         return []
@@ -80,7 +82,7 @@ def save_activity(activity: dict):
         if not drinking_logged and not gambling_logged:
             raise Exception("No activity selected")
 
-        # Keep one logical entry per user/day. Reuse latest entry if present.
+        # Keep exactly one logical entry per day. If duplicates exist, operate on the latest.
         day_entries = get_entries_for_user_day(user_id, entry_date)
 
         if day_entries:
@@ -102,6 +104,7 @@ def save_activity(activity: dict):
         }
 
         primary_entry_id = primary_entry.id
+        # Child tables are keyed by entry_id; query by entry_id only.
         drinking_rows = Drinking.query.filter_by(entry_id=primary_entry_id).all()
         gambling_rows = Gambling.query.filter_by(entry_id=primary_entry_id).all()
 
@@ -147,6 +150,7 @@ def save_activity(activity: dict):
                 db.session.delete(drinking)
             for gambling in duplicate_gambling_rows:
                 db.session.delete(gambling)
+            # Flush child deletes before deleting parent to avoid FK violations.
             db.session.flush()
             db.session.delete(duplicate_entry)
 
@@ -191,6 +195,7 @@ def get_calendar_events():
         entries = get_calendar_entries_for_user(user_id)
         entries = sorted(entries, key=lambda row: (row.entry_date, row.id))
 
+        # Collapse multiple DB rows from the same date into one API event.
         events_by_date = {}
         for e in entries:
             iso_date = e.entry_date.isoformat().split('T')[0]
@@ -205,6 +210,7 @@ def get_calendar_events():
 
             event = events_by_date[iso_date]
             if e.id > event["id"]:
+                # Keep highest id so frontend edits/deletes target the newest row.
                 event["id"] = e.id
 
             # Fetch drinking details if it's a drinking entry
@@ -314,7 +320,7 @@ def update_activity(entry_id):
             for gambling in gambling_rows:
                 db.session.delete(gambling)
 
-        # Keep only the edited entry for that day.
+        # Keep only the edited entry for that day; remove stale duplicates.
         for day_entry in same_day_entries:
             if day_entry.id == entry_id:
                 continue
@@ -326,6 +332,7 @@ def update_activity(entry_id):
                 db.session.delete(drinking)
             for gambling in duplicate_gambling_rows:
                 db.session.delete(gambling)
+            # Flush child deletes before deleting parent to satisfy FK constraints.
             db.session.flush()
             db.session.delete(day_entry)
 
@@ -361,6 +368,7 @@ def delete_activity(entry_id):
                 db.session.delete(drinking)
             for gambling in gambling_rows:
                 db.session.delete(gambling)
+            # Flush child deletes before deleting parent to satisfy FK constraints.
             db.session.flush()
             db.session.delete(day_entry)
 
