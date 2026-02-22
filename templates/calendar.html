@@ -95,6 +95,7 @@
                                 id="{{ q.id }}"
                                 name="{{ q.id }}"
                                 placeholder="{{ q.placeholder }}"
+                                {% if q.type == "number" %}step="any"{% endif %}
                                 class="modal-input">
                         </div>
                     {% endfor %}
@@ -109,6 +110,7 @@
                                     id="{{ q.id }}"
                                     name="{{ q.id }}"
                                     placeholder="{{ q.placeholder }}"
+                                    {% if q.type == "number" %}step="any"{% endif %}
                                     class="modal-input">
                             </div>
                         {% endfor %}

@@ -557,6 +557,17 @@ button:focus-visible {
     font-size: 16px;
 }
 
+/* Hide number input spinner arrows in all browsers */
+.modal-input[type="number"]::-webkit-inner-spin-button,
+.modal-input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.modal-input[type="number"] {
+    -moz-appearance: textfield;
+}
+
 .modal-actions {
     display: flex;
     gap: 12px;
