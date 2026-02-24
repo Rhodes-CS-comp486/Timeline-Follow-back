@@ -16,9 +16,9 @@
     },
     {
       "id": "time_spent",
-      "label": "How long were you gambling that day?",
-      "type": "text",
-      "placeholder": "e.g. 1.5 hours"
+      "label": "How long were you gambling that day? (hours)",
+      "type": "number",
+      "placeholder": "e.g. 1.5"
     },
     {
       "id": "money_intended",
