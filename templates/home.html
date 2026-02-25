@@ -15,14 +15,24 @@
 <body>
     <div class="app-shell">
         <nav class="top-nav" aria-label="Primary">
-            <a class="nav-btn is-active" href="{{ url_for('home') }}">Home</a>
-            <a class="nav-btn" href="{{ url_for('instructions.gambling_instructions') }}">Gambling Instructions</a>
-            <a class="nav-btn" href="{{ url_for('instructions.alcohol_instructions') }}">Alcohol Instructions</a>
-            <a class="nav-btn" href="{{ url_for('calendar') }}">Calendar</a>
-            <a class="nav-btn" href="#">Reports</a>
+
+            <!-- Always visible -->
+            <a class="nav-btn" href="{{ url_for('home') }}">Home</a>
+
+           {% if current_user and current_user.is_admin %}
+            <!-- ADMIN ONLY -->
+                <a class="nav-btn" href="{{ url_for('admin.report') }}">Reports</a>
+            {% else %}
+            <!-- NORMAL USER -->
+                <a class="nav-btn" href="{{ url_for('instructions.gambling_instructions') }}">Gambling Instructions</a>
+                <a class="nav-btn" href="{{ url_for('instructions.alcohol_instructions') }}">Alcohol Instructions</a>
+                <a class="nav-btn" href="{{ url_for('calendar') }}">Calendar</a>
+            {% endif %}
+
+            <!-- Always visible -->
             <a class="nav-btn" href="#">Dashboard</a>
             <a class="nav-btn" href="#">Settings</a>
-            <a class="nav-btn" href="{{ url_for('auth.create_account') }}">Create Account</a>
+            <a class="nav-btn" href="{{ url_for('auth.logout') }}">Logout</a>
         </nav>
 
         <header class="page-header">

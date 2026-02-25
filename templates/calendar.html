@@ -22,9 +22,10 @@
                 <a class="nav-btn" href="{{ url_for('instructions.gambling_instructions') }}">Gambling Instructions</a>
                 <a class="nav-btn" href="{{ url_for('instructions.alcohol_instructions') }}">Alcohol Instructions</a>
                 <a class="nav-btn is-active" href="{{ url_for('calendar') }}">Calendar</a>
-                <a class="nav-btn" href="#">Reports</a>
                 <a class="nav-btn" href="#">Dashboard</a>
                 <a class="nav-btn" href="#">Settings</a>
+                <!-- Logout keeps the same nav styling and routes to the sign-out endpoint. -->
+                <a class="nav-btn" href="{{ url_for('auth.logout') }}">Logout</a>
             </nav>
 
             <main class="app-main">
@@ -33,6 +34,17 @@
                         <div class="panel-title" id="selectedDateLabel">Pick a day</div>
                         <div class="entry-summary" id="entrySummary">
                             <p class="entry-empty">Select a date to view its entry.</p>
+                        </div>
+                        <div class="marker-legend" aria-label="Marker legend">
+                            <div class="legend-title">Marker Legend</div>
+                            <div class="legend-item">
+                                <span class="activity-marker marker-drinking"></span>
+                                <span>Drinking</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="activity-marker marker-gambling"></span>
+                                <span>Gambling</span>
+                            </div>
                         </div>
                     </div>
                 </aside>
@@ -74,44 +86,41 @@
                     <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
 
                     <div id="drinkingSection">
+                    {% for q in questions.drinking %}
                         <div class="form-group">
-                            <label for="drinksInput">How many standard drinks did you consume? (Refer to the <a href="{{ url_for('instructions.alcohol_instructions') }}">Alcohol Instructions</a> page for what a standard drink is.)</label>
-                            <input type="text" inputmode="numeric" id="drinksInput" placeholder="e.g. 0, 3, 5" class="modal-input">
+                            <label for="{{ q.id }}">{{ q.label }}</label>
+                            <input
+                                type="{{ q.type }}"
+                                id="{{ q.id }}"
+                                name="{{ q.id }}"
+                                placeholder="{{ q.placeholder }}"
+                                {% if q.type == "number" %}step="any"{% endif %}
+                                class="modal-input">
                         </div>
+                    {% endfor %}
                     </div>
-
-                    <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
 
                     <div id="gamblingSection">
-                        <div class="form-group">
-                            <label for="gamblingType">What type of gambling did you engage in?</label>
-                            <input type="text" id="gamblingType" placeholder="e.g. sports betting, roulette, blackjack" class="modal-input">
-                        </div>
-                        <div class="form-group">
-                            <label for="timeSpent">How long were you gambling that day?</label>
-                            <input type="text" id="timeSpent" placeholder="e.g. 1.5 hours" class="modal-input">
-                        </div>
-                        <div class="form-group">
-                            <label for="moneyIntended">How much did you intend to gamble with?</label>
-                            <input type="text" inputmode="decimal" id="moneyIntended" placeholder="e.g. $100" class="modal-input">
-                        </div>
-                        <div class="form-group">
-                            <label for="moneyInputSpent">How much did you actually wager (not including wins)?</label>
-                            <input type="text" inputmode="decimal" id="moneyInputSpent" placeholder="e.g. $300" class="modal-input">
-                        </div>
-                        <div class="form-group">
-                            <label for="moneyInputEarned">How much did you end up winning or losing?</label>
-                            <input type="text" inputmode="decimal" id="moneyInputEarned" placeholder="e.g. +$50 or -$25" class="modal-input">
-                        </div>
-                        <div class="form-group">
-                            <label for="drinksWhileGambling">How many drinks did you have while gambling?</label>
-                            <input type="text" inputmode="numeric" id="drinksWhileGambling" placeholder="e.g. 0, 2, 5" class="modal-input">
-                        </div>
+                        {% for q in questions.gambling %}
+                            <div class="form-group">
+                                <label for="{{ q.id }}">{{ q.label }}</label>
+                                <input
+                                    type="{{ q.type }}"
+                                    id="{{ q.id }}"
+                                    name="{{ q.id }}"
+                                    placeholder="{{ q.placeholder }}"
+                                    {% if q.type == "number" %}step="any"{% endif %}
+                                    class="modal-input">
+                            </div>
+                        {% endfor %}
                     </div>
 
+
+                    <p class="modal-mode-text" id="modalModeText"></p>
                     <div class="modal-actions">
                         <button type="button" class="nav-btn" id="closeModal">Cancel</button>
-                        <button type="submit" class="nav-btn is-active">Save Entry</button>
+                        <button type="button" class="nav-btn" id="deleteEntryBtn" style="display: none;">Delete Entry</button>
+                        <button type="submit" class="nav-btn is-active" id="saveEntryBtn">Save Entry</button>
                     </div>
                 </form>
             </div>

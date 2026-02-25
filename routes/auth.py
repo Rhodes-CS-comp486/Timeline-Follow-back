@@ -1,11 +1,12 @@
 import re
 
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from database.db_initialization import User
 from database.db_helper import create_user
 
+from functools import wraps
 auth_bp = Blueprint('auth', __name__)
 
 
@@ -107,6 +108,33 @@ def login():
         if error:
             return render_template('login.html', error=error)
 
+        session['user_id'] = user.id
+
         return redirect(url_for('home'))
 
     return render_template('login.html', error=None)
+
+
+@auth_bp.route('/logout')
+def logout():
+    # Clear all session data so the user is fully signed out.
+    session.clear()
+    # Send the user back to the login screen after logout.
+    return redirect(url_for('auth.login'))
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        user_id = session.get('user_id')
+
+        if not user_id:
+            return redirect(url_for('auth.login'))
+
+        user = User.query.get(user_id)
+
+        if not user or not user.is_admin:
+            return abort(403)  # Forbidden
+
+        return f(*args, **kwargs)
+
+    return decorated_function

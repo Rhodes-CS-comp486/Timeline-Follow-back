@@ -103,12 +103,16 @@ const initCalendar = () => {
     const modalTitle = document.getElementById('modalDateTitle');
     const closeModalBtn = document.getElementById('closeModal');
     const activityForm = document.getElementById('activityForm');
+    const saveEntryBtn = document.getElementById('saveEntryBtn');
+    const deleteEntryBtn = document.getElementById('deleteEntryBtn');
+    const modalModeText = document.getElementById('modalModeText');
 
     // Toggling Elements
     const chkDrinking = document.getElementById('chkDrinking');
     const chkGambling = document.getElementById('chkGambling');
     const drinkingSection = document.getElementById('drinkingSection');
     const gamblingSection = document.getElementById('gamblingSection');
+    let activeEntryId = null;
 
     if (!monthLabel || !grid || !prevBtn || !nextBtn || !selectedLabel) {
         return;
@@ -134,6 +138,156 @@ const initCalendar = () => {
         // Force the sections back to their "locked" state
         toggleSection(chkDrinking, drinkingSection);
         toggleSection(chkGambling, gamblingSection);
+    };
+
+    const hasValue = (value) => (
+        value !== null &&
+        value !== undefined &&
+        String(value).trim() !== ''
+    );
+
+    const gamblingFieldNames = [
+        'gambling_type',
+        'time_spent',
+        'money_intended',
+        'money_spent',
+        'money_earned',
+        'drinks_while_gambling',
+    ];
+
+    const entryHasDrinking = (entry) => Boolean(entry?.has_drinking) || hasValue(entry?.num_drinks);
+    const entryHasGambling = (entry) => (
+        Boolean(entry?.has_gambling) ||
+        gamblingFieldNames.some((field) => hasValue(entry?.[field]))
+    );
+
+    const setModalMode = (mode, iso) => {
+        if (mode === 'edit') {
+            if (saveEntryBtn) saveEntryBtn.textContent = 'Update Entry';
+            if (deleteEntryBtn) deleteEntryBtn.style.display = 'inline-flex';
+            if (modalTitle) modalTitle.textContent = `Edit Activity for ${iso}`;
+            if (modalModeText) modalModeText.textContent = 'Existing entry loaded. You can update or delete it.';
+            return;
+        }
+
+        activeEntryId = null;
+        if (saveEntryBtn) saveEntryBtn.textContent = 'Save Entry';
+        if (deleteEntryBtn) deleteEntryBtn.style.display = 'none';
+        if (modalTitle) modalTitle.textContent = `Log Activity for ${iso}`;
+        if (modalModeText) modalModeText.textContent = 'No existing entry for this date yet.';
+    };
+
+    const getEditableEntryForDate = (iso) => {
+        const dayEntries = entries[iso];
+        if (!Array.isArray(dayEntries) || dayEntries.length === 0) {
+            return null;
+        }
+
+        return dayEntries.reduce((latest, current) => {
+            if (!latest) return current;
+            return (current.id || 0) > (latest.id || 0) ? current : latest;
+        }, null);
+    };
+
+    const fillInput = (name, value) => {
+        if (!activityForm) return;
+        const input = activityForm.querySelector(`[name="${name}"]`);
+        if (input) input.value = hasValue(value) ? value : '';
+    };
+
+    const populateFormFromEntry = (entry) => {
+        resetFormState();
+        if (!entry) return;
+
+        if (chkDrinking) chkDrinking.checked = entryHasDrinking(entry);
+        if (chkGambling) chkGambling.checked = entryHasGambling(entry);
+
+        fillInput('num_drinks', entry.num_drinks);
+        fillInput('gambling_type', entry.gambling_type);
+        fillInput('time_spent', entry.time_spent);
+        fillInput('money_intended', entry.money_intended);
+        fillInput('money_spent', entry.money_spent);
+        fillInput('money_earned', entry.money_earned);
+        fillInput('drinks_while_gambling', entry.drinks_while_gambling);
+
+        toggleSection(chkDrinking, drinkingSection);
+        toggleSection(chkGambling, gamblingSection);
+    };
+
+    const closeModal = () => {
+        if (modal) modal.style.display = 'none';
+        activeEntryId = null;
+        resetFormState();
+        if (saveEntryBtn) saveEntryBtn.textContent = 'Save Entry';
+        if (deleteEntryBtn) deleteEntryBtn.style.display = 'none';
+        if (modalModeText) modalModeText.textContent = '';
+    };
+
+    const openModalForDate = (iso) => {
+        const editableEntry = getEditableEntryForDate(iso);
+
+        if (editableEntry && editableEntry.id) {
+            activeEntryId = editableEntry.id;
+            setModalMode('edit', iso);
+            populateFormFromEntry(editableEntry);
+        } else {
+            setModalMode('create', iso);
+            resetFormState();
+        }
+
+        if (modal) {
+            modal.style.display = 'flex';
+            modal.scrollTop = 0;
+            const content = modal.querySelector('.modal-content');
+            if (content) content.scrollTop = 0;
+        }
+    };
+
+    const loadEvents = async () => {
+        try {
+            const response = await fetch(`/api/calendar-events?ts=${Date.now()}`, {
+                cache: 'no-store'
+            });
+            const events = await response.json();
+
+            if (!Array.isArray(events)) {
+                console.error('calendar-events failed:', events);
+                render();
+                return;
+            }
+
+            Object.keys(entries).forEach((key) => delete entries[key]);
+
+            events.forEach((event) => {
+                const dateKey = event.date;
+                if (!entries[dateKey]) {
+                    entries[dateKey] = [event];
+                    return;
+                }
+
+                const merged = entries[dateKey][0];
+                merged.id = Math.max(merged.id || 0, event.id || 0);
+                merged.has_drinking = Boolean(merged.has_drinking) || Boolean(event.has_drinking);
+                merged.has_gambling = Boolean(merged.has_gambling) || Boolean(event.has_gambling);
+
+                [
+                    'num_drinks',
+                    'gambling_type',
+                    'time_spent',
+                    'money_intended',
+                    'money_spent',
+                    'money_earned',
+                    'drinks_while_gambling',
+                ].forEach((field) => {
+                    if (hasValue(event[field])) merged[field] = event[field];
+                });
+            });
+
+            render();
+        } catch (error) {
+            console.error('Error fetching calendar events:', error);
+            render();
+        }
     };
 
     const monthNames = [
@@ -169,34 +323,37 @@ const initCalendar = () => {
     const renderSidebar = () => {
         if (!entrySummary) return;
 
-        if (!state.selectedISO || !entries[state.selectedISO]) {
+        if (!state.selectedISO) {
             entrySummary.innerHTML = '<p class="entry-empty">Select a date to view its entry.</p>';
             return;
         }
 
-        const entry = entries[state.selectedISO];
+        const dayEntries = entries[state.selectedISO];
+        if (!Array.isArray(dayEntries) || dayEntries.length === 0) {
+            entrySummary.innerHTML = '<p class="entry-empty">No activity logged for this date.</p>';
+            return;
+        }
+
         let html = '';
-
-        if (entry.drinks) {
-            html += '<div class="entry-section">';
-            html += '<div class="entry-section-title">Drinking</div>';
-            html += `<div class="entry-row"><span class="entry-label">Drinks:</span> ${entry.drinks}</div>`;
-            if (entry.drinks_cost) html += `<div class="entry-row"><span class="entry-label">Cost:</span> ${entry.drinks_cost}</div>`;
-            if (entry.drink_trigger) html += `<div class="entry-row"><span class="entry-label">Trigger:</span> ${entry.drink_trigger}</div>`;
-            html += '</div>';
-        }
-
-        if (entry.gambling_type) {
-            html += '<div class="entry-section">';
-            html += '<div class="entry-section-title">Gambling</div>';
-            html += `<div class="entry-row"><span class="entry-label">Type:</span> ${entry.gambling_type}</div>`;
-            if (entry.time_spent) html += `<div class="entry-row"><span class="entry-label">Time Spent:</span> ${entry.time_spent}</div>`;
-            if (entry.money_intended) html += `<div class="entry-row"><span class="entry-label">Intended to Wager:</span> ${entry.money_intended}</div>`;
-            if (entry.money_spent) html += `<div class="entry-row"><span class="entry-label">Actually Wagered:</span> ${entry.money_spent}</div>`;
-            if (entry.money_earned) html += `<div class="entry-row"><span class="entry-label">Won/Lost:</span> ${entry.money_earned}</div>`;
-            if (entry.drinks_while_gambling) html += `<div class="entry-row"><span class="entry-label">Drinks While Gambling:</span> ${entry.drinks_while_gambling}</div>`;
-            html += '</div>';
-        }
+        dayEntries.forEach(entry => {
+            if (hasValue(entry.num_drinks)) {
+                html += `<div class="entry-section">`;
+                html += `<div class="entry-section-title" style="color: var(--primary);">Drinking</div>`;
+                html += `<div class="entry-row"><span class="entry-label">Drinks:</span> ${entry.num_drinks}</div>`;
+                html += `</div>`;
+            }
+            if (entryHasGambling(entry)) {
+                html += `<div class="entry-section">`;
+                html += `<div class="entry-section-title">Gambling</div>`;
+                if (hasValue(entry.gambling_type)) html += `<div class="entry-row"><span class="entry-label">Type:</span> ${entry.gambling_type}</div>`;
+                if (hasValue(entry.time_spent)) html += `<div class="entry-row"><span class="entry-label">Time Spent:</span> ${entry.time_spent}</div>`;
+                if (hasValue(entry.money_intended)) html += `<div class="entry-row"><span class="entry-label">Intended:</span> $${entry.money_intended}</div>`;
+                if (hasValue(entry.money_spent)) html += `<div class="entry-row"><span class="entry-label">Wagered:</span> $${entry.money_spent}</div>`;
+                if (hasValue(entry.money_earned)) html += `<div class="entry-row"><span class="entry-label">Won/Lost:</span> $${entry.money_earned}</div>`;
+                if (hasValue(entry.drinks_while_gambling)) html += `<div class="entry-row"><span class="entry-label">Drinks While Gambling:</span> ${entry.drinks_while_gambling}</div>`;
+                html += `</div>`;
+            }
+        });
 
         if (!html) {
             entrySummary.innerHTML = '<p class="entry-empty">No activity logged for this date.</p>';
@@ -252,21 +409,33 @@ const initCalendar = () => {
                 button.appendChild(label);
             }
 
-            // Show X indicators for no-drinking / no-gambling entries
-            const entry = entries[iso];
-            if (entry) {
-                button.classList.add('day--holiday');
-                if (entry.no_drinking) {
-                    const redX = document.createElement('span');
-                    redX.className = 'no-drink-x';
-                    redX.textContent = 'X';
-                    button.appendChild(redX);
-                }
-                if (entry.no_gambling) {
-                    const blueX = document.createElement('span');
-                    blueX.className = 'no-gamble-x';
-                    blueX.textContent = 'X';
-                    button.appendChild(blueX);
+            // Show two activity markers for days with saved entries
+            const dayEntries = entries[iso];
+
+            if (Array.isArray(dayEntries) && dayEntries.length > 0) {
+                const hasDrinkingMarker = dayEntries.some((entry) => entryHasDrinking(entry));
+                const hasGamblingMarker = dayEntries.some((entry) => entryHasGambling(entry));
+
+                if (hasDrinkingMarker || hasGamblingMarker) {
+                    button.classList.add('day--has-markers');
+                    const markerWrap = document.createElement('div');
+                    markerWrap.className = 'activity-markers';
+
+                    if (hasDrinkingMarker) {
+                        const drinkingMarker = document.createElement('span');
+                        drinkingMarker.className = 'activity-marker marker-drinking';
+                        drinkingMarker.title = 'Drinking entry';
+                        markerWrap.appendChild(drinkingMarker);
+                    }
+
+                    if (hasGamblingMarker) {
+                        const gamblingMarker = document.createElement('span');
+                        gamblingMarker.className = 'activity-marker marker-gambling';
+                        gamblingMarker.title = 'Gambling entry';
+                        markerWrap.appendChild(gamblingMarker);
+                    }
+
+                    button.appendChild(markerWrap);
                 }
             }
 
@@ -292,15 +461,8 @@ const initCalendar = () => {
                     selectedLabel.textContent = formatReadable(cellDate);
                     renderSidebar();
 
-                    // Added: Open the Modal when a valid day is clicked
-                    if (modal && modalTitle) {
-                        modalTitle.textContent = `Log Activity for ${iso}`;
-                        resetFormState()
-                        modal.style.display = 'flex';
-                        modal.scrollTop = 0;
-                        const content = modal.querySelector('.modal-content');
-                        if (content) content.scrollTop = 0;
-                    }
+                    // Open the modal when a valid day is clicked
+                    openModalForDate(iso);
 
                     renderGrid();
                 });
@@ -327,7 +489,7 @@ const initCalendar = () => {
     // Added: Event listener to close the popup window
     if (closeModalBtn) {
         closeModalBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
+            closeModal();
         });
     }
 
@@ -335,7 +497,7 @@ const initCalendar = () => {
     if (modal) {
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
-                modal.style.display = 'none';
+                closeModal();
             }
         });
     }
@@ -351,71 +513,138 @@ const initCalendar = () => {
     // Added: Event listener for the Activity Form submission
     // Handle saving the event
     if (activityForm) {
-        activityForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+    activityForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-            // Base payload is the date, else this payload does not exist
-            const payload = {
-                date: state.selectedISO
-            };
+        if (!state.selectedISO) return;
 
-            // Is drinking checked? If true then save data related to it
-            if (chkDrinking.checked) {
-                payload.type = "drinking";
-                payload.drinks = document.getElementById('drinksInput').value;
+        const payload = {
+            date: state.selectedISO
+        };
+
+
+        if (!chkDrinking.checked && !chkGambling.checked) {
+            alert("Please select drinking and/or gambling.");
+            return;
+        }
+
+        // Store flags instead of forcing single type
+        payload.drinking_logged = chkDrinking.checked;
+        payload.gambling_logged = chkGambling.checked;
+
+
+        // Collect ALL enabled inputs dynamically
+        const enabledInputs = activityForm.querySelectorAll(
+            'input:not([disabled]), select:not([disabled]), textarea:not([disabled])'
+        );
+
+        enabledInputs.forEach(input => {
+            if (!input.name) return; // Skip inputs without name attribute
+            payload[input.name] = input.value;
+        });
+
+        // Validate numeric fields before submitting
+        const nonNegativeFields = {
+            num_drinks: 'Number of drinks',
+            time_spent: 'Time spent gambling',
+            money_intended: 'Money intended to gamble',
+            money_spent: 'Money wagered',
+            drinks_while_gambling: 'Drinks while gambling',
+        };
+        const anyNumberFields = {
+            money_earned: 'Money won/lost',
+        };
+
+        for (const [field, label] of Object.entries(nonNegativeFields)) {
+            const val = payload[field];
+            if (val === undefined || val === null || String(val).trim() === '') continue;
+            if (isNaN(Number(val))) {
+                alert(`${label} must be a number.`);
+                return;
+            }
+            if (Number(val) < 0) {
+                alert(`${label} cannot be negative.`);
+                return;
+            }
+            const dotIndex = String(val).indexOf('.');
+            if (dotIndex !== -1 && String(val).length - dotIndex - 1 > 2) {
+                alert(`${label} can have at most 2 decimal places.`);
+                return;
+            }
+        }
+        for (const [field, label] of Object.entries(anyNumberFields)) {
+            const val = payload[field];
+            if (val === undefined || val === null || String(val).trim() === '') continue;
+            if (isNaN(Number(val))) {
+                alert(`${label} must be a number.`);
+                return;
+            }
+            const dotIndex = String(val).indexOf('.');
+            if (dotIndex !== -1 && String(val).length - dotIndex - 1 > 2) {
+                alert(`${label} can have at most 2 decimal places.`);
+                return;
+            }
+        }
+
+        try {
+            const endpoint = activeEntryId ? `/api/activity/${activeEntryId}` : '/api/log-activity';
+            const method = activeEntryId ? 'PUT' : 'POST';
+
+            const response = await fetch(endpoint, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                console.warn('Server did not save the entry.', errorData);
+                alert(errorData.message || 'Unable to save changes. Check console/server logs.');
+                return;
             }
 
-            // Same for gambling
-            if (chkGambling.checked) {
-                payload.type = "gambling";
-                payload.gambling_type = document.getElementById('gamblingType').value;
-                payload.time_spent = document.getElementById('timeSpent').value;
-                payload.money_intended = document.getElementById('moneyIntended').value;
-                payload.money_spent = document.getElementById('moneyInputSpent').value;
-                payload.money_earned = document.getElementById('moneyInputEarned').value;
-                payload.drinks_while_gambling = document.getElementById('drinksWhileGambling').value;
-            }
+            closeModal();
+            await loadEvents();
+        } catch (error) {
+            console.error('Error saving data:', error);
+        }
+    });
+}
 
-            // Track whether the user did NOT drink or gamble
-            payload.no_drinking = !chkDrinking.checked;
-            payload.no_gambling = !chkGambling.checked;
+    if (deleteEntryBtn) {
+        deleteEntryBtn.addEventListener('click', async () => {
+            if (!activeEntryId) return;
 
-            // Store the entry locally so the sidebar can display it
-            entries[state.selectedISO] = { ...payload };
+            const confirmed = window.confirm('Delete this entry for the selected date?');
+            if (!confirmed) return;
 
-            if (modal) {
-                modal.style.display = 'none';
-            }
-
-            resetFormState()
-            renderSidebar();
-            renderGrid();
-
-            // Send data to backend in the background => route: log-activity
             try {
-                const response = await fetch('/api/log-activity', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    // sending the payload
-                    body: JSON.stringify(payload)
+                const response = await fetch(`/api/activity/${activeEntryId}`, {
+                    method: 'DELETE'
                 });
 
-                if (response.ok) {
-                    console.log(`Saved entry for ${state.selectedISO}!`);
-                } else {
-                    console.warn('Server did not save the entry.');
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    console.warn('Server did not delete the entry.', errorData);
+                    alert(errorData.message || 'Unable to delete this entry. Check console/server logs.');
+                    return;
                 }
+
+                closeModal();
+                await loadEvents();
             } catch (error) {
-                console.error('Error saving data:', error);
+                console.error('Error deleting data:', error);
             }
         });
     }
 
+
     prevBtn.addEventListener('click', () => changeMonth(-1));
     nextBtn.addEventListener('click', () => changeMonth(1));
 
+    resetFormState();
     render();
-    resetFormState()
+    loadEvents();
 };
 
 mountApp();
