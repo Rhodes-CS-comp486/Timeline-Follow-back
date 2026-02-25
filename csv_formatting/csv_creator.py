@@ -5,10 +5,15 @@ from datetime import datetime, timedelta
 from database.db_initialization import User, CalendarEntry, Drinking, Gambling
 from config.config_helper import *
 
-
+# This function generates the csv file for all users
+# Parameters: N/A
+# Returns: the output path for the csv to be saved
 def generate_user_csv_report(user_id: int, start_date=None, end_date=None, output_path: str = None):
+    # load in the scheme/questions from our JSON file
     schema = load_questions()
+    # generate cvs headers with our question
     headers = get_csv_headers(schema)
+    # getting the "field id" of the questions noted as "id" in our JSON file
     dynamic_fields = get_all_field_ids(schema)
 
     user = User.query.get(user_id)
@@ -65,6 +70,7 @@ def generate_user_csv_report(user_id: int, start_date=None, end_date=None, outpu
 
             merged_data = merge_activity_data(schema, drinking_data, gambling_data)
 
+            # Look to change this since it is hard code!
             row = [
                 user.id,
                 user.username,
@@ -80,7 +86,9 @@ def generate_user_csv_report(user_id: int, start_date=None, end_date=None, outpu
 
     return output_path
 
-
+# This function generates the csv file for a single users
+# Parameters: N/A
+# Returns: the output path for the csv to be saved
 def generate_all_users_csv(start_date=None, end_date=None, output_path="all_users_report.csv"):
     schema = load_questions()
     headers = get_csv_headers(schema)

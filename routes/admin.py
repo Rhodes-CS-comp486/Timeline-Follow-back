@@ -5,13 +5,18 @@ from routes.auth import admin_required
 
 admin_bp = Blueprint('admin', __name__)
 
+# This function loads the report tab
+# Parameters: N/A
+# Returns: The rendered report.html file
 @admin_bp.route('/report')
 @admin_required
 def report():
     users = User.query.filter_by(is_admin=False).all()
     return render_template('report.html', users=users)
 
-
+# This function downloads the csv file for all users
+# Parameters: N/A
+# Returns: cvs file to be downloaded sent to device
 @admin_bp.route('/download_report_user')
 @admin_required
 def download_report_user():
@@ -25,7 +30,9 @@ def download_report_user():
     file_path = generate_user_csv_report(user_id, start_date, end_date)
     return send_file(file_path, as_attachment=True)
 
-
+# This function downloads the csv file for a single users
+# Parameters: N/A
+# Returns: cvs file to be downloaded sent to device
 @admin_bp.route('/download_report_full')
 @admin_required
 def download_report_full():

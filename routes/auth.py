@@ -122,6 +122,9 @@ def logout():
     # Send the user back to the login screen after logout.
     return redirect(url_for('auth.login'))
 
+# This function makes sure an admin account is required
+# Parameters: N/A
+# Returns: Either abort(403) or whatever was in f
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
