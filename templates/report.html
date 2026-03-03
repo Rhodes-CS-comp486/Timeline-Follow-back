@@ -13,96 +13,132 @@
 <body>
 <div class="app-shell">
 
-    <!-- NAV -->
     <nav class="top-nav">
         <a class="nav-btn" href="{{ url_for('home') }}">Home</a>
         <a class="nav-btn is-active" href="{{ url_for('admin.report') }}">Reports</a>
     </nav>
 
     <div class="page-content">
-        <div style="max-width: 900px; margin: 60px auto; padding: 0 20px;">
+        <section class="report-page">
+            <header class="report-header">
+                <h1>Reports</h1>
+                <p class="subtitle">Download and view user activity reports</p>
+            </header>
 
-            <h1 style="text-align: center; margin-bottom: 12px;">Reports</h1>
-            <p style="text-align: center; color: #666; margin-bottom: 48px;">Download and view user activity reports</p>
+            <section class="report-grid">
+                <article class="report-card">
+                    <h2>All Users</h2>
+                    <p class="report-card-copy">View or download a filtered report across every non-admin user.</p>
 
-            <!-- Report Cards Container -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 48px;">
+                    <form action="{{ url_for('admin.download_report_full') }}" method="get" class="report-form">
+                        <input type="hidden" name="scope" value="all">
 
-                <!-- FULL REPORT CARD -->
-                <div style="background: white; border-radius: 12px; padding: 28px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border: 1px solid #e5e7eb;">
-                    <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 1.25rem;">All Users</h3>
-                    <p style="color: #6b7280; margin-bottom: 20px; font-size: 0.95rem;">Download comprehensive report for all users</p>
-                    <form action="{{ url_for('admin.download_report_full') }}" method="get">
-                        <input type="date" name="start_date" style="
-                            width: 100%;
-                            padding: 10px;
-                            margin-bottom: 10px;
-                            border-radius: 6px;
-                            border: 1px solid #d1d5db;
-                        ">
+                        <label class="form-group">
+                            <span class="form-label">Start date</span>
+                            <input class="form-input" type="date" name="start_date" value="{{ filters.start_date }}">
+                        </label>
 
-                        <input type="date" name="end_date" style="
-                            width: 100%;
-                            padding: 10px;
-                            margin-bottom: 16px;
-                            border-radius: 6px;
-                            border: 1px solid #d1d5db;
-                        ">
+                        <label class="form-group">
+                            <span class="form-label">End date</span>
+                            <input class="form-input" type="date" name="end_date" value="{{ filters.end_date }}">
+                        </label>
 
-                        <button class="primary-btn" style="width: 100%;">
-                            Download Full Report
-                        </button>
+                        <label class="form-group">
+                            <span class="form-label">Users</span>
+                            <select class="form-input" name="all_user_id">
+                                <option value="" {% if not filters.all_user_id %}selected{% endif %}>All users</option>
+                                {% for user in users %}
+                                    <option value="{{ user.id }}" {% if filters.all_user_id == user.id %}selected{% endif %}>
+                                        {{ user.username }} (ID: {{ user.id }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </label>
+
+                        <label class="form-group">
+                            <span class="form-label">Type</span>
+                            <select class="form-input" name="report_type">
+                                <option value="" {% if not filters.report_type %}selected{% endif %}>All activity</option>
+                                <option value="drinking" {% if filters.report_type == 'drinking' %}selected{% endif %}>Drinking</option>
+                                <option value="gambling" {% if filters.report_type == 'gambling' %}selected{% endif %}>Gambling</option>
+                            </select>
+                        </label>
+
+                        <label class="form-group">
+                            <span class="form-label">Number of drinks</span>
+                            <input class="form-input" type="number" name="num_drinks" min="0" step="0.01" value="{{ filters.num_drinks }}" placeholder="Exact drink count">
+                            <span class="form-hint">Matches reported drinks for drinking entries or drinks while gambling.</span>
+                        </label>
+
+                        <div class="report-actions">
+                            <a class="btn-tertiary" href="{{ url_for('admin.report') }}">Reset Filters</a>
+                            <button class="btn-secondary" formaction="{{ url_for('admin.report') }}">View Table</button>
+                            <button class="btn-primary" type="submit">Download Full Report</button>
+                        </div>
                     </form>
+                </article>
+            </section>
+
+            <section class="report-table-card">
+                <div class="report-table-header">
+                    <div>
+                        <h2>All Users Report Table</h2>
+                        <p class="report-card-copy">
+                            {{ report_rows|length }} row{% if report_rows|length != 1 %}s{% endif %} matching the current filters.
+                        </p>
+                    </div>
+                    <div class="report-filter-summary">
+                        <span class="filter-pill">
+                            Users:
+                            {% if filters.all_user_id %}
+                                1 selected
+                            {% else %}
+                                All
+                            {% endif %}
+                        </span>
+                        <span class="filter-pill">Type: {{ filters.report_type or 'All' }}</span>
+                        <span class="filter-pill">Drinks: {{ filters.num_drinks or 'Any' }}</span>
+                    </div>
                 </div>
 
-                <!-- USER-SPECIFIC REPORT CARD -->
-                <div style="background: white; border-radius: 12px; padding: 28px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border: 1px solid #e5e7eb;">
-                    <h3 style="margin-top: 0; margin-bottom: 8px; font-size: 1.25rem;">Individual User</h3>
-                    <p style="color: #6b7280; margin-bottom: 20px; font-size: 0.95rem;">Generate report for a specific user</p>
-
-                    <form action="{{ url_for('admin.download_report_user') }}" method="get">
-                        <select name="user_id" required style="
-                            width: 100%;
-                            padding: 12px 14px;
-                            border: 1px solid #d1d5db;
-                            border-radius: 8px;
-                            margin-bottom: 16px;
-                            font-size: 1rem;
-                            background: white;
-                        ">
-                            <option value="" disabled selected>Select a user</option>
-                            {% for user in users %}
-                                <option value="{{ user.id }}">
-                                    {{ user.username }} (ID: {{ user.id }})
-                                </option>
-                            {% endfor %}
-                        </select>
-
-                        <input type="date" name="start_date" style="
-                            width: 100%;
-                            padding: 10px;
-                            margin-bottom: 10px;
-                            border-radius: 6px;
-                            border: 1px solid #d1d5db;
-                        ">
-
-                        <input type="date" name="end_date" style="
-                            width: 100%;
-                            padding: 10px;
-                            margin-bottom: 16px;
-                            border-radius: 6px;
-                            border: 1px solid #d1d5db;
-                        ">
-
-                        <button class="primary-btn" style="width: 100%;">
-                            Download User Report
-                        </button>
-                    </form>
-                </div>
-
-            </div>
-
-        </div>
+                {% if report_rows %}
+                    <div class="report-table-wrap">
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    {% for header in report_headers %}
+                                        <th>{{ header.replace('_', ' ').title() }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in report_rows %}
+                                    <tr>
+                                        {% for header in report_headers %}
+                                            <td>
+                                                {% if row[header] is sameas true %}
+                                                    Yes
+                                                {% elif row[header] is sameas false %}
+                                                    No
+                                                {% elif row[header] is none or row[header] == '' %}
+                                                    —
+                                                {% else %}
+                                                    {{ row[header] }}
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="report-empty">
+                        <p>No report rows matched the current filters.</p>
+                    </div>
+                {% endif %}
+            </section>
+        </section>
     </div>
 </div>
 </body>
