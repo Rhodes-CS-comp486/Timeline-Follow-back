@@ -1,9 +1,13 @@
 import csv
+import os
 from collections import defaultdict
 from datetime import datetime, timedelta
 
 from database.db_initialization import User, CalendarEntry, Drinking, Gambling
 from config.config_helper import *
+
+# Directory for temporary export files (avoids cluttering project root)
+EXPORTS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "temp", "exports")
 
 # This function generates the csv file for all users
 # Parameters: N/A
@@ -42,7 +46,9 @@ def generate_user_csv_report(user_id: int, start_date=None, end_date=None, outpu
         grouped[date_str].append(e)
 
     if not output_path:
-        output_path = f"user_{user_id}_report.csv"
+        os.makedirs(EXPORTS_DIR, exist_ok=True)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_path = os.path.join(EXPORTS_DIR, f"user_{user_id}_report_{timestamp}.csv")
 
     with open(output_path, mode="w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
@@ -89,7 +95,12 @@ def generate_user_csv_report(user_id: int, start_date=None, end_date=None, outpu
 # This function generates the csv file for a single users
 # Parameters: N/A
 # Returns: the output path for the csv to be saved
-def generate_all_users_csv(start_date=None, end_date=None, output_path="all_users_report.csv"):
+def generate_all_users_csv(start_date=None, end_date=None, output_path=None):
+    if output_path is None:
+        os.makedirs(EXPORTS_DIR, exist_ok=True)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_path = os.path.join(EXPORTS_DIR, f"all_users_report_{timestamp}.csv")
+
     schema = load_questions()
     headers = get_csv_headers(schema)
     dynamic_fields = get_all_field_ids(schema)
