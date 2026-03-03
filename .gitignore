@@ -65,6 +65,9 @@ db.sqlite3-journal
 instance/
 .webassets-cache
 
+# Temp export files from admin CSV reports
+temp/
+
 # Scrapy stuff:
 .scrapy
 
