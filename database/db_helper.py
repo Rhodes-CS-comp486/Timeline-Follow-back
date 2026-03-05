@@ -87,6 +87,8 @@ def get_calendar_entries_for_user(user_id: int):
         CalendarEntry.entry_date
     ).all()
 
+# This function retrieves user info: email
+
 # This function adds any object to the session and commits it to Postgres
 # Parameters: new_entry -> db.Model object (User, CalendarEntry, Gambling, etc.)
 # Returns: The committed object if successful, None if failure
