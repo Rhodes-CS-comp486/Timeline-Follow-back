@@ -543,6 +543,49 @@ const initCalendar = () => {
             payload[input.name] = input.value;
         });
 
+        // Validate numeric fields before submitting
+        const nonNegativeFields = {
+            num_drinks: 'Number of drinks',
+            time_spent: 'Time spent gambling',
+            money_intended: 'Money intended to gamble',
+            money_spent: 'Money wagered',
+            drinks_while_gambling: 'Drinks while gambling',
+        };
+        const anyNumberFields = {
+            money_earned: 'Money won/lost',
+        };
+
+        for (const [field, label] of Object.entries(nonNegativeFields)) {
+            const val = payload[field];
+            if (val === undefined || val === null || String(val).trim() === '') continue;
+            if (isNaN(Number(val))) {
+                alert(`${label} must be a number.`);
+                return;
+            }
+            if (Number(val) < 0) {
+                alert(`${label} cannot be negative.`);
+                return;
+            }
+            const dotIndex = String(val).indexOf('.');
+            if (dotIndex !== -1 && String(val).length - dotIndex - 1 > 2) {
+                alert(`${label} can have at most 2 decimal places.`);
+                return;
+            }
+        }
+        for (const [field, label] of Object.entries(anyNumberFields)) {
+            const val = payload[field];
+            if (val === undefined || val === null || String(val).trim() === '') continue;
+            if (isNaN(Number(val))) {
+                alert(`${label} must be a number.`);
+                return;
+            }
+            const dotIndex = String(val).indexOf('.');
+            if (dotIndex !== -1 && String(val).length - dotIndex - 1 > 2) {
+                alert(`${label} can have at most 2 decimal places.`);
+                return;
+            }
+        }
+
         try {
             const endpoint = activeEntryId ? `/api/activity/${activeEntryId}` : '/api/log-activity';
             const method = activeEntryId ? 'PUT' : 'POST';

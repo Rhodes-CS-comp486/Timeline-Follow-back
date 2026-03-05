@@ -44,6 +44,10 @@ def log_activity():
     if not data:
         return jsonify({"status": "error", "message": "No data received"}), 400
 
+    valid, error_msg = validate_activity_data(data)
+    if not valid:
+        return jsonify({"status": "error", "message": error_msg}), 400
+
     # save entry to database
     success = save_activity(data)
 
@@ -162,6 +166,52 @@ def save_activity(activity: dict):
         print(f"Save Error: {e}")
         return False
 
+def validate_activity_data(data: dict) -> tuple:
+    """
+    Validate that numeric fields contain actual numbers and meet constraints.
+    Returns (True, "") on success or (False, error_message) on failure.
+    """
+    drinking_logged = data.get("drinking_logged")
+    gambling_logged = data.get("gambling_logged")
+
+    # Fields that must be non-negative numbers
+    non_negative_fields = {
+        "num_drinks": "Number of drinks",
+        "time_spent": "Time spent gambling",
+        "money_intended": "Money intended to gamble",
+        "money_spent": "Money wagered",
+        "drinks_while_gambling": "Drinks while gambling",
+    }
+    # Fields that must be a number but can be negative (e.g. a loss)
+    any_number_fields = {
+        "money_earned": "Money won/lost",
+    }
+
+    fields_to_check = {}
+    if drinking_logged:
+        fields_to_check["num_drinks"] = non_negative_fields["num_drinks"]
+    if gambling_logged:
+        for field in ["time_spent", "money_intended", "money_spent", "drinks_while_gambling"]:
+            fields_to_check[field] = non_negative_fields[field]
+        fields_to_check["money_earned"] = any_number_fields["money_earned"]
+
+    for field, label in fields_to_check.items():
+        value = data.get(field)
+        if value is None or str(value).strip() == "":
+            continue  # Fields are optional; skip if blank
+        try:
+            num = float(value)
+        except (ValueError, TypeError):
+            return False, f"{label} must be a number."
+        if field != "money_earned" and num < 0:
+            return False, f"{label} cannot be negative."
+        str_val = str(value).strip()
+        if '.' in str_val and len(str_val.split('.')[1]) > 2:
+            return False, f"{label} can have at most 2 decimal places."
+
+    return True, ""
+
+
 def extract_fields(schema_section, answers_dict):
     """
     schema_section: list of question definitions
@@ -269,6 +319,10 @@ def update_activity(entry_id):
     gambling_logged = data.get("gambling_logged")
     if not drinking_logged and not gambling_logged:
         return jsonify({"status": "error", "message": "No activity selected"}), 400
+
+    valid, error_msg = validate_activity_data(data)
+    if not valid:
+        return jsonify({"status": "error", "message": error_msg}), 400
 
     entry = CalendarEntry.query.filter_by(id=entry_id, user_id=user_id).first()
     if not entry:
