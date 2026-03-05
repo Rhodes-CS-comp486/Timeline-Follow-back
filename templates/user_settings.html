@@ -18,7 +18,7 @@
             <a class="nav-btn" href="{{ url_for('calendar') }}">Calendar</a>
             <a class="nav-btn" href="#">Reports</a>
             <a class="nav-btn" href="#">Dashboard</a>
-            <a class="nav-btn" href="{{ url_for('settings') }}">Settings</a>
+            <a class="nav-btn" href="{{ url_for('user_settings') }}">Settings</a>
             <!-- Logout keeps the same nav styling and routes to the sign-out endpoint. -->
             <a class="nav-btn" href="{{ url_for('auth.logout') }}">Logout</a>
         </nav>
@@ -33,12 +33,34 @@
                     <h2 class="auth-title">Profile Information</h2>
 
                     <div class="form-group">
+                        <label class="form-label" for="first_name">First Name</label>
+                        <input
+                            type="text"
+                            id="first_name"
+                            class="form-input"
+                            value="{{ current_user.first_name if current_user else '' }}"
+                            readonly
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="last_name">Last Name</label>
+                        <input
+                            type="text"
+                            id="last_name"
+                            class="form-input"
+                            value="{{ current_user.last_name if current_user else '' }}"
+                            readonly
+                        >
+                    </div>
+
+                    <div class="form-group">
                         <label class="form-label" for="username">Username</label>
                         <input
                             type="text"
                             id="username"
                             class="form-input"
-                            value="user123"
+                            value="{{ current_user.username if current_user else '' }}"
                             readonly
                         >
                     </div>
@@ -49,7 +71,7 @@
                             type="email"
                             id="email"
                             class="form-input"
-                            value="user@example.com"
+                            value="{{ current_user.email if current_user else '' }}"
                             readonly
                         >
                     </div>
