@@ -219,11 +219,11 @@ def get_calendar_events():
                 if drinking:
                     event["has_drinking"] = True
                 if drinking and drinking.drinking_questions:
-                    print(f"DEBUG - drinking_questions: {drinking.drinking_questions}")
+                    # print(f"DEBUG - drinking_questions: {drinking.drinking_questions}")
                     extracted = extract_fields(qSchema["drinking"], drinking.drinking_questions)
-                    print(f"DEBUG - extracted fields: {extracted}")
+                    # print(f"DEBUG - extracted fields: {extracted}")
                     event.update(extracted)
-                    print(f"DEBUG - final event object: {event}")
+                    # print(f"DEBUG - final event object: {event}")
 
 
             if not e.entry_type or e.entry_type == "gambling":
@@ -232,19 +232,19 @@ def get_calendar_events():
                 if gambling:
                     event["has_gambling"] = True
 
-                print(f"DEBUG - Found gambling record: {gambling}")
+                # print(f"DEBUG - Found gambling record: {gambling}")
 
-                print(f"DEBUG - gambling.gambling_questions: {gambling.gambling_questions if gambling else 'N/A'}")
+                # print(f"DEBUG - gambling.gambling_questions: {gambling.gambling_questions if gambling else 'N/A'}")
 
                 if gambling and gambling.gambling_questions:
-                    print(f"DEBUG - gambling_questions: {gambling.gambling_questions}")
+                    # print(f"DEBUG - gambling_questions: {gambling.gambling_questions}")
                     extracted = extract_fields(qSchema["gambling"], gambling.gambling_questions)
-                    print(f"DEBUG - extracted fields: {extracted}")
+                    # print(f"DEBUG - extracted fields: {extracted}")
                     event.update(extracted)
                     if not  e.entry_type:
                         event["type"] = "gambling"
 
-                    print(f"DEBUG - final event object: {event}")
+                    # print(f"DEBUG - final event object: {event}")
 
         events = sorted(events_by_date.values(), key=lambda item: item["date"])
 

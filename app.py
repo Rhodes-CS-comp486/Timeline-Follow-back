@@ -78,5 +78,12 @@ def calendar():
     questions = load_questions()
     return render_template('calendar.html', questions=questions)
 
+# This function loads the user settings page
+# Parameters: N/A
+# Returns: The rendered user_settings.html file
+@app.route('/user_settings.html')
+def settings():
+    return render_template('user_settings.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
