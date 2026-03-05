@@ -798,6 +798,7 @@ button:focus-visible {
     box-shadow: 0 8px 18px rgba(31, 138, 112, 0.16);
 }
 
+/* Reset filters link button */
 .btn-tertiary {
     display: inline-flex;
     align-items: center;
@@ -820,6 +821,7 @@ button:focus-visible {
     border-color: rgba(31, 138, 112, 0.35);
 }
 
+/* Reports page layout */
 .report-page {
     max-width: 1200px;
     margin: 0 auto;
@@ -889,6 +891,7 @@ button:focus-visible {
 
 .report-actions {
     display: grid;
+    /* Reset + View + Download */
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
 }

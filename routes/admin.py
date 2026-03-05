@@ -7,6 +7,7 @@ admin_bp = Blueprint('admin', __name__)
 
 
 def get_report_filters():
+    # Shared filters used by table view and CSV export.
     return {
         "start_date": request.args.get('start_date', ''),
         "end_date": request.args.get('end_date', ''),
@@ -26,6 +27,7 @@ def report():
     selected_user_id = request.args.get('user_id', type=int) if selected_scope == "user" else None
     filters = get_report_filters()
 
+    # Build on-screen rows from the same filter logic as CSV.
     report_headers, report_rows = build_report_dataset(
         user_id=selected_user_id if selected_scope == "user" else filters["all_user_id"],
         start_date=filters["start_date"],
@@ -73,6 +75,7 @@ def download_report_user():
 def download_report_full():
     filters = get_report_filters()
 
+    # Use named args so user_ids maps to the correct parameter.
     file_path = generate_all_users_csv(
         start_date=filters["start_date"],
         end_date=filters["end_date"],

@@ -30,6 +30,7 @@
                     <h2>All Users</h2>
                     <p class="report-card-copy">View or download a filtered report across every non-admin user.</p>
 
+                    <!-- Shared filters for table view and CSV download -->
                     <form action="{{ url_for('admin.download_report_full') }}" method="get" class="report-form">
                         <input type="hidden" name="scope" value="all">
 
@@ -71,6 +72,7 @@
                         </label>
 
                         <div class="report-actions">
+                            <!-- Clears query params and restores full dataset -->
                             <a class="btn-tertiary" href="{{ url_for('admin.report') }}">Reset Filters</a>
                             <button class="btn-secondary" formaction="{{ url_for('admin.report') }}">View Table</button>
                             <button class="btn-primary" type="submit">Download Full Report</button>
@@ -88,6 +90,7 @@
                         </p>
                     </div>
                     <div class="report-filter-summary">
+                        <!-- Quick summary of active filters -->
                         <span class="filter-pill">
                             Users:
                             {% if filters.all_user_id %}
