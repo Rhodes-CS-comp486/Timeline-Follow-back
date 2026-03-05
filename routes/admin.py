@@ -23,26 +23,28 @@ def get_report_filters():
 @admin_required
 def report():
     users = User.query.filter_by(is_admin=False).all()
-    selected_scope = request.args.get('scope', 'all')
-    selected_user_id = request.args.get('user_id', type=int) if selected_scope == "user" else None
     filters = get_report_filters()
+    # Load table rows only after explicit user action.
+    show_table = str(request.args.get('show_table', '')).lower() in {"1", "true", "yes", "on"}
 
-    # Build on-screen rows from the same filter logic as CSV.
-    report_headers, report_rows = build_report_dataset(
-        user_id=selected_user_id if selected_scope == "user" else filters["all_user_id"],
-        start_date=filters["start_date"],
-        end_date=filters["end_date"],
-        report_type=filters["report_type"] or None,
-        num_drinks=filters["num_drinks"],
-    )
+    report_headers = []
+    report_rows = []
+    if show_table:
+        # Build on-screen rows from the same filter logic as CSV.
+        report_headers, report_rows = build_report_dataset(
+            user_id=filters["all_user_id"],
+            start_date=filters["start_date"],
+            end_date=filters["end_date"],
+            report_type=filters["report_type"] or None,
+            num_drinks=filters["num_drinks"],
+        )
 
     return render_template(
         'report.html',
         users=users,
         report_headers=report_headers,
         report_rows=report_rows,
-        selected_scope=selected_scope,
-        selected_user_id=selected_user_id,
+        show_table=show_table,
         filters=filters,
     )
 

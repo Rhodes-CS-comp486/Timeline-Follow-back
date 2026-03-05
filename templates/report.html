@@ -74,73 +74,84 @@
                         <div class="report-actions">
                             <!-- Clears query params and restores full dataset -->
                             <a class="btn-tertiary" href="{{ url_for('admin.report') }}">Reset Filters</a>
-                            <button class="btn-secondary" formaction="{{ url_for('admin.report') }}">View Table</button>
+                            <!-- Sends show_table so backend can lazy-load rows -->
+                            <button class="btn-secondary" formaction="{{ url_for('admin.report') }}" name="show_table" value="1">View Table</button>
                             <button class="btn-primary" type="submit">Download Full Report</button>
                         </div>
                     </form>
                 </article>
             </section>
 
-            <section class="report-table-card">
-                <div class="report-table-header">
-                    <div>
-                        <h2>All Users Report Table</h2>
-                        <p class="report-card-copy">
-                            {{ report_rows|length }} row{% if report_rows|length != 1 %}s{% endif %} matching the current filters.
-                        </p>
+            {% if show_table %}
+                <!-- Table is rendered only after clicking View Table -->
+                <section class="report-table-card">
+                    <div class="report-table-header">
+                        <div>
+                            <h2>All Users Report Table</h2>
+                            <p class="report-card-copy">
+                                {{ report_rows|length }} row{% if report_rows|length != 1 %}s{% endif %} matching the current filters.
+                            </p>
+                        </div>
+                        <div class="report-filter-summary">
+                            <!-- Quick summary of active filters -->
+                            <span class="filter-pill">
+                                Users:
+                                {% if filters.all_user_id %}
+                                    1 selected
+                                {% else %}
+                                    All
+                                {% endif %}
+                            </span>
+                            <span class="filter-pill">Type: {{ filters.report_type or 'All' }}</span>
+                            <span class="filter-pill">Drinks: {{ filters.num_drinks or 'Any' }}</span>
+                        </div>
                     </div>
-                    <div class="report-filter-summary">
-                        <!-- Quick summary of active filters -->
-                        <span class="filter-pill">
-                            Users:
-                            {% if filters.all_user_id %}
-                                1 selected
-                            {% else %}
-                                All
-                            {% endif %}
-                        </span>
-                        <span class="filter-pill">Type: {{ filters.report_type or 'All' }}</span>
-                        <span class="filter-pill">Drinks: {{ filters.num_drinks or 'Any' }}</span>
-                    </div>
-                </div>
 
-                {% if report_rows %}
-                    <div class="report-table-wrap">
-                        <table class="report-table">
-                            <thead>
-                                <tr>
-                                    {% for header in report_headers %}
-                                        <th>{{ header.replace('_', ' ').title() }}</th>
-                                    {% endfor %}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for row in report_rows %}
+                    {% if report_rows %}
+                        <div class="report-table-wrap">
+                            <table class="report-table">
+                                <thead>
                                     <tr>
                                         {% for header in report_headers %}
-                                            <td>
-                                                {% if row[header] is sameas true %}
-                                                    Yes
-                                                {% elif row[header] is sameas false %}
-                                                    No
-                                                {% elif row[header] is none or row[header] == '' %}
-                                                    —
-                                                {% else %}
-                                                    {{ row[header] }}
-                                                {% endif %}
-                                            </td>
+                                            <th>{{ header.replace('_', ' ').title() }}</th>
                                         {% endfor %}
                                     </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% else %}
+                                </thead>
+                                <tbody>
+                                    {% for row in report_rows %}
+                                        <tr>
+                                            {% for header in report_headers %}
+                                                <td>
+                                                    {% if row[header] is sameas true %}
+                                                        Yes
+                                                    {% elif row[header] is sameas false %}
+                                                        No
+                                                    {% elif row[header] is none or row[header] == '' %}
+                                                        —
+                                                    {% else %}
+                                                        {{ row[header] }}
+                                                    {% endif %}
+                                                </td>
+                                            {% endfor %}
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="report-empty">
+                            <p>No report rows matched the current filters.</p>
+                        </div>
+                    {% endif %}
+                </section>
+            {% else %}
+                <!-- Keeps page light until admin asks to view rows -->
+                <section class="report-table-card">
                     <div class="report-empty">
-                        <p>No report rows matched the current filters.</p>
+                        <p>Click "View Table" to load report data.</p>
                     </div>
-                {% endif %}
-            </section>
+                </section>
+            {% endif %}
         </section>
     </div>
 </div>
