@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reports</title>
+    <title>My Report</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
@@ -17,7 +17,7 @@
         <a class="nav-btn" href="{{ url_for('home') }}">Home</a>
 
         {% if current_user and current_user.is_admin %}
-            <a class="nav-btn is-active" href="{{ url_for('admin.report') }}">Reports</a>
+            <a class="nav-btn" href="{{ url_for('admin.report') }}">Reports</a>
         {% else %}
             <a class="nav-btn" href="{{ url_for('instructions.gambling_instructions') }}">Gambling Instructions</a>
             <a class="nav-btn" href="{{ url_for('instructions.alcohol_instructions') }}">Alcohol Instructions</a>
@@ -33,18 +33,16 @@
     <div class="page-content">
         <section class="report-page">
             <header class="report-header">
-                <h1>Reports</h1>
-                <p class="subtitle">Download and view user activity reports</p>
+                <h1>My Report</h1>
+                <p class="subtitle">View and download your activity report</p>
             </header>
 
             <section class="report-grid">
                 <article class="report-card">
-                    <h2>All Users</h2>
-                    <p class="report-card-copy">View or download a filtered report across every non-admin user.</p>
+                    <h2>My Activity</h2>
+                    <p class="report-card-copy">Filter and view your logged drinking and gambling activity.</p>
 
-                    <!-- Shared filters for table view and CSV download -->
-                    <form action="{{ url_for('admin.download_report_full') }}" method="get" class="report-form">
-                        <input type="hidden" name="scope" value="all">
+                    <form action="{{ url_for('user_report.download_report') }}" method="get" class="report-form">
 
                         <label class="form-group">
                             <span class="form-label">Start date</span>
@@ -54,18 +52,6 @@
                         <label class="form-group">
                             <span class="form-label">End date</span>
                             <input class="form-input" type="date" name="end_date" value="{{ filters.end_date }}">
-                        </label>
-
-                        <label class="form-group">
-                            <span class="form-label">Users</span>
-                            <select class="form-input" name="all_user_id">
-                                <option value="" {% if not filters.all_user_id %}selected{% endif %}>All users</option>
-                                {% for user in users %}
-                                    <option value="{{ user.id }}" {% if filters.all_user_id == user.id %}selected{% endif %}>
-                                        {{ user.username }} (ID: {{ user.id }})
-                                    </option>
-                                {% endfor %}
-                            </select>
                         </label>
 
                         <label class="form-group">
@@ -84,36 +70,24 @@
                         </label>
 
                         <div class="report-actions">
-                            <!-- Clears query params and restores full dataset -->
-                            <a class="btn-tertiary" href="{{ url_for('admin.report') }}">Reset Filters</a>
-                            <!-- Sends show_table so backend can lazy-load rows -->
-                            <button class="btn-secondary" formaction="{{ url_for('admin.report') }}" name="show_table" value="1">View Table</button>
-                            <button class="btn-primary" type="submit">Download Full Report</button>
+                            <a class="btn-tertiary" href="{{ url_for('user_report.report') }}">Reset Filters</a>
+                            <button class="btn-secondary" formaction="{{ url_for('user_report.report') }}" name="show_table" value="1">View Table</button>
+                            <button class="btn-primary" type="submit">Download Report</button>
                         </div>
                     </form>
                 </article>
             </section>
 
             {% if show_table %}
-                <!-- Table is rendered only after clicking View Table -->
                 <section class="report-table-card">
                     <div class="report-table-header">
                         <div>
-                            <h2>All Users Report Table</h2>
+                            <h2>My Report Table</h2>
                             <p class="report-card-copy">
                                 {{ report_rows|length }} row{% if report_rows|length != 1 %}s{% endif %} matching the current filters.
                             </p>
                         </div>
                         <div class="report-filter-summary">
-                            <!-- Quick summary of active filters -->
-                            <span class="filter-pill">
-                                Users:
-                                {% if filters.all_user_id %}
-                                    1 selected
-                                {% else %}
-                                    All
-                                {% endif %}
-                            </span>
                             <span class="filter-pill">Type: {{ filters.report_type or 'All' }}</span>
                             <span class="filter-pill">Drinks: {{ filters.num_drinks or 'Any' }}</span>
                         </div>
@@ -157,7 +131,6 @@
                     {% endif %}
                 </section>
             {% else %}
-                <!-- Keeps page light until admin asks to view rows -->
                 <section class="report-table-card">
                     <div class="report-empty">
                         <p>Click "View Table" to load report data.</p>
