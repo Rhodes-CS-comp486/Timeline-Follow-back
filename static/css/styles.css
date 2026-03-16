@@ -637,12 +637,54 @@ button:focus-visible {
     line-height: 1.7;
 }
 
-/* Visual style for disabled sections */
+/* FAQ accordion items */
+.faq-item {
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    padding: 0;
+    overflow: hidden;
+}
+
+.faq-item summary {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 15px;
+    padding: 14px 18px;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    user-select: none;
+}
+
+.faq-item summary::-webkit-details-marker { display: none; }
+
+.faq-item summary::before {
+    content: '+';
+    font-size: 18px;
+    line-height: 1;
+    color: var(--primary, #6c63ff);
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+.faq-item[open] summary::before {
+    content: '−';
+}
+
+.faq-item p {
+    margin: 0 18px 10px;
+}
+
+.faq-item p:first-of-type {
+    margin-top: 4px;
+}
+
+/* Hide sections until their checkbox is checked */
 .section-disabled {
-    opacity: 0.3;              /* Makes it look faded/gray */
-    pointer-events: none;      /* Prevents clicking or typing */
-    user-select: none;         /* Prevents highlighting text */
-    filter: grayscale(100%);   /* Optional: Removes all color */
+    display: none;
 }
 
 /* ── Auth pages ──────────────────────────────────────────── */
