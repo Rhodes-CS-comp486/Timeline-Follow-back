@@ -31,7 +31,7 @@
 
             <!-- Always visible -->
             <a class="nav-btn" href="#">Dashboard</a>
-            <a class="nav-btn" href="#">Settings</a>
+            <a class="nav-btn" href="{{ url_for('user_settings') }}">Settings</a>
             <a class="nav-btn" href="{{ url_for('auth.logout') }}">Logout</a>
         </nav>
 

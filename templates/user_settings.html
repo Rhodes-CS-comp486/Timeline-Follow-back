@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="app-shell">
+            <nav class="top-nav" aria-label="Primary">
+            <a class="nav-btn" href="{{ url_for('home') }}">Home</a>
+            <a class="nav-btn" href="{{ url_for('instructions.gambling_instructions') }}">Gambling Instructions</a>
+            <a class="nav-btn" href="{{ url_for('instructions.alcohol_instructions') }}">Alcohol Instructions</a>
+            <a class="nav-btn" href="{{ url_for('calendar') }}">Calendar</a>
+            <a class="nav-btn" href="#">Dashboard</a>
+            <a class="nav-btn is-active" href="{{ url_for('user_settings') }}">Settings</a>
+            <!-- Logout keeps the same nav styling and routes to the sign-out endpoint. -->
+            <a class="nav-btn" href="{{ url_for('auth.logout') }}">Logout</a>
+        </nav>
+
+            <header class="page-header">
+                <h1>Account Settings</h1>
+                <p class="subtitle">Manage your account information</p>
+            </header>
+
+            <main class="auth-wrapper">
+                <div class="auth-card panel">
+                    <h2 class="auth-title">Profile Information</h2>
+
+                    <div class="form-group">
+                        <label class="form-label" for="first_name">First Name</label>
+                        <input
+                            type="text"
+                            id="first_name"
+                            class="form-input"
+                            value="{{ current_user.first_name if current_user else '' }}"
+                            readonly
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="last_name">Last Name</label>
+                        <input
+                            type="text"
+                            id="last_name"
+                            class="form-input"
+                            value="{{ current_user.last_name if current_user else '' }}"
+                            readonly
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="username">Username</label>
+                        <input
+                            type="text"
+                            id="username"
+                            class="form-input"
+                            value="{{ current_user.username if current_user else '' }}"
+                            readonly
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="email">Email</label>
+                        <input
+                            type="email"
+                            id="email"
+                            class="form-input"
+                            value="{{ current_user.email if current_user else '' }}"
+                            readonly
+                        >
+                    </div>
+
+                    <p class="form-hint">Contact your administrator to update your account information.</p>
+                </div>
+            </main>
+        </div>
+</body>
+</html>

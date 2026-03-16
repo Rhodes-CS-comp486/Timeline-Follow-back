@@ -23,7 +23,7 @@
                 <a class="nav-btn" href="{{ url_for('instructions.alcohol_instructions') }}">Alcohol Instructions</a>
                 <a class="nav-btn is-active" href="{{ url_for('calendar') }}">Calendar</a>
                 <a class="nav-btn" href="#">Dashboard</a>
-                <a class="nav-btn" href="#">Settings</a>
+                <a class="nav-btn" href="{{ url_for('user_settings') }}">Settings</a>
                 <!-- Logout keeps the same nav styling and routes to the sign-out endpoint. -->
                 <a class="nav-btn" href="{{ url_for('auth.logout') }}">Logout</a>
             </nav>
