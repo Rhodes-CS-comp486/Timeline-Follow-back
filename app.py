@@ -3,6 +3,7 @@ from flask import Flask, render_template, redirect, url_for, session
 from database.db_initialization import db
 import os
 from database.db_initialization import User
+from sqlalchemy import inspect
 
 # helper function to load questions from JSON
 from config.config_helper import load_questions
@@ -43,20 +44,20 @@ db.init_app(app)
 
 # create database contents if not already
 with app.app_context():
-    '''
+    #db.drop_all() # uncomment this to reset the db
     print(f"--- CONNECTION CHECK ---")
     print(f"Database: {db.engine.url.database}")
     print(f"Host: {db.engine.url.host}")
     print(f"Username: {db.engine.url.username}")
     print("Create new database columns and rows")
-    '''
+
     db.create_all()
-    '''
+
     # This reflects the database schema and prints table names
     inspector = inspect(db.engine)
     print(f"Tables found: {inspector.get_table_names()}")
     print("Database synced! Models now match the Postgres schema.")
-    '''
+
 
 # The default route is to auth.html
 @app.route('/')
