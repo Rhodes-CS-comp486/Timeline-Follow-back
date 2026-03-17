@@ -104,13 +104,22 @@
                         {% for q in questions.gambling %}
                             <div class="form-group">
                                 <label for="{{ q.id }}">{{ q.label }}</label>
-                                <input
-                                    type="{{ q.type }}"
-                                    id="{{ q.id }}"
-                                    name="{{ q.id }}"
-                                    placeholder="{{ q.placeholder }}"
-                                    {% if q.type == "number" %}step="any"{% endif %}
-                                    class="modal-input">
+                                {% if q.type == "select" %}
+                                    <select id="{{ q.id }}" name="{{ q.id }}" class="modal-input">
+                                        <option value="">-- Select an option --</option>
+                                        {% for opt in q.options %}
+                                            <option value="{{ opt }}">{{ opt }}</option>
+                                        {% endfor %}
+                                    </select>
+                                {% else %}
+                                    <input
+                                        type="{{ q.type }}"
+                                        id="{{ q.id }}"
+                                        name="{{ q.id }}"
+                                        placeholder="{{ q.placeholder }}"
+                                        {% if q.type == "number" %}step="any"{% endif %}
+                                        class="modal-input">
+                                {% endif %}
                             </div>
                         {% endfor %}
                     </div>
