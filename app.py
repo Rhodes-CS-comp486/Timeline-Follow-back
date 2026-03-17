@@ -12,6 +12,7 @@ from routes.events_handler import events_handler_bp
 from routes.instructions import instructions_bp
 from routes.auth import auth_bp
 from routes.admin import admin_bp
+from routes.user_report import user_report_bp
 
 app = Flask(__name__)
 
@@ -20,6 +21,7 @@ app.register_blueprint(events_handler_bp, url_prefix='/api')
 app.register_blueprint(instructions_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(admin_bp, url_prefix='/admin/api')
+app.register_blueprint(user_report_bp, url_prefix='/user')
 
 
 # ------------- This part is for DB initialization and connection ----------------
@@ -78,10 +80,7 @@ def calendar():
     questions = load_questions()
     return render_template('calendar.html', questions=questions)
 
-# This function loads the user settings page
-# Parameters: N/A
-# Returns: The rendered user_settings.html file
-@app.route('/user_settings.html')
+@app.route('/settings.html')
 def user_settings():
     return render_template('user_settings.html')
 
