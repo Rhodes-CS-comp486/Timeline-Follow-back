@@ -56,6 +56,21 @@ def add_gambling_entry(
 
     return commit_to_db(new_gambling_entry)
 
+# This function creates a personal expense in the database and commits it
+# Parameters: user_id     -> int (Foreign Key from User table)
+#             activity_data  -> JSON
+# Returns: The entry object if valid, None if failure
+def add_personal_expense_entry(
+    user_id: int,
+    activity_data: dict
+):
+
+    new_personal_expense_entry = PersonalExpense(
+        user_id=user_id,
+        drinking_questions=activity_data
+    )
+
+    return commit_to_db(new_personal_expense_entry)
 
 # This function creates a drinking entry in the database and commits it
 # Parameters: user_id     -> int (Foreign Key from User table)
@@ -104,3 +119,4 @@ def commit_to_db(new_entry):
         db.session.rollback()
         print(f"Error creating user: {e}")
         return None
+
