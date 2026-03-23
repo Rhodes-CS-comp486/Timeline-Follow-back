@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Expense</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="app-shell">
+        <nav class="top-nav" aria-label="Primary">
+            <a class="nav-btn" href="{{ url_for('home') }}">Home</a>
+
+            {% if current_user and current_user.is_admin %}
+                <a class="nav-btn" href="{{ url_for('admin.report') }}">Reports</a>
+            {% else %}
+                <a class="nav-btn" href="{{ url_for('instructions.gambling_instructions') }}">Gambling Instructions</a>
+                <a class="nav-btn" href="{{ url_for('instructions.alcohol_instructions') }}">Alcohol Instructions</a>
+                <a class="nav-btn" href="{{ url_for('calendar') }}">Calendar</a>
+                <a class="nav-btn is-active" href="{{ url_for('personal_expense.personal_expense') }}">Personal Expense</a>
+                <a class="nav-btn" href="{{ url_for('user_report.report') }}">Reports</a>
+            {% endif %}
+
+            <a class="nav-btn" href="#">Dashboard</a>
+            <a class="nav-btn" href="{{ url_for('user_settings') }}">Settings</a>
+            <a class="nav-btn" href="{{ url_for('auth.logout') }}">Logout</a>
+        </nav>
+
+        <div class="page-content">
+            <section class="expense-page">
+                <header class="report-header expense-header">
+                    <h1>Personal Expense</h1>
+                    <p class="subtitle">Track monthly income and spending by category, one month at a time.</p>
+                </header>
+
+                {% if status == 'saved' %}
+                    <div class="status-banner status-banner--success">
+                        Monthly personal expense data was saved successfully.
+                    </div>
+                {% endif %}
+
+                {% if error_message %}
+                    <div class="status-banner status-banner--error">
+                        {{ error_message }}
+                    </div>
+                {% endif %}
+
+                <section class="report-card expense-month-card">
+                    <div>
+                        <h2>{{ selected_month_label }}</h2>
+                        <p class="report-card-copy">Use the dropdown to switch between the 12 months in the current year.</p>
+                    </div>
+
+                    <form class="expense-month-form" method="get" action="{{ url_for('personal_expense.personal_expense') }}">
+                        <label class="form-group expense-month-group">
+                            <span class="form-label">Month</span>
+                            <select class="form-input" name="month" data-month-select>
+                                {% for option in month_options %}
+                                    <option value="{{ option.value }}" {% if option.value == selected_month %}selected{% endif %}>
+                                        {{ option.label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                    </form>
+                </section>
+
+                <section class="expense-summary-grid">
+                    <article class="expense-summary-card">
+                        <span class="expense-summary-label">Income</span>
+                        <strong class="expense-summary-value" data-summary="income">{{ "$%.2f"|format(totals.income) }}</strong>
+                    </article>
+                    <article class="expense-summary-card">
+                        <span class="expense-summary-label">Monthly Expenses</span>
+                        <strong class="expense-summary-value" data-summary="expense_total">{{ "$%.2f"|format(totals.expense_total) }}</strong>
+                    </article>
+                    <article class="expense-summary-card">
+                        <span class="expense-summary-label">Savings</span>
+                        <strong class="expense-summary-value" data-summary="savings">{{ "$%.2f"|format(totals.savings) }}</strong>
+                    </article>
+                    <article class="expense-summary-card">
+                        <span class="expense-summary-label">Remaining Balance</span>
+                        <strong class="expense-summary-value" data-summary="remaining">{{ "$%.2f"|format(totals.remaining) }}</strong>
+                    </article>
+                </section>
+
+                <section class="expense-layout">
+                    <article class="report-card expense-form-card">
+                        <div class="expense-card-header">
+                            <div>
+                                <h2>Monthly Entry</h2>
+                                <p class="report-card-copy">Income is shown first, followed by the categories from your user story.</p>
+                            </div>
+                            <a class="btn-secondary expense-download-btn" href="{{ url_for('personal_expense.download_personal_expense_csv') }}">Download CSV</a>
+                        </div>
+
+                        <form method="post" action="{{ url_for('personal_expense.personal_expense') }}" class="expense-form" data-expense-form>
+                            <input type="hidden" name="month" value="{{ selected_month }}">
+
+                            <section class="expense-section expense-section--income">
+                                <div class="expense-section-title-row">
+                                    <h3>Income</h3>
+                                </div>
+
+                                <label class="expense-field-card">
+                                    <span class="expense-field-label">Income</span>
+                                    <div class="expense-input-wrap">
+                                        <span class="expense-input-prefix">$</span>
+                                        <input
+                                            class="form-input expense-input"
+                                            type="number"
+                                            min="0"
+                                            step="0.01"
+                                            name="income"
+                                            value="{{ '%.2f'|format(payload.income) }}"
+                                            data-expense-field
+                                            data-field-key="income"
+                                            data-field-label="Income"
+                                            data-field-color="#1f8a70"
+                                        >
+                                    </div>
+                                </label>
+                            </section>
+
+                            <section class="expense-section">
+                                <div class="expense-section-title-row">
+                                    <h3>Monthly Categories</h3>
+                                </div>
+
+                                <div class="expense-field-grid">
+                                    {% for category in categories %}
+                                        <label class="expense-field-card">
+                                            <span class="expense-field-label">{{ category.label }}</span>
+                                            <div class="expense-input-wrap">
+                                                <span class="expense-input-prefix">$</span>
+                                                <input
+                                                    class="form-input expense-input"
+                                                    type="number"
+                                                    min="0"
+                                                    step="0.01"
+                                                    name="{{ category.key }}"
+                                                    value="{{ '%.2f'|format(payload[category.key]) }}"
+                                                    data-expense-field
+                                                    data-field-key="{{ category.key }}"
+                                                    data-field-label="{{ category.label }}"
+                                                    data-field-color="{{ category.color }}"
+                                                >
+                                            </div>
+                                        </label>
+                                    {% endfor %}
+                                </div>
+                            </section>
+
+                            <div class="expense-form-actions">
+                                <button type="submit" class="btn-primary">Save Month</button>
+                            </div>
+                        </form>
+                    </article>
+
+                    <article class="report-card expense-chart-card">
+                        <div class="expense-card-header">
+                            <div>
+                                <h2>Monthly Breakdown</h2>
+                                <p class="report-card-copy">The chart shows all entered categories except income and updates as values change.</p>
+                            </div>
+                        </div>
+
+                        <div class="expense-chart-wrap">
+                            <div class="expense-pie-shell">
+                                <div class="expense-pie-chart" id="expensePieChart" aria-label="Expense category pie chart"></div>
+                                <div class="expense-pie-center">
+                                    <span>Total</span>
+                                    <strong data-summary="allocation_total">{{ "$%.2f"|format(totals.allocation_total) }}</strong>
+                                </div>
+                            </div>
+
+                            <div class="expense-chart-legend" id="expenseChartLegend">
+                                <p class="entry-empty">Enter values to see the breakdown.</p>
+                            </div>
+                        </div>
+                    </article>
+                </section>
+            </section>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/personal_expense.js') }}"></script>
+</body>
+</html>
