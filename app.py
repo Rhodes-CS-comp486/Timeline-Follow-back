@@ -15,6 +15,7 @@ from routes.auth import auth_bp
 from routes.admin import admin_bp
 from routes.user_report import user_report_bp
 from routes.personal_expense import personal_expense_bp
+from routes.patterns import patterns_bp
 
 app = Flask(__name__)
 
@@ -25,6 +26,7 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(admin_bp, url_prefix='/admin/api')
 app.register_blueprint(user_report_bp, url_prefix='/user')
 app.register_blueprint(personal_expense_bp, url_prefix='/user')
+app.register_blueprint(patterns_bp, url_prefix='/user')
 
 
 # ------------- This part is for DB initialization and connection ----------------
@@ -54,6 +56,23 @@ with app.app_context():
     print("Create new database columns and rows")
 
     db.create_all()
+
+    # Add any missing columns that weren't present when the table was first created
+    with db.engine.connect() as conn:
+        from sqlalchemy import text
+        existing_columns = [col['name'] for col in inspect(db.engine).get_columns('user')]
+        migrations = {
+            'username':   'ALTER TABLE "user" ADD COLUMN username VARCHAR UNIQUE',
+            'first_name': 'ALTER TABLE "user" ADD COLUMN first_name VARCHAR',
+            'last_name':  'ALTER TABLE "user" ADD COLUMN last_name VARCHAR',
+            'is_admin':   'ALTER TABLE "user" ADD COLUMN is_admin BOOLEAN',
+            'email':      'ALTER TABLE "user" ADD COLUMN email VARCHAR',
+        }
+        for col, sql in migrations.items():
+            if col not in existing_columns:
+                conn.execute(text(sql))
+                print(f"Migrated: added '{col}' column to user table.")
+        conn.commit()
 
     # This reflects the database schema and prints table names
     inspector = inspect(db.engine)
