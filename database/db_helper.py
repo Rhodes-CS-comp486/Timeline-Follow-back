@@ -10,14 +10,11 @@ from database.db_initialization import User, Gambling, Drinking, db, CalendarEnt
 # Parameters: email, first_name, last_name, username (maybe), password (maybe) -> str
 #             is_admin -> bool
 # Returns: entry if valid, error if failure
-def create_user(email : str, first_name : str, last_name : str, password, username, is_admin=False):
+def create_user(email : str, password, is_admin=False):
     # Create a user
     new_user = User(
         email=email,
-        first_name=first_name,
-        last_name=last_name,
         password=password,
-        username=username,
         is_admin=is_admin
     )
 

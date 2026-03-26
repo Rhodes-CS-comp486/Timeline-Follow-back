@@ -40,39 +40,6 @@
                     <h2 class="auth-title">Profile Information</h2>
 
                     <div class="form-group">
-                        <label class="form-label" for="first_name">First Name</label>
-                        <input
-                            type="text"
-                            id="first_name"
-                            class="form-input"
-                            value="{{ current_user.first_name if current_user else '' }}"
-                            readonly
-                        >
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="last_name">Last Name</label>
-                        <input
-                            type="text"
-                            id="last_name"
-                            class="form-input"
-                            value="{{ current_user.last_name if current_user else '' }}"
-                            readonly
-                        >
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="username">Username</label>
-                        <input
-                            type="text"
-                            id="username"
-                            class="form-input"
-                            value="{{ current_user.username if current_user else '' }}"
-                            readonly
-                        >
-                    </div>
-
-                    <div class="form-group">
                         <label class="form-label" for="email">Email</label>
                         <input
                             type="email"
