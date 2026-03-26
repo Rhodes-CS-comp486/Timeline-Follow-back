@@ -38,18 +38,22 @@
                 <div class="auth-card panel">
                     <h2 class="auth-title">Profile Information</h2>
 
-                    <div class="form-group">
-                        <label class="form-label" for="email">Email</label>
-                        <input
-                            type="email"
-                            id="email"
-                            class="form-input"
-                            value="{{ current_user.email if current_user else '' }}"
-                            readonly
-                        >
-                    </div>
+                    <form method="POST" action="{{ url_for('user_settings') }}">
+                        <div class="form-group">
+                            <label class="form-label" for="email">Email</label>
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                class="form-input"
+                                value="{{ current_user.email if current_user else '' }}"
+                            >
+                        </div>
 
-                    <p class="form-hint">Contact your administrator to update your account information.</p>
+                        <p class="form-hint">Contact your administrator to update your account information.</p>
+
+                        <button class="btn-primary" type="submit">Save</button>
+                    </form>
                 </div>
             </main>
         </div>

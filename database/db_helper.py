@@ -117,3 +117,21 @@ def commit_to_db(new_entry):
         print(f"Error creating user: {e}")
         return None
 
+# This function updates an existing user's email in the database
+# Parameters: user_id -> int, email -> str
+# Returns: The updated user object if successful, None if failure
+def update_user_email(user_id: int, email: str):
+    user = User.query.get(user_id)
+    if user is None:
+        return None
+    user.email = email
+    try:
+        db.session.commit()
+        print(f"Successfully updated email for user {user_id}")
+        return user
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error updating email: {e}")
+        return None
+
+
