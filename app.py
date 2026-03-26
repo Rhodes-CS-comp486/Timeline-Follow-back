@@ -1,9 +1,10 @@
 from dotenv import load_dotenv
-from flask import Flask, render_template, redirect, url_for, session
+from flask import Flask, render_template, redirect, url_for, session, request
 from database.db_initialization import db
 import os
 from database.db_initialization import User
 from sqlalchemy import inspect
+from database.db_helper import update_user_email
 
 # helper function to load questions from JSON
 from config.config_helper import load_questions
@@ -83,8 +84,13 @@ def calendar():
     questions = load_questions()
     return render_template('calendar.html', questions=questions)
 
-@app.route('/settings.html')
+@app.route('/settings.html', methods=['GET', 'POST'])
 def user_settings():
+    if request.method == 'POST':
+        user_id = session.get("user_id")
+        new_email = request.form.get('email')
+        if user_id and new_email:
+            update_user_email(user_id, new_email)
     return render_template('user_settings.html')
 
 # This function defines current_user=user in the context of our flask app
