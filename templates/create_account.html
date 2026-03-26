@@ -35,35 +35,6 @@
                 {% endif %}
 
                 <form method="POST" action="{{ url_for('auth.create_account') }}" novalidate>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label" for="first_name">First Name</label>
-                            <input
-                                class="form-input"
-                                type="text"
-                                id="first_name"
-                                name="first_name"
-                                value="{{ form_data.get('first_name', '') }}"
-                                placeholder="Jane"
-                                required
-                                autocomplete="given-name"
-                            >
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label" for="last_name">Last Name</label>
-                            <input
-                                class="form-input"
-                                type="text"
-                                id="last_name"
-                                name="last_name"
-                                value="{{ form_data.get('last_name', '') }}"
-                                placeholder="Doe"
-                                required
-                                autocomplete="family-name"
-                            >
-                        </div>
-                    </div>
-
                     <div class="form-group">
                         <label class="form-label" for="email">Email</label>
                         <input
@@ -75,20 +46,6 @@
                             placeholder="jane@example.com"
                             required
                             autocomplete="email"
-                        >
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="username">Username</label>
-                        <input
-                            class="form-input"
-                            type="text"
-                            id="username"
-                            name="username"
-                            value="{{ form_data.get('username', '') }}"
-                            placeholder="janedoe"
-                            required
-                            autocomplete="username"
                         >
                     </div>
 

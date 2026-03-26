@@ -11,10 +11,7 @@ db = SQLAlchemy(model_class=Base)
 # creating user table that stores ID, username, password, items, date borrowed and date due
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String, unique=True)
     password = db.Column(db.String)
-    first_name = db.Column(db.String)
-    last_name = db.Column(db.String)
     is_admin = db.Column(db.Boolean)
     email = db.Column(db.String)
 
