@@ -7,7 +7,7 @@ from sqlalchemy import asc
 
 from database.db_initialization import CalendarEntry, Drinking, Gambling, User, db
 
-patterns_bp = Blueprint("patterns", __name__)
+insights_bp = Blueprint("insights", __name__)
 
 
 def _get_three_month_income(user_id):
@@ -79,7 +79,7 @@ def compute_insights(user_id):
         if wagered > intended:
             sessions_over_intent += 1
 
-        chart_labels.append(entry_date.strftime("%b %-d"))
+        chart_labels.append(entry_date.strftime("%b") + " " + str(entry_date.day))
         chart_intended.append(round(intended, 2))
         chart_wagered.append(round(wagered, 2))
 
@@ -215,8 +215,8 @@ def compute_insights(user_id):
     )
 
 
-@patterns_bp.route("/patterns")
-def patterns():
+@insights_bp.route("/insights")
+def insights():
     user_id = session.get("user_id")
     if not user_id:
         return redirect(url_for("auth.login"))
@@ -225,4 +225,4 @@ def patterns():
     if not user or user.is_admin:
         return redirect(url_for("home"))
 
-    return render_template("patterns.html", **compute_insights(user_id))
+    return render_template("insights.html", **compute_insights(user_id))

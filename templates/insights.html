@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patterns - Timeline Follow-Back</title>
+    <title>Insights - Timeline Follow-Back</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <style>
-        .patterns-page {
+        .insights-page {
             max-width: 860px;
         }
-        .patterns-section-label {
+        .insights-section-label {
             display: inline-block;
             font-family: var(--font-heading);
             font-size: 11px;
@@ -25,40 +25,40 @@
             padding: 4px 12px;
             margin-bottom: 12px;
         }
-        .patterns-card-body {
+        .insights-card-body {
             margin-top: 14px;
             font-size: 16px;
             line-height: 1.75;
             color: var(--text);
         }
-        .patterns-card-body p + p {
+        .insights-card-body p + p {
             margin-top: 10px;
         }
-        .patterns-highlight {
+        .insights-highlight {
             font-weight: 700;
             color: var(--primary-strong);
         }
-        .patterns-highlight--warn {
+        .insights-highlight--warn {
             font-weight: 700;
             color: #c0392b;
         }
-        .patterns-no-data {
+        .insights-no-data {
             color: var(--muted);
             font-style: italic;
         }
-        .patterns-stat-grid {
+        .insights-stat-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
             gap: 16px;
             margin-top: 22px;
         }
-        .patterns-stat-card {
+        .insights-stat-card {
             background: rgba(31, 138, 112, 0.07);
             border: 1px solid rgba(31, 138, 112, 0.18);
             border-radius: 16px;
             padding: 18px 20px;
         }
-        .patterns-stat-label {
+        .insights-stat-label {
             font-size: 12px;
             font-weight: 600;
             letter-spacing: 0.06em;
@@ -66,33 +66,33 @@
             color: var(--muted);
             margin-bottom: 6px;
         }
-        .patterns-stat-value {
+        .insights-stat-value {
             font-family: var(--font-heading);
             font-size: 24px;
             font-weight: 700;
             color: var(--primary-strong);
         }
-        .patterns-card-divider {
+        .insights-card-divider {
             border: none;
             border-top: 1px solid var(--border);
             margin: 20px 0;
         }
-        .patterns-chart-card {
+        .insights-chart-card {
             max-width: 100%;
             overflow: hidden;
         }
-        .patterns-chart-wrap {
+        .insights-chart-wrap {
             position: relative;
             margin-top: 24px;
             height: 320px;
         }
-        .patterns-chart-legend {
+        .insights-chart-legend {
             display: flex;
             gap: 24px;
             margin-top: 16px;
             flex-wrap: wrap;
         }
-        .patterns-legend-item {
+        .insights-legend-item {
             display: flex;
             align-items: center;
             gap: 8px;
@@ -100,30 +100,30 @@
             font-weight: 600;
             color: var(--text);
         }
-        .patterns-legend-dot {
+        .insights-legend-dot {
             width: 12px;
             height: 12px;
             border-radius: 3px;
             flex-shrink: 0;
         }
-        .patterns-dow-grid {
+        .insights-dow-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 10px;
             margin-top: 22px;
         }
-        .patterns-dow-tile {
+        .insights-dow-tile {
             background: var(--bg);
             border: 1px solid var(--border);
             border-radius: 14px;
             padding: 14px 10px;
             text-align: center;
         }
-        .patterns-dow-tile.is-weekend {
+        .insights-dow-tile.is-weekend {
             border-color: rgba(244, 162, 97, 0.5);
             background: rgba(244, 162, 97, 0.07);
         }
-        .patterns-dow-day {
+        .insights-dow-day {
             font-family: var(--font-heading);
             font-size: 13px;
             font-weight: 700;
@@ -132,16 +132,16 @@
             letter-spacing: 0.05em;
             margin-bottom: 10px;
         }
-        .patterns-dow-stat {
+        .insights-dow-stat {
             margin-top: 6px;
         }
-        .patterns-dow-stat-value {
+        .insights-dow-stat-value {
             font-family: var(--font-heading);
             font-size: 18px;
             font-weight: 700;
             color: var(--primary-strong);
         }
-        .patterns-dow-stat-label {
+        .insights-dow-stat-label {
             font-size: 10px;
             font-weight: 600;
             letter-spacing: 0.06em;
@@ -149,36 +149,36 @@
             color: var(--muted);
             margin-top: 2px;
         }
-        .patterns-dow-charts {
+        .insights-dow-charts {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
             margin-top: 24px;
         }
         @media (max-width: 700px) {
-            .patterns-dow-grid { grid-template-columns: repeat(4, 1fr); }
-            .patterns-dow-charts { grid-template-columns: 1fr; }
+            .insights-dow-grid { grid-template-columns: repeat(4, 1fr); }
+            .insights-dow-charts { grid-template-columns: 1fr; }
         }
-        .patterns-monthly-grid {
+        .insights-monthly-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 16px;
             margin-top: 22px;
         }
-        .patterns-month-tile {
+        .insights-month-tile {
             background: var(--bg);
             border: 1px solid var(--border);
             border-radius: 16px;
             padding: 20px;
         }
-        .patterns-month-tile h3 {
+        .insights-month-tile h3 {
             font-family: var(--font-heading);
             font-size: 16px;
             font-weight: 700;
             margin-bottom: 14px;
             color: var(--text);
         }
-        .patterns-month-row {
+        .insights-month-row {
             display: flex;
             justify-content: space-between;
             align-items: baseline;
@@ -186,11 +186,11 @@
             padding: 5px 0;
             border-bottom: 1px solid var(--border);
         }
-        .patterns-month-row:last-child { border-bottom: none; }
-        .patterns-month-row-label { color: var(--muted); }
-        .patterns-month-row-value { font-weight: 700; }
-        .patterns-month-row-value--over { color: #c0392b; }
-        .patterns-month-row-value--under { color: var(--primary-strong); }
+        .insights-month-row:last-child { border-bottom: none; }
+        .insights-month-row-label { color: var(--muted); }
+        .insights-month-row-value { font-weight: 700; }
+        .insights-month-row-value--over { color: #c0392b; }
+        .insights-month-row-value--under { color: var(--primary-strong); }
     </style>
 </head>
 <body>
@@ -207,7 +207,7 @@
                 <a class="nav-btn" href="{{ url_for('calendar') }}">Calendar</a>
                 <a class="nav-btn" href="{{ url_for('personal_expense.personal_expense') }}">Personal Expense</a>
                 <a class="nav-btn" href="{{ url_for('user_report.report') }}">Reports</a>
-                <a class="nav-btn is-active" href="{{ url_for('patterns.patterns') }}">Insights</a>
+                <a class="nav-btn is-active" href="{{ url_for('insights.insights') }}">Insights</a>
             {% endif %}
 
             <a class="nav-btn" href="#">Dashboard</a>
@@ -216,7 +216,7 @@
         </nav>
 
         <div class="page-content">
-            <section class="patterns-page">
+            <section class="insights-page">
                 <header class="report-header">
                     <h1>Insights</h1>
                     <p class="subtitle">A summary of your gambling intent and behavior over the past 3 months.</p>
@@ -224,58 +224,58 @@
 
                 {% if total_sessions == 0 %}
                     <article class="report-card">
-                        <p class="patterns-no-data">No gambling episodes were recorded in the past 3 months. Log activity on the Calendar to see your patterns here.</p>
+                        <p class="insights-no-data">No gambling episodes were recorded in the past 3 months. Log activity on the Calendar to see your patterns here.</p>
                     </article>
                 {% else %}
 
                 <!-- Overall Card -->
-                <article class="report-card patterns-chart-card" style="margin-bottom: 24px;">
-                    <span class="patterns-section-label">Past 3 Months</span>
+                <article class="report-card insights-chart-card" style="margin-bottom: 24px;">
+                    <span class="insights-section-label">Past 3 Months</span>
                     <h2>Overall Summary</h2>
 
-                    <div class="patterns-card-body">
+                    <div class="insights-card-body">
                         <p>
                             Over the past 3 months you gambled
-                            <span class="patterns-highlight">{{ total_sessions }} time{% if total_sessions != 1 %}s{% endif %}</span>,
-                            intending to wager <span class="patterns-highlight">${{ "{:,.2f}".format(total_intended) }}</span>
-                            and actually wagering <span class="patterns-highlight">${{ "{:,.2f}".format(total_wagered) }}</span>.
+                            <span class="insights-highlight">{{ total_sessions }} time{% if total_sessions != 1 %}s{% endif %}</span>,
+                            intending to wager <span class="insights-highlight">${{ "{:,.2f}".format(total_intended) }}</span>
+                            and actually wagering <span class="insights-highlight">${{ "{:,.2f}".format(total_wagered) }}</span>.
                             {% if intent_pct is not none %}
                                 Your intended amount was approximately
-                                <span class="patterns-highlight">{{ intent_pct }}%</span>
+                                <span class="insights-highlight">{{ intent_pct }}%</span>
                                 of your reported income, while what you wagered was
-                                <span class="patterns-highlight">{{ risk_pct }}%</span>.
+                                <span class="insights-highlight">{{ risk_pct }}%</span>.
                             {% else %}
-                                <span class="patterns-no-data">(No income reported — add income in Personal Expense to see percentages.)</span>
+                                <span class="insights-no-data">(No income reported — add income in Personal Expense to see percentages.)</span>
                             {% endif %}
                         </p>
                         <p>
                             You spent approximately
-                            <span class="patterns-highlight">{{ total_hours }} hour{% if total_hours != 1 %}s{% endif %}</span>
+                            <span class="insights-highlight">{{ total_hours }} hour{% if total_hours != 1 %}s{% endif %}</span>
                             gambling, which is
-                            <span class="patterns-highlight">{{ total_days }} day{% if total_days != 1 %}s{% endif %} and {{ remaining_hours }} hour{% if remaining_hours != 1 %}s{% endif %}</span>.
+                            <span class="insights-highlight">{{ total_days }} day{% if total_days != 1 %}s{% endif %} and {{ remaining_hours }} hour{% if remaining_hours != 1 %}s{% endif %}</span>.
                         </p>
 
                         {% if excess_wagered > 0 %}
                         <p>
                             You wagered
-                            <span class="patterns-highlight--warn">${{ "{:,.2f}".format(excess_wagered) }} more</span>
+                            <span class="insights-highlight--warn">${{ "{:,.2f}".format(excess_wagered) }} more</span>
                             than you intended, and went over your intended amount on
-                            <span class="patterns-highlight--warn">{{ sessions_over_intent }} of {{ total_sessions }}</span>
+                            <span class="insights-highlight--warn">{{ sessions_over_intent }} of {{ total_sessions }}</span>
                             episode{% if total_sessions != 1 %}s{% endif %}.
                         </p>
                         {% elif excess_wagered < 0 %}
                         <p>
                             You wagered
-                            <span class="patterns-highlight">${{ "{:,.2f}".format(excess_wagered|abs) }} less</span>
+                            <span class="insights-highlight">${{ "{:,.2f}".format(excess_wagered|abs) }} less</span>
                             than you intended, and went over your intended amount on
-                            <span class="patterns-highlight{% if sessions_over_intent > 0 %}--warn{% endif %}">{{ sessions_over_intent }} of {{ total_sessions }}</span>
+                            <span class="insights-highlight{% if sessions_over_intent > 0 %}--warn{% endif %}">{{ sessions_over_intent }} of {{ total_sessions }}</span>
                             episode{% if total_sessions != 1 %}s{% endif %}.
                         </p>
                         {% else %}
                         <p>
                             You wagered exactly as much as you intended.
                             You went over your intended amount on
-                            <span class="patterns-highlight{% if sessions_over_intent > 0 %}--warn{% endif %}">{{ sessions_over_intent }} of {{ total_sessions }}</span>
+                            <span class="insights-highlight{% if sessions_over_intent > 0 %}--warn{% endif %}">{{ sessions_over_intent }} of {{ total_sessions }}</span>
                             episode{% if total_sessions != 1 %}s{% endif %}.
                         </p>
                         {% endif %}
@@ -283,139 +283,139 @@
                         {% if total_losses > 0 %}
                         <p>
                             Your total losses were
-                            <span class="patterns-highlight--warn">${{ "{:,.2f}".format(total_losses) }}</span>{% if loss_pct is not none %}
-                            (approximately <span class="patterns-highlight--warn">{{ loss_pct }}%</span> of your reported income){% endif %}.
+                            <span class="insights-highlight--warn">${{ "{:,.2f}".format(total_losses) }}</span>{% if loss_pct is not none %}
+                            (approximately <span class="insights-highlight--warn">{{ loss_pct }}%</span> of your reported income){% endif %}.
                             At this rate, projected losses would be:
                         </p>
                         <ul style="margin: 8px 0 0 20px; line-height: 2;">
-                            <li><span class="patterns-highlight--warn">${{ "{:,.0f}".format(projected_1yr) }}</span> for one year.</li>
-                            <li><span class="patterns-highlight--warn">${{ "{:,.0f}".format(projected_5yr) }}</span> for five years.</li>
-                            <li><span class="patterns-highlight--warn">${{ "{:,.0f}".format(projected_10yr) }}</span> for ten years.</li>
-                            <li><span class="patterns-highlight--warn">${{ "{:,.0f}".format(projected_25yr) }}</span> for twenty-five years.</li>
+                            <li><span class="insights-highlight--warn">${{ "{:,.0f}".format(projected_1yr) }}</span> for one year.</li>
+                            <li><span class="insights-highlight--warn">${{ "{:,.0f}".format(projected_5yr) }}</span> for five years.</li>
+                            <li><span class="insights-highlight--warn">${{ "{:,.0f}".format(projected_10yr) }}</span> for ten years.</li>
+                            <li><span class="insights-highlight--warn">${{ "{:,.0f}".format(projected_25yr) }}</span> for twenty-five years.</li>
                         </ul>
                         {% if loss_per_hour > 0 %}
                         <p style="margin-top: 10px;">
                             At minimum wage ($7.25/hr) you would have earned
-                            <span class="patterns-highlight">${{ "{:,.2f}".format(min_wage_earnings) }}</span>
+                            <span class="insights-highlight">${{ "{:,.2f}".format(min_wage_earnings) }}</span>
                             for that time. Instead, you lost
-                            <span class="patterns-highlight--warn">${{ "{:,.2f}".format(loss_per_hour) }}</span>
+                            <span class="insights-highlight--warn">${{ "{:,.2f}".format(loss_per_hour) }}</span>
                             per hour gambling.
                         </p>
                         {% endif %}
                         {% endif %}
                     </div>
 
-                    <div class="patterns-stat-grid">
-                        <div class="patterns-stat-card">
-                            <div class="patterns-stat-label">Gambling Episodes</div>
-                            <div class="patterns-stat-value">{{ total_sessions }}</div>
+                    <div class="insights-stat-grid">
+                        <div class="insights-stat-card">
+                            <div class="insights-stat-label">Gambling Episodes</div>
+                            <div class="insights-stat-value">{{ total_sessions }}</div>
                         </div>
-                        <div class="patterns-stat-card">
-                            <div class="patterns-stat-label">Total Intended</div>
-                            <div class="patterns-stat-value">${{ "{:,.2f}".format(total_intended) }}</div>
+                        <div class="insights-stat-card">
+                            <div class="insights-stat-label">Total Intended</div>
+                            <div class="insights-stat-value">${{ "{:,.2f}".format(total_intended) }}</div>
                         </div>
-                        <div class="patterns-stat-card">
-                            <div class="patterns-stat-label">Total Wagered</div>
-                            <div class="patterns-stat-value">${{ "{:,.2f}".format(total_wagered) }}</div>
+                        <div class="insights-stat-card">
+                            <div class="insights-stat-label">Total Wagered</div>
+                            <div class="insights-stat-value">${{ "{:,.2f}".format(total_wagered) }}</div>
                         </div>
-                        <div class="patterns-stat-card">
-                            <div class="patterns-stat-label">Total Hours</div>
-                            <div class="patterns-stat-value">{{ total_hours }}h</div>
+                        <div class="insights-stat-card">
+                            <div class="insights-stat-label">Total Hours</div>
+                            <div class="insights-stat-value">{{ total_hours }}h</div>
                         </div>
                         {% if total_losses > 0 %}
-                        <div class="patterns-stat-card" style="border-color: rgba(192,57,43,0.25); background: rgba(192,57,43,0.06);">
-                            <div class="patterns-stat-label">Total Losses</div>
-                            <div class="patterns-stat-value" style="color: #c0392b;">${{ "{:,.2f}".format(total_losses) }}</div>
+                        <div class="insights-stat-card" style="border-color: rgba(192,57,43,0.25); background: rgba(192,57,43,0.06);">
+                            <div class="insights-stat-label">Total Losses</div>
+                            <div class="insights-stat-value" style="color: #c0392b;">${{ "{:,.2f}".format(total_losses) }}</div>
                         </div>
                         {% endif %}
                         {% if risk_pct is not none %}
-                        <div class="patterns-stat-card">
-                            <div class="patterns-stat-label">Wagered % of Income</div>
-                            <div class="patterns-stat-value">{{ risk_pct }}%</div>
+                        <div class="insights-stat-card">
+                            <div class="insights-stat-label">Wagered % of Income</div>
+                            <div class="insights-stat-value">{{ risk_pct }}%</div>
                         </div>
                         {% endif %}
-                        <div class="patterns-stat-card">
-                            <div class="patterns-stat-label">Over-Intent Episodes</div>
-                            <div class="patterns-stat-value">{{ sessions_over_intent }} / {{ total_sessions }}</div>
+                        <div class="insights-stat-card">
+                            <div class="insights-stat-label">Over-Intent Episodes</div>
+                            <div class="insights-stat-value">{{ sessions_over_intent }} / {{ total_sessions }}</div>
                         </div>
                     </div>
 
                 </article>
 
                 <!-- Monthly Overview Card -->
-                <article class="report-card patterns-chart-card" style="margin-bottom: 24px;">
-                    <span class="patterns-section-label">By Month</span>
+                <article class="report-card insights-chart-card" style="margin-bottom: 24px;">
+                    <span class="insights-section-label">By Month</span>
                     <h2>Month-by-Month Overview</h2>
                     <p class="report-card-copy">Totals broken down by calendar month — sessions, intended, and actual amount wagered.</p>
 
-                    <div class="patterns-monthly-grid">
+                    <div class="insights-monthly-grid">
                         {% for m in monthly_breakdown %}
-                        <div class="patterns-month-tile">
+                        <div class="insights-month-tile">
                             <h3>{{ m.label }}</h3>
-                            <div class="patterns-month-row">
-                                <span class="patterns-month-row-label">Sessions</span>
-                                <span class="patterns-month-row-value">{{ m.sessions }}</span>
+                            <div class="insights-month-row">
+                                <span class="insights-month-row-label">Sessions</span>
+                                <span class="insights-month-row-value">{{ m.sessions }}</span>
                             </div>
-                            <div class="patterns-month-row">
-                                <span class="patterns-month-row-label">Intended</span>
-                                <span class="patterns-month-row-value">${{ "{:,.2f}".format(m.intended) }}</span>
+                            <div class="insights-month-row">
+                                <span class="insights-month-row-label">Intended</span>
+                                <span class="insights-month-row-value">${{ "{:,.2f}".format(m.intended) }}</span>
                             </div>
-                            <div class="patterns-month-row">
-                                <span class="patterns-month-row-label">Wagered</span>
-                                <span class="patterns-month-row-value">${{ "{:,.2f}".format(m.wagered) }}</span>
+                            <div class="insights-month-row">
+                                <span class="insights-month-row-label">Wagered</span>
+                                <span class="insights-month-row-value">${{ "{:,.2f}".format(m.wagered) }}</span>
                             </div>
-                            <div class="patterns-month-row">
-                                <span class="patterns-month-row-label">Difference</span>
+                            <div class="insights-month-row">
+                                <span class="insights-month-row-label">Difference</span>
                                 {% if m.diff > 0 %}
-                                    <span class="patterns-month-row-value patterns-month-row-value--over">+${{ "{:,.2f}".format(m.diff) }}</span>
+                                    <span class="insights-month-row-value insights-month-row-value--over">+${{ "{:,.2f}".format(m.diff) }}</span>
                                 {% elif m.diff < 0 %}
-                                    <span class="patterns-month-row-value patterns-month-row-value--under">-${{ "{:,.2f}".format(m.diff|abs) }}</span>
+                                    <span class="insights-month-row-value insights-month-row-value--under">-${{ "{:,.2f}".format(m.diff|abs) }}</span>
                                 {% else %}
-                                    <span class="patterns-month-row-value">$0.00</span>
+                                    <span class="insights-month-row-value">$0.00</span>
                                 {% endif %}
                             </div>
-                            <div class="patterns-month-row">
-                                <span class="patterns-month-row-label">Over-intent</span>
-                                <span class="patterns-month-row-value {% if m.over_intent > 0 %}patterns-month-row-value--over{% endif %}">{{ m.over_intent }} / {{ m.sessions }}</span>
+                            <div class="insights-month-row">
+                                <span class="insights-month-row-label">Over-intent</span>
+                                <span class="insights-month-row-value {% if m.over_intent > 0 %}insights-month-row-value--over{% endif %}">{{ m.over_intent }} / {{ m.sessions }}</span>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
 
-                    <div class="patterns-chart-legend" style="margin-top: 28px;">
-                        <div class="patterns-legend-item">
-                            <div class="patterns-legend-dot" style="background: rgba(31,138,112,0.85);"></div>
+                    <div class="insights-chart-legend" style="margin-top: 28px;">
+                        <div class="insights-legend-item">
+                            <div class="insights-legend-dot" style="background: rgba(31,138,112,0.85);"></div>
                             Intended
                         </div>
-                        <div class="patterns-legend-item">
-                            <div class="patterns-legend-dot" style="background: rgba(192,57,43,0.80);"></div>
+                        <div class="insights-legend-item">
+                            <div class="insights-legend-dot" style="background: rgba(192,57,43,0.80);"></div>
                             Wagered
                         </div>
                     </div>
-                    <div class="patterns-chart-wrap" style="height: 260px;">
+                    <div class="insights-chart-wrap" style="height: 260px;">
                         <canvas id="monthlyChart"></canvas>
                     </div>
                 </article>
 
                 <!-- Day-of-Week Card -->
-                <article class="report-card patterns-chart-card">
-                    <span class="patterns-section-label">Day of Week</span>
+                <article class="report-card insights-chart-card">
+                    <span class="insights-section-label">Day of Week</span>
                     <h2>When Do You Gamble & Drink?</h2>
                     <p class="report-card-copy">Session counts and totals broken down by day of the week.</p>
 
                     <!-- Gambling by day -->
                     <h3 style="margin-top: 22px; margin-bottom: 4px; font-family: var(--font-heading); font-size: 15px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em;">Gambling</h3>
-                    <div class="patterns-dow-grid">
+                    <div class="insights-dow-grid">
                         {% for d in dow_gambling %}
-                        <div class="patterns-dow-tile">
-                            <div class="patterns-dow-day">{{ d.day }}</div>
-                            <div class="patterns-dow-stat">
-                                <div class="patterns-dow-stat-value">{{ d.sessions }}</div>
-                                <div class="patterns-dow-stat-label">Sessions</div>
+                        <div class="insights-dow-tile">
+                            <div class="insights-dow-day">{{ d.day }}</div>
+                            <div class="insights-dow-stat">
+                                <div class="insights-dow-stat-value">{{ d.sessions }}</div>
+                                <div class="insights-dow-stat-label">Sessions</div>
                             </div>
-                            <div class="patterns-dow-stat">
-                                <div class="patterns-dow-stat-value" style="font-size:14px;">${{ "{:,.0f}".format(d.wagered) }}</div>
-                                <div class="patterns-dow-stat-label">Wagered</div>
+                            <div class="insights-dow-stat">
+                                <div class="insights-dow-stat-value" style="font-size:14px;">${{ "{:,.0f}".format(d.wagered) }}</div>
+                                <div class="insights-dow-stat-label">Wagered</div>
                             </div>
                         </div>
                         {% endfor %}
@@ -423,43 +423,43 @@
 
                     <!-- Drinking by day -->
                     <h3 style="margin-top: 24px; margin-bottom: 4px; font-family: var(--font-heading); font-size: 15px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em;">Alcohol</h3>
-                    <div class="patterns-dow-grid">
+                    <div class="insights-dow-grid">
                         {% for d in dow_drinking %}
-                        <div class="patterns-dow-tile">
-                            <div class="patterns-dow-day">{{ d.day }}</div>
-                            <div class="patterns-dow-stat">
-                                <div class="patterns-dow-stat-value">{{ d.sessions }}</div>
-                                <div class="patterns-dow-stat-label">Days</div>
+                        <div class="insights-dow-tile">
+                            <div class="insights-dow-day">{{ d.day }}</div>
+                            <div class="insights-dow-stat">
+                                <div class="insights-dow-stat-value">{{ d.sessions }}</div>
+                                <div class="insights-dow-stat-label">Days</div>
                             </div>
-                            <div class="patterns-dow-stat">
-                                <div class="patterns-dow-stat-value" style="font-size:14px;">{{ d.drinks }}</div>
-                                <div class="patterns-dow-stat-label">Total Drinks</div>
+                            <div class="insights-dow-stat">
+                                <div class="insights-dow-stat-value" style="font-size:14px;">{{ d.drinks }}</div>
+                                <div class="insights-dow-stat-label">Total Drinks</div>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
 
                     <!-- Side-by-side charts -->
-                    <div class="patterns-dow-charts">
+                    <div class="insights-dow-charts">
                         <div>
-                            <div class="patterns-chart-legend" style="margin-top: 28px; margin-bottom: 0;">
-                                <div class="patterns-legend-item">
-                                    <div class="patterns-legend-dot" style="background: rgba(31,138,112,0.85);"></div>
+                            <div class="insights-chart-legend" style="margin-top: 28px; margin-bottom: 0;">
+                                <div class="insights-legend-item">
+                                    <div class="insights-legend-dot" style="background: rgba(31,138,112,0.85);"></div>
                                     Gambling Sessions
                                 </div>
                             </div>
-                            <div class="patterns-chart-wrap" style="height: 220px;">
+                            <div class="insights-chart-wrap" style="height: 220px;">
                                 <canvas id="dowGamblingChart"></canvas>
                             </div>
                         </div>
                         <div>
-                            <div class="patterns-chart-legend" style="margin-top: 28px; margin-bottom: 0;">
-                                <div class="patterns-legend-item">
-                                    <div class="patterns-legend-dot" style="background: rgba(69,123,157,0.85);"></div>
+                            <div class="insights-chart-legend" style="margin-top: 28px; margin-bottom: 0;">
+                                <div class="insights-legend-item">
+                                    <div class="insights-legend-dot" style="background: rgba(69,123,157,0.85);"></div>
                                     Drinking Days
                                 </div>
                             </div>
-                            <div class="patterns-chart-wrap" style="height: 220px;">
+                            <div class="insights-chart-wrap" style="height: 220px;">
                                 <canvas id="dowDrinkingChart"></canvas>
                             </div>
                         </div>

@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, send_file, request
 from csv_formatting.csv_creator import generate_user_csv_report, generate_all_users_csv, build_report_dataset
 from database.db_initialization import User
 from routes.auth import admin_required
-from routes.patterns import compute_insights
+from routes.insights import compute_insights
 
 admin_bp = Blueprint('admin', __name__)
 
