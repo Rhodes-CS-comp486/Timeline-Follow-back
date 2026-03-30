@@ -28,17 +28,14 @@ def validate_password(password):
 @auth_bp.route('/create-account', methods=['GET', 'POST'])
 def create_account():
     if request.method == 'POST':
-        first_name = request.form.get('first_name', '').strip()
-        last_name = request.form.get('last_name', '').strip()
         email = request.form.get('email', '').strip().lower()
-        username = request.form.get('username', '').strip()
         password = request.form.get('password', '')
         confirm_password = request.form.get('confirm_password', '')
 
         errors = []
 
         # All fields required
-        if not all([first_name, last_name, email, username, password, confirm_password]):
+        if not all([email, password, confirm_password]):
             errors.append("All fields are required.")
 
         # Passwords must match
@@ -55,16 +52,7 @@ def create_account():
         if email and User.query.filter_by(email=email).first():
             errors.append("An account with this email already exists.")
 
-        # Username uniqueness
-        if username and User.query.filter_by(username=username).first():
-            errors.append("This username is already taken.")
-
-        form_data = {
-            'first_name': first_name,
-            'last_name': last_name,
-            'email': email,
-            'username': username,
-        }
+        form_data = {'email': email}
 
         if errors:
             return render_template('create_account.html', errors=errors, form_data=form_data)
@@ -73,10 +61,7 @@ def create_account():
 
         user = create_user(
             email=email,
-            first_name=first_name,
-            last_name=last_name,
             password=hashed_password,
-            username=username,
             is_admin=False,
         )
 

@@ -39,16 +39,8 @@ def _get_three_month_income(user_id):
     return total_income
 
 
-@patterns_bp.route("/patterns")
-def patterns():
-    user_id = session.get("user_id")
-    if not user_id:
-        return redirect(url_for("auth.login"))
-
-    user = User.query.get(user_id)
-    if not user or user.is_admin:
-        return redirect(url_for("home"))
-
+def compute_insights(user_id):
+    """Compute all insights data for a given user_id. Returns a dict of template variables."""
     three_months_ago = datetime.utcnow() - timedelta(days=91)
 
     rows = (
@@ -186,8 +178,7 @@ def patterns():
         risk_pct   = None
         loss_pct   = None
 
-    return render_template(
-        "patterns.html",
+    return dict(
         total_sessions=total_sessions,
         total_intended=total_intended,
         total_wagered=total_wagered,
@@ -222,3 +213,16 @@ def patterns():
         dow_drinking_sessions=dow_drinking_sessions,
         dow_drinking_drinks=dow_drinking_drinks,
     )
+
+
+@patterns_bp.route("/patterns")
+def patterns():
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect(url_for("auth.login"))
+
+    user = User.query.get(user_id)
+    if not user or user.is_admin:
+        return redirect(url_for("home"))
+
+    return render_template("patterns.html", **compute_insights(user_id))
