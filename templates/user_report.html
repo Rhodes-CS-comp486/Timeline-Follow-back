@@ -18,12 +18,14 @@
 
         {% if current_user and current_user.is_admin %}
             <a class="nav-btn" href="{{ url_for('admin.report') }}">Reports</a>
+            <a class="nav-btn" href="{{ url_for('admin.insights') }}">Insights</a>
         {% else %}
             <a class="nav-btn" href="{{ url_for('instructions.gambling_instructions') }}">Gambling Instructions</a>
             <a class="nav-btn" href="{{ url_for('instructions.alcohol_instructions') }}">Alcohol Instructions</a>
             <a class="nav-btn" href="{{ url_for('calendar') }}">Calendar</a>
             <a class="nav-btn" href="{{ url_for('personal_expense.personal_expense') }}">Personal Expense</a>
             <a class="nav-btn is-active" href="{{ url_for('user_report.report') }}">Reports</a>
+            <a class="nav-btn" href="{{ url_for('insights.insights') }}">Insights</a>
         {% endif %}
 
         <a class="nav-btn" href="#">Dashboard</a>

@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, send_file, request
 from csv_formatting.csv_creator import generate_user_csv_report, generate_all_users_csv, build_report_dataset
 from database.db_initialization import User
 from routes.auth import admin_required
+from routes.insights import compute_insights
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -15,6 +16,27 @@ def get_report_filters():
         "num_drinks": request.args.get('num_drinks', ''),
         "all_user_id": request.args.get('all_user_id', type=int),
     }
+
+@admin_bp.route('/insights')
+@admin_required
+def insights():
+    users = User.query.filter_by(is_admin=False).order_by(User.email).all()
+    selected_user_id = request.args.get('user_id', type=int)
+    selected_user = None
+    insights_data = None
+
+    if selected_user_id:
+        selected_user = User.query.get(selected_user_id)
+        if selected_user and not selected_user.is_admin:
+            insights_data = compute_insights(selected_user_id)
+
+    return render_template(
+        'admin_insights.html',
+        users=users,
+        selected_user=selected_user,
+        insights_data=insights_data,
+    )
+
 
 # This function loads the report tab
 # Parameters: N/A
