@@ -1,0 +1,113 @@
+{% set endpoint = request.endpoint or '' %}
+{% set instructions_active = endpoint in ['instructions.gambling_instructions', 'instructions.alcohol_instructions'] %}
+<div class="site-nav">
+    <button
+        type="button"
+        class="menu-toggle"
+        aria-label="Open navigation menu"
+        aria-controls="siteSidebar"
+        aria-expanded="false"
+        data-sidebar-toggle
+    >
+        <span class="menu-toggle__line"></span>
+        <span class="menu-toggle__line"></span>
+        <span class="menu-toggle__line"></span>
+    </button>
+
+    <div class="site-sidebar-backdrop" data-sidebar-close></div>
+
+    <aside class="site-sidebar" id="siteSidebar" aria-label="Primary navigation" aria-hidden="true">
+        <div class="site-sidebar__header">
+            <a class="site-sidebar__brand" href="{{ url_for('home') }}">Timeline Follow-Back</a>
+            <button type="button" class="site-sidebar__close" aria-label="Close navigation menu" data-sidebar-close>&times;</button>
+        </div>
+
+        <nav class="site-sidebar__nav" aria-label="Primary">
+            <a class="site-nav-link{% if endpoint == 'home' %} is-active{% endif %}" href="{{ url_for('home') }}"
+               {% if endpoint == 'home' %}aria-current="page"{% endif %}>
+                Home
+            </a>
+
+            {% if current_user and current_user.is_admin %}
+                <a class="site-nav-link{% if endpoint == 'admin.report' %} is-active{% endif %}" href="{{ url_for('admin.report') }}"
+                   {% if endpoint == 'admin.report' %}aria-current="page"{% endif %}>
+                    Reports
+                </a>
+                <a class="site-nav-link{% if endpoint == 'admin.insights' %} is-active{% endif %}" href="{{ url_for('admin.insights') }}"
+                   {% if endpoint == 'admin.insights' %}aria-current="page"{% endif %}>
+                    Insights
+                </a>
+                <a class="site-nav-link site-nav-link--muted" href="#">Dashboard</a>
+                <a class="site-nav-link{% if endpoint == 'user_settings' %} is-active{% endif %}" href="{{ url_for('user_settings') }}"
+                   {% if endpoint == 'user_settings' %}aria-current="page"{% endif %}>
+                    Settings
+                </a>
+                <a class="site-nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+            {% elif current_user %}
+                <details class="site-nav-group{% if instructions_active %} is-active{% endif %}" {% if instructions_active %}open{% endif %}>
+                    <summary>Instructions</summary>
+                    <div class="site-nav-submenu">
+                        <a class="site-nav-sublink{% if endpoint == 'instructions.gambling_instructions' %} is-active{% endif %}"
+                           href="{{ url_for('instructions.gambling_instructions') }}"
+                           {% if endpoint == 'instructions.gambling_instructions' %}aria-current="page"{% endif %}>
+                            Gambling Instructions
+                        </a>
+                        <a class="site-nav-sublink{% if endpoint == 'instructions.alcohol_instructions' %} is-active{% endif %}"
+                           href="{{ url_for('instructions.alcohol_instructions') }}"
+                           {% if endpoint == 'instructions.alcohol_instructions' %}aria-current="page"{% endif %}>
+                            Alcohol Instructions
+                        </a>
+                    </div>
+                </details>
+
+                <a class="site-nav-link{% if endpoint == 'calendar' %} is-active{% endif %}" href="{{ url_for('calendar') }}"
+                   {% if endpoint == 'calendar' %}aria-current="page"{% endif %}>
+                    Calendar
+                </a>
+                <a class="site-nav-link{% if endpoint == 'personal_expense.personal_expense' %} is-active{% endif %}"
+                   href="{{ url_for('personal_expense.personal_expense') }}"
+                   {% if endpoint == 'personal_expense.personal_expense' %}aria-current="page"{% endif %}>
+                    Personal Expense
+                </a>
+                <a class="site-nav-link{% if endpoint == 'user_report.report' %} is-active{% endif %}" href="{{ url_for('user_report.report') }}"
+                   {% if endpoint == 'user_report.report' %}aria-current="page"{% endif %}>
+                    Reports
+                </a>
+                <a class="site-nav-link{% if endpoint == 'insights.insights' %} is-active{% endif %}" href="{{ url_for('insights.insights') }}"
+                   {% if endpoint == 'insights.insights' %}aria-current="page"{% endif %}>
+                    Insights
+                </a>
+                <a class="site-nav-link{% if endpoint == 'user_settings' %} is-active{% endif %}" href="{{ url_for('user_settings') }}"
+                   {% if endpoint == 'user_settings' %}aria-current="page"{% endif %}>
+                    Settings
+                </a>
+                <a class="site-nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+            {% else %}
+                <details class="site-nav-group{% if instructions_active %} is-active{% endif %}" {% if instructions_active %}open{% endif %}>
+                    <summary>Instructions</summary>
+                    <div class="site-nav-submenu">
+                        <a class="site-nav-sublink{% if endpoint == 'instructions.gambling_instructions' %} is-active{% endif %}"
+                           href="{{ url_for('instructions.gambling_instructions') }}"
+                           {% if endpoint == 'instructions.gambling_instructions' %}aria-current="page"{% endif %}>
+                            Gambling Instructions
+                        </a>
+                        <a class="site-nav-sublink{% if endpoint == 'instructions.alcohol_instructions' %} is-active{% endif %}"
+                           href="{{ url_for('instructions.alcohol_instructions') }}"
+                           {% if endpoint == 'instructions.alcohol_instructions' %}aria-current="page"{% endif %}>
+                            Alcohol Instructions
+                        </a>
+                    </div>
+                </details>
+
+                <a class="site-nav-link{% if endpoint == 'calendar' %} is-active{% endif %}" href="{{ url_for('calendar') }}"
+                   {% if endpoint == 'calendar' %}aria-current="page"{% endif %}>
+                    Calendar
+                </a>
+                <a class="site-nav-link{% if endpoint == 'auth.create_account' %} is-active{% endif %}" href="{{ url_for('auth.create_account') }}"
+                   {% if endpoint == 'auth.create_account' %}aria-current="page"{% endif %}>
+                    Create Account
+                </a>
+            {% endif %}
+        </nav>
+    </aside>
+</div>

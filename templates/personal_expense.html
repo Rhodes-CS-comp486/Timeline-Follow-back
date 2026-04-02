@@ -11,36 +11,18 @@
 </head>
 <body>
     <div class="app-shell">
-        <nav class="top-nav" aria-label="Primary">
-            <a class="nav-btn" href="{{ url_for('home') }}">Home</a>
-
-            {% if current_user and current_user.is_admin %}
-                <a class="nav-btn" href="{{ url_for('admin.report') }}">Reports</a>
-                <a class="nav-btn" href="{{ url_for('admin.insights') }}">Insights</a>
-            {% else %}
-                <a class="nav-btn" href="{{ url_for('instructions.gambling_instructions') }}">Gambling Instructions</a>
-                <a class="nav-btn" href="{{ url_for('instructions.alcohol_instructions') }}">Alcohol Instructions</a>
-                <a class="nav-btn" href="{{ url_for('calendar') }}">Calendar</a>
-                <a class="nav-btn is-active" href="{{ url_for('personal_expense.personal_expense') }}">Personal Expense</a>
-                <a class="nav-btn" href="{{ url_for('user_report.report') }}">Reports</a>
-                <a class="nav-btn" href="{{ url_for('insights.insights') }}">Insights</a>
-            {% endif %}
-
-            <a class="nav-btn" href="#">Dashboard</a>
-            <a class="nav-btn" href="{{ url_for('user_settings') }}">Settings</a>
-            <a class="nav-btn" href="{{ url_for('auth.logout') }}">Logout</a>
-        </nav>
+        {% include 'partials/sidebar_nav.html' %}
 
         <div class="page-content">
             <section class="expense-page">
                 <header class="report-header expense-header">
                     <h1>Personal Expense</h1>
-                    <p class="subtitle">Track monthly income and spending by category, one month at a time.</p>
+                    <p class="subtitle">Save one monthly expense profile and update it whenever your regular spending changes.</p>
                 </header>
 
                 {% if status == 'saved' %}
                     <div class="status-banner status-banner--success">
-                        Monthly personal expense data was saved successfully.
+                        Your personal expense profile was saved successfully.
                     </div>
                 {% endif %}
 
@@ -52,22 +34,10 @@
 
                 <section class="report-card expense-month-card">
                     <div>
-                        <h2>{{ selected_month_label }}</h2>
-                        <p class="report-card-copy">Use the dropdown to switch between the 12 months in the current year.</p>
+                        <h2>Saved Expense Profile</h2>
+                        <p class="report-card-copy">Enter your regular monthly income and expenses once. Insights will reuse this profile until you update it.</p>
                     </div>
-
-                    <form class="expense-month-form" method="get" action="{{ url_for('personal_expense.personal_expense') }}">
-                        <label class="form-group expense-month-group">
-                            <span class="form-label">Month</span>
-                            <select class="form-input" name="month" data-month-select>
-                                {% for option in month_options %}
-                                    <option value="{{ option.value }}" {% if option.value == selected_month %}selected{% endif %}>
-                                        {{ option.label }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </label>
-                    </form>
+                    <a class="btn-secondary expense-download-btn" href="{{ url_for('personal_expense.download_personal_expense_csv') }}">Download CSV</a>
                 </section>
 
                 <section class="expense-summary-grid">
@@ -93,15 +63,12 @@
                     <article class="report-card expense-form-card">
                         <div class="expense-card-header">
                             <div>
-                                <h2>Monthly Entry</h2>
+                                <h2>Expense Profile</h2>
                                 <p class="report-card-copy">Income is shown first, followed by the categories from your user story.</p>
                             </div>
-                            <a class="btn-secondary expense-download-btn" href="{{ url_for('personal_expense.download_personal_expense_csv') }}">Download CSV</a>
                         </div>
 
                         <form method="post" action="{{ url_for('personal_expense.personal_expense') }}" class="expense-form" data-expense-form>
-                            <input type="hidden" name="month" value="{{ selected_month }}">
-
                             <section class="expense-section expense-section--income">
                                 <div class="expense-section-title-row">
                                     <h3>Income</h3>
@@ -157,7 +124,7 @@
                             </section>
 
                             <div class="expense-form-actions">
-                                <button type="submit" class="btn-primary">Save Month</button>
+                                <button type="submit" class="btn-primary">Save Expenses</button>
                             </div>
                         </form>
                     </article>
@@ -165,7 +132,7 @@
                     <article class="report-card expense-chart-card">
                         <div class="expense-card-header">
                             <div>
-                                <h2>Monthly Breakdown</h2>
+                                <h2>Expense Breakdown</h2>
                                 <p class="report-card-copy">The chart shows all entered categories except income and updates as values change.</p>
                             </div>
                         </div>
@@ -189,6 +156,7 @@
         </div>
     </div>
 
+    <script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
     <script src="{{ url_for('static', filename='js/personal_expense.js') }}"></script>
 </body>
 </html>

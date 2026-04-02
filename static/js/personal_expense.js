@@ -33,13 +33,6 @@ function buildLegendRow(item) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    const monthSelect = document.querySelector("[data-month-select]");
-    if (monthSelect) {
-        monthSelect.addEventListener("change", () => {
-            monthSelect.form.submit();
-        });
-    }
-
     const form = document.querySelector("[data-expense-form]");
     if (!form) {
         return;

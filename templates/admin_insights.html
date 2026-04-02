@@ -11,6 +11,8 @@
     <style>
         .insights-page {
             max-width: 860px;
+            width: 100%;
+            margin: 0 auto;
         }
         .insights-section-label {
             display: inline-block;
@@ -215,25 +217,7 @@
 </head>
 <body>
     <div class="app-shell">
-        <nav class="top-nav" aria-label="Primary">
-            <a class="nav-btn" href="{{ url_for('home') }}">Home</a>
-
-            {% if current_user and current_user.is_admin %}
-                <a class="nav-btn" href="{{ url_for('admin.report') }}">Reports</a>
-                <a class="nav-btn is-active" href="{{ url_for('admin.insights') }}">Insights</a>
-            {% else %}
-                <a class="nav-btn" href="{{ url_for('instructions.gambling_instructions') }}">Gambling Instructions</a>
-                <a class="nav-btn" href="{{ url_for('instructions.alcohol_instructions') }}">Alcohol Instructions</a>
-                <a class="nav-btn" href="{{ url_for('calendar') }}">Calendar</a>
-                <a class="nav-btn" href="{{ url_for('personal_expense.personal_expense') }}">Personal Expense</a>
-                <a class="nav-btn" href="{{ url_for('user_report.report') }}">Reports</a>
-                <a class="nav-btn" href="{{ url_for('patterns.patterns') }}">Insights</a>
-            {% endif %}
-
-            <a class="nav-btn" href="#">Dashboard</a>
-            <a class="nav-btn" href="{{ url_for('user_settings') }}">Settings</a>
-            <a class="nav-btn" href="{{ url_for('auth.logout') }}">Logout</a>
-        </nav>
+        {% include 'partials/sidebar_nav.html' %}
 
         <div class="page-content">
             <section class="insights-page">
@@ -274,6 +258,53 @@
 
                 {% else %}
                     {% set d = insights_data %}
+
+                    <article class="report-card insights-chart-card" style="margin-bottom: 24px;">
+                        <span class="insights-section-label">Expenses vs Gambling</span>
+                        <h2>1-Month Comparison</h2>
+                        <p class="report-card-copy">Monthly regular expenses from the saved profile compared with gambling wagered during {{ d.expense_vs_gambling_period_label }}.</p>
+
+                        {% if d.expense_vs_gambling_has_data %}
+                            {% if d.expense_vs_gambling_pct is not none %}
+                                <div class="insights-card-body">
+                                    <p>
+                                        In {{ d.expense_vs_gambling_period_label }}, this user gambled
+                                        <span class="insights-highlight--warn">{{ d.expense_vs_gambling_pct }}%</span>
+                                        of their total regular expenses.
+                                    </p>
+                                </div>
+                            {% else %}
+                                <p class="insights-no-data" style="margin-top: 16px;">Add regular expenses to calculate what percent of expenses went to gambling.</p>
+                            {% endif %}
+
+                            <div class="insights-stat-grid">
+                                <div class="insights-stat-card" style="background: rgba(16, 42, 67, 0.06); border-color: rgba(16, 42, 67, 0.18);">
+                                    <div class="insights-stat-label">Monthly Expenses</div>
+                                    <div class="insights-stat-value" style="color: #102a43;">${{ "{:,.2f}".format(d.monthly_expense_total) }}</div>
+                                </div>
+                                <div class="insights-stat-card" style="background: rgba(198, 40, 40, 0.06); border-color: rgba(198, 40, 40, 0.18);">
+                                    <div class="insights-stat-label">Gambling In {{ d.expense_vs_gambling_period_label }}</div>
+                                    <div class="insights-stat-value" style="color: #c62828;">${{ "{:,.2f}".format(d.last_month_gambling_total) }}</div>
+                                </div>
+                            </div>
+
+                            <div class="insights-chart-legend" style="margin-top: 28px;">
+                                <div class="insights-legend-item">
+                                    <div class="insights-legend-dot" style="background: #102a43;"></div>
+                                    Expenses
+                                </div>
+                                <div class="insights-legend-item">
+                                    <div class="insights-legend-dot" style="background: #c62828;"></div>
+                                    Gambling
+                                </div>
+                            </div>
+                            <div class="insights-chart-wrap" style="height: 280px;">
+                                <canvas id="expenseVsGamblingChart"></canvas>
+                            </div>
+                        {% else %}
+                            <p class="insights-no-data" style="margin-top: 16px;">Add expenses or gambling activity to see this comparison.</p>
+                        {% endif %}
+                    </article>
 
                     {% if d.total_sessions == 0 %}
                         <article class="report-card">
@@ -523,10 +554,47 @@
             </section>
         </div>
     </div>
-
-    {% if insights_data and insights_data.total_sessions > 0 %}
+    <script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
+    {% if insights_data %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script>
+        (function renderExpenseVsGamblingChart() {
+            const canvas = document.getElementById("expenseVsGamblingChart");
+            if (!canvas) return;
+
+            new Chart(canvas, {
+                type: "doughnut",
+                data: {
+                    labels: {{ insights_data.expense_vs_gambling_labels | safe }},
+                    datasets: [{
+                        data: {{ insights_data.expense_vs_gambling_values | safe }},
+                        backgroundColor: ["#102a43", "#c62828"],
+                        borderColor: ["#102a43", "#c62828"],
+                        borderWidth: 1,
+                        hoverOffset: 8,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: "62%",
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function (ctx) {
+                                    return ctx.label + ": $" + Number(ctx.parsed).toLocaleString(undefined, {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                    });
+                                },
+                            },
+                        },
+                    },
+                },
+            });
+        })();
+
         // Monthly bar chart
         (function () {
             const canvas = document.getElementById("monthlyChart");
