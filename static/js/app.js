@@ -30,6 +30,10 @@ const mountApp = () => {
     }
 
     app.replaceChildren(baseFragment);
+
+    if (window.initSidebarNavigation) {
+        window.initSidebarNavigation(app);
+    }
 };
 // Returns a Map of ISO date strings to holiday names for a given year
 const getUSHolidays = (year) => {
