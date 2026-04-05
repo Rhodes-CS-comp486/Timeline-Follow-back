@@ -101,6 +101,10 @@ def parse_json_value(raw_value):
     return {}
 
 
+def default_payload():
+    return {field["key"]: 0.0 for field in FIELD_DEFINITIONS}
+
+
 def current_month_key():
     today = date.today()
     return f"{today.year}-{today.month:02d}"
@@ -338,9 +342,54 @@ def fetch_expense_row(table, user_id, context):
     return db.session.execute(statement).mappings().first()
 
 
+def fetch_expense_snapshot_row(table, user_id):
+    user_column = resolve_user_column(table)
+    if user_column is None:
+        raise RuntimeError("The personal_expense table must include a user_id column.")
+
+    statement = select(table).where(user_column == user_id)
+    timestamp_columns = resolve_timestamp_columns(table)
+
+    if timestamp_columns["updated_at"] is not None:
+        statement = statement.order_by(timestamp_columns["updated_at"].desc())
+    elif timestamp_columns["created_at"] is not None:
+        statement = statement.order_by(timestamp_columns["created_at"].desc())
+    else:
+        primary_keys = list(table.primary_key.columns)
+        if primary_keys:
+            statement = statement.order_by(primary_keys[0].desc())
+
+    return db.session.execute(statement.limit(1)).mappings().first()
+
+
+def extract_snapshot_document(stored_payload):
+    if not isinstance(stored_payload, dict):
+        return {}
+
+    profile_payload = stored_payload.get("profile")
+    if isinstance(profile_payload, dict):
+        return profile_payload
+
+    if any(field["key"] in stored_payload for field in FIELD_DEFINITIONS):
+        return stored_payload
+
+    months_map = stored_payload.get("months")
+    if isinstance(months_map, dict) and months_map:
+        latest_month_key = max(
+            (key for key, value in months_map.items() if isinstance(value, dict)),
+            default=None,
+        )
+        if latest_month_key:
+            latest_payload = months_map.get(latest_month_key)
+            if isinstance(latest_payload, dict):
+                return latest_payload
+
+    return {}
+
+
 def read_payload_for_month(table, user_id, context):
     row = fetch_expense_row(table, user_id, context)
-    payload = {field["key"]: 0.0 for field in FIELD_DEFINITIONS}
+    payload = default_payload()
 
     if row is None:
         return row, payload
@@ -360,6 +409,27 @@ def read_payload_for_month(table, user_id, context):
             for field in FIELD_DEFINITIONS:
                 if field["key"] in stored_payload:
                     payload[field["key"]] = to_float(stored_payload[field["key"]])
+
+    field_columns = resolve_field_columns(table)
+    for field_key, column in field_columns.items():
+        payload[field_key] = to_float(row.get(column.name))
+
+    return row, payload
+
+
+def read_expense_snapshot(table, user_id):
+    row = fetch_expense_snapshot_row(table, user_id)
+    payload = default_payload()
+
+    if row is None:
+        return row, payload
+
+    payload_column = resolve_payload_column(table)
+    if payload_column is not None:
+        stored_payload = extract_snapshot_document(parse_json_value(row.get(payload_column.name)))
+        for field in FIELD_DEFINITIONS:
+            if field["key"] in stored_payload:
+                payload[field["key"]] = to_float(stored_payload[field["key"]])
 
     field_columns = resolve_field_columns(table)
     for field_key, column in field_columns.items():
@@ -425,6 +495,57 @@ def save_payload_for_month(table, user_id, context, payload):
         raise RuntimeError("Unable to save personal expense data.") from exc
 
 
+def save_expense_snapshot(table, user_id, payload):
+    existing_row, existing_payload = read_expense_snapshot(table, user_id)
+
+    user_column = resolve_user_column(table)
+    payload_column = resolve_payload_column(table)
+    field_columns = resolve_field_columns(table)
+    timestamp_columns = resolve_timestamp_columns(table)
+
+    values = {user_column.name: user_id}
+
+    if existing_row is None:
+        values.update(build_month_values(resolve_month_storage(table), month_context(current_month_key())))
+
+    for field_key, column in field_columns.items():
+        values[column.name] = payload[field_key]
+
+    now = datetime.utcnow()
+    if timestamp_columns["updated_at"] is not None:
+        values[timestamp_columns["updated_at"].name] = now
+
+    if payload_column is not None:
+        merged_document = {}
+        if existing_row is not None:
+            raw_existing_payload = parse_json_value(existing_row.get(payload_column.name))
+            if isinstance(raw_existing_payload, dict):
+                merged_document = raw_existing_payload
+
+        merged_document["profile"] = {
+            **existing_payload,
+            **payload,
+        }
+        values[payload_column.name] = serialize_payload(payload_column, merged_document)
+
+    try:
+        if existing_row is None:
+            if timestamp_columns["created_at"] is not None:
+                values[timestamp_columns["created_at"].name] = now
+            db.session.execute(insert(table).values(**values))
+        else:
+            primary_key_filters = [
+                column == existing_row[column.name] for column in table.primary_key.columns
+            ]
+            update_filters = primary_key_filters or [user_column == user_id]
+            db.session.execute(update(table).where(and_(*update_filters)).values(**values))
+
+        db.session.commit()
+    except SQLAlchemyError as exc:
+        db.session.rollback()
+        raise RuntimeError("Unable to save personal expense data.") from exc
+
+
 def calculate_totals(payload):
     income = payload["income"]
     savings = payload["savings"]
@@ -446,9 +567,6 @@ def personal_expense():
     if not user:
         return redirect(url_for("auth.login"))
 
-    selected_month = resolve_month_key(request.values.get("month"))
-    context = month_context(selected_month)
-
     status = request.args.get("status")
     error_message = None
 
@@ -461,7 +579,7 @@ def personal_expense():
         table = None
         error_message = "The personal expense page could not connect to the database."
 
-    payload = {field["key"]: 0.0 for field in FIELD_DEFINITIONS}
+    payload = default_payload()
 
     if request.method == "POST" and table is not None:
         payload = {}
@@ -474,14 +592,14 @@ def personal_expense():
 
         if error_message is None:
             try:
-                save_payload_for_month(table, user.id, context, payload)
-                return redirect(url_for("personal_expense.personal_expense", month=selected_month, status="saved"))
+                save_expense_snapshot(table, user.id, payload)
+                return redirect(url_for("personal_expense.personal_expense", status="saved"))
             except RuntimeError as exc:
                 error_message = str(exc)
 
     if table is not None and request.method == "GET":
         try:
-            _, payload = read_payload_for_month(table, user.id, context)
+            _, payload = read_expense_snapshot(table, user.id)
         except RuntimeError as exc:
             error_message = str(exc)
 
@@ -491,13 +609,10 @@ def personal_expense():
         "personal_expense.html",
         categories=EXPENSE_FIELDS,
         field_definitions=FIELD_DEFINITIONS,
-        selected_month=selected_month,
-        month_options=month_options(),
         payload=payload,
         totals=totals,
         status=status,
         error_message=error_message,
-        selected_month_label=context["label"],
     )
 
 
@@ -514,22 +629,17 @@ def download_personal_expense_csv():
 
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(["Month", *[field["label"] for field in FIELD_DEFINITIONS]])
+    writer.writerow(["Category", "Amount"])
 
-    for option in month_options():
-        context = month_context(option["value"])
-        try:
-            _, payload = read_payload_for_month(table, user.id, context)
-        except RuntimeError:
-            payload = {field["key"]: 0.0 for field in FIELD_DEFINITIONS}
-        writer.writerow(
-            [
-                option["label"],
-                *[f"{payload[field['key']]:.2f}" for field in FIELD_DEFINITIONS],
-            ]
-        )
+    try:
+        _, payload = read_expense_snapshot(table, user.id)
+    except RuntimeError:
+        return redirect(url_for("personal_expense.personal_expense"))
 
-    filename = f"personal_expenses_{date.today().year}.csv"
+    for field in FIELD_DEFINITIONS:
+        writer.writerow([field["label"], f"{payload[field['key']]:.2f}"])
+
+    filename = "personal_expense_profile.csv"
     return Response(
         output.getvalue(),
         mimetype="text/csv",

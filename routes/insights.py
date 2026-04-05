@@ -10,8 +10,34 @@ from database.db_initialization import CalendarEntry, Drinking, Gambling, User, 
 insights_bp = Blueprint("insights", __name__)
 
 
+def _get_expense_snapshot(user_id):
+    try:
+        from routes.personal_expense import (
+            calculate_totals,
+            read_expense_snapshot,
+            reflect_personal_expense_table,
+        )
+
+        table = reflect_personal_expense_table()
+        _, payload = read_expense_snapshot(table, user_id)
+        return payload, calculate_totals(payload)
+    except (NoSuchTableError, Exception):
+        return {}, {
+            "income": 0.0,
+            "expense_total": 0.0,
+            "savings": 0.0,
+            "allocation_total": 0.0,
+            "remaining": 0.0,
+        }
+
+
 def _get_three_month_income(user_id):
-    """Sum income from personal_expense for the current and past 2 months."""
+    """Estimate 3 months of income using the saved expense profile, with old monthly data as fallback."""
+    _, expense_totals = _get_expense_snapshot(user_id)
+    monthly_income = expense_totals.get("income", 0.0)
+    if monthly_income > 0:
+        return monthly_income * 3
+
     try:
         from routes.personal_expense import (
             month_context,
@@ -42,6 +68,10 @@ def _get_three_month_income(user_id):
 def compute_insights(user_id):
     """Compute all insights data for a given user_id. Returns a dict of template variables."""
     three_months_ago = datetime.utcnow() - timedelta(days=91)
+    current_month_start = datetime.utcnow().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    last_month_end = current_month_start
+    last_month_start = (current_month_start - timedelta(days=1)).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    last_month_label = last_month_start.strftime("%B %Y")
 
     rows = (
         db.session.query(Gambling, CalendarEntry.entry_date)
@@ -60,6 +90,7 @@ def compute_insights(user_id):
     total_hours = 0.0
     total_net_earned = 0.0
     sessions_over_intent = 0
+    last_month_gambling_total = 0.0
 
     chart_labels = []
     chart_intended = []
@@ -78,6 +109,10 @@ def compute_insights(user_id):
         total_net_earned += float(questions.get("money_earned") or 0)
         if wagered > intended:
             sessions_over_intent += 1
+
+        entry_moment = entry_date if isinstance(entry_date, datetime) else datetime.combine(entry_date, datetime.min.time())
+        if last_month_start <= entry_moment < last_month_end:
+            last_month_gambling_total += wagered
 
         chart_labels.append(entry_date.strftime("%b") + " " + str(entry_date.day))
         chart_intended.append(round(intended, 2))
@@ -168,6 +203,14 @@ def compute_insights(user_id):
 
     excess_wagered = total_wagered - total_intended
     total_income = _get_three_month_income(user_id)
+    _, expense_totals = _get_expense_snapshot(user_id)
+    monthly_expense_total = round(expense_totals.get("expense_total", 0.0), 2)
+    last_month_gambling_total = round(last_month_gambling_total, 2)
+    expense_vs_gambling_has_data = monthly_expense_total > 0 or last_month_gambling_total > 0
+    if monthly_expense_total > 0:
+        expense_vs_gambling_pct = round((last_month_gambling_total / monthly_expense_total) * 100)
+    else:
+        expense_vs_gambling_pct = None
 
     if total_income > 0:
         intent_pct  = round((total_intended / total_income) * 100)
@@ -212,6 +255,13 @@ def compute_insights(user_id):
         dow_gambling_wagered=dow_gambling_wagered,
         dow_drinking_sessions=dow_drinking_sessions,
         dow_drinking_drinks=dow_drinking_drinks,
+        monthly_expense_total=monthly_expense_total,
+        last_month_gambling_total=last_month_gambling_total,
+        expense_vs_gambling_pct=expense_vs_gambling_pct,
+        expense_vs_gambling_period_label=last_month_label,
+        expense_vs_gambling_has_data=expense_vs_gambling_has_data,
+        expense_vs_gambling_labels=json.dumps(["Expenses", "Gambling"]),
+        expense_vs_gambling_values=json.dumps([monthly_expense_total, last_month_gambling_total]),
     )
 
 

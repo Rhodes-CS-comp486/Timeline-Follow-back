@@ -35,8 +35,11 @@ class Drinking(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     drinking_questions = db.Column(db.JSON)
 
-
-
+# create a personal expense table that stores all personal expense information
+class PersonalExpense(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    personal_expense_questions = db.Column(db.JSON)
 
 
 

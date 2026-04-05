@@ -12,6 +12,7 @@ Sprints
 - [Sprint 2](https://docs.google.com/document/d/10DOS5v4IT1fR6m0kvhi1vDr2VwHIyLmCBo4GbKtfjGE/edit?usp=sharing)
 - [Sprint 3](https://docs.google.com/document/d/1ZToECIw66xyvSD3fEioZY-AY3svtOMPfmY7L_UWrgiI/edit?usp=sharing)
 - [Sprint 4](https://docs.google.com/document/d/1DAAOaUlRy1jiaKCtWW2kcNF49yYj_ri2TIC1fxRfVPs/edit?usp=sharing)
+- [Sprint 5](https://docs.google.com/document/d/1-VVmFNJGli5hRTtcdsIRgnvHPx4deJDouga1k1i-3n4/edit?usp=sharing)
 
 Slideshows
 - [Mid-Semester Slideshow](https://docs.google.com/presentation/d/1oa4ge7Kv9xXsgHoBk9u0-2Guwie36OXVhX3_5XdY81g/edit?usp=sharing)
