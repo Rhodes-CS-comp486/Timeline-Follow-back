@@ -95,7 +95,11 @@ def login():
 
         session['user_id'] = user.id
 
-        return redirect(url_for('home'))
+        if user.is_admin:
+            return redirect(url_for('admin.report'))
+        if not user.onboarding_complete:
+            return redirect(url_for('personal_expense.personal_expense', onboarding=1))
+        return redirect(url_for('calendar'))
 
     return render_template('login.html', error=None)
 
