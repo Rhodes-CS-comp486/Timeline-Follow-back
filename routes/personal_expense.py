@@ -567,6 +567,7 @@ def personal_expense():
     if not user:
         return redirect(url_for("auth.login"))
 
+    onboarding = request.args.get("onboarding") == "1"
     status = request.args.get("status")
     error_message = None
 
@@ -593,13 +594,18 @@ def personal_expense():
         if error_message is None:
             try:
                 save_expense_snapshot(table, user.id, payload)
-                return redirect(url_for("personal_expense.personal_expense", status="saved"))
+                kwargs = {"status": "saved"}
+                if onboarding:
+                    kwargs["onboarding"] = 1
+                return redirect(url_for("personal_expense.personal_expense", **kwargs))
             except RuntimeError as exc:
                 error_message = str(exc)
 
+    expenses_saved = status == "saved"
     if table is not None and request.method == "GET":
         try:
-            _, payload = read_expense_snapshot(table, user.id)
+            snapshot_row, payload = read_expense_snapshot(table, user.id)
+            expenses_saved = snapshot_row is not None
         except RuntimeError as exc:
             error_message = str(exc)
 
@@ -613,6 +619,8 @@ def personal_expense():
         totals=totals,
         status=status,
         error_message=error_message,
+        onboarding=onboarding,
+        expenses_saved=expenses_saved,
     )
 
 

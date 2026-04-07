@@ -18,16 +18,11 @@
 
     <aside class="site-sidebar" id="siteSidebar" aria-label="Primary navigation" aria-hidden="true">
         <div class="site-sidebar__header">
-            <a class="site-sidebar__brand" href="{{ url_for('home') }}">Timeline Follow-Back</a>
+            <a class="site-sidebar__brand" href="{{ url_for('calendar') }}">Timeline Follow-Back</a>
             <button type="button" class="site-sidebar__close" aria-label="Close navigation menu" data-sidebar-close>&times;</button>
         </div>
 
         <nav class="site-sidebar__nav" aria-label="Primary">
-            <a class="site-nav-link{% if endpoint == 'home' %} is-active{% endif %}" href="{{ url_for('home') }}"
-               {% if endpoint == 'home' %}aria-current="page"{% endif %}>
-                Home
-            </a>
-
             {% if current_user and current_user.is_admin %}
                 <a class="site-nav-link{% if endpoint == 'admin.report' %} is-active{% endif %}" href="{{ url_for('admin.report') }}"
                    {% if endpoint == 'admin.report' %}aria-current="page"{% endif %}>
