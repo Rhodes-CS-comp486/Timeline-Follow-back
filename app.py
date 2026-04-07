@@ -62,11 +62,12 @@ with app.app_context():
         from sqlalchemy import text
         existing_columns = [col['name'] for col in inspect(db.engine).get_columns('user')]
         migrations = {
-            'username':   'ALTER TABLE "user" ADD COLUMN username VARCHAR UNIQUE',
-            'first_name': 'ALTER TABLE "user" ADD COLUMN first_name VARCHAR',
-            'last_name':  'ALTER TABLE "user" ADD COLUMN last_name VARCHAR',
-            'is_admin':   'ALTER TABLE "user" ADD COLUMN is_admin BOOLEAN',
-            'email':      'ALTER TABLE "user" ADD COLUMN email VARCHAR',
+            'username':             'ALTER TABLE "user" ADD COLUMN username VARCHAR UNIQUE',
+            'first_name':           'ALTER TABLE "user" ADD COLUMN first_name VARCHAR',
+            'last_name':            'ALTER TABLE "user" ADD COLUMN last_name VARCHAR',
+            'is_admin':             'ALTER TABLE "user" ADD COLUMN is_admin BOOLEAN',
+            'email':                'ALTER TABLE "user" ADD COLUMN email VARCHAR',
+            'onboarding_complete':  'ALTER TABLE "user" ADD COLUMN onboarding_complete BOOLEAN DEFAULT FALSE',
         }
         for col, sql in migrations.items():
             if col not in existing_columns:
@@ -85,14 +86,6 @@ with app.app_context():
 def index():
     """ Redirects to login page """
     return redirect(url_for('auth.login'))
-
-@app.route('/home.html')
-# This function just loads the home.html file
-# Parameters: N/A
-# Returns: The rendered home.html file
-def home():
-    """ Renders home view """
-    return render_template('home.html')
 
 # This function loads the calendar.html
 # Parameters: N/A
@@ -118,4 +111,4 @@ def inject_user():
     return dict(current_user=user)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    app.run(debug=True, port=5003)

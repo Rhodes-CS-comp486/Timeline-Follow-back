@@ -273,6 +273,6 @@ def insights():
 
     user = User.query.get(user_id)
     if not user or user.is_admin:
-        return redirect(url_for("home"))
+        return redirect(url_for("calendar"))
 
     return render_template("insights.html", **compute_insights(user_id))

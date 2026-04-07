@@ -14,6 +14,7 @@ class User(db.Model):
     password = db.Column(db.String)
     is_admin = db.Column(db.Boolean)
     email = db.Column(db.String)
+    onboarding_complete = db.Column(db.Boolean, default=False)
 
 class CalendarEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
