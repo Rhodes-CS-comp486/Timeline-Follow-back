@@ -26,7 +26,7 @@ def get_csv_headers(schema: dict):
     """
     Build dynamic CSV headers.
     """
-    base_headers = ["user_id", "username", "date", "has_drinking", "has_gambling"]
+    base_headers = ["user_id", "date", "has_drinking", "has_gambling"]
     dynamic_fields = get_all_field_ids(schema)
 
     return base_headers + dynamic_fields

@@ -99,7 +99,63 @@ def get_calendar_entries_for_user(user_id: int):
         CalendarEntry.entry_date
     ).all()
 
-# This function retrieves user info: email
+# This function aggregates gambling data across users for the admin report
+# Parameters: start_date -> str (optional), end_date -> str (optional), user_id -> int (optional)
+# Returns: dict of aggregated values
+def get_gambling_aggregates(start_date=None, end_date=None, user_id=None):
+    from database.db_initialization import Gambling, CalendarEntry
+    from datetime import datetime
+
+    query = db.session.query(Gambling, CalendarEntry).join(
+        CalendarEntry, Gambling.entry_id == CalendarEntry.id
+    )
+
+    if user_id:
+        query = query.filter(Gambling.user_id == user_id)
+    if start_date:
+        query = query.filter(CalendarEntry.entry_date >= datetime.strptime(start_date, "%Y-%m-%d").date())
+    if end_date:
+        query = query.filter(CalendarEntry.entry_date <= datetime.strptime(end_date, "%Y-%m-%d").date())
+
+    results = query.all()
+
+    day_labels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    by_day = {day: 0.0 for day in day_labels}
+
+    total_intended = 0.0
+    total_spent = 0.0
+    total_hours = 0.0
+
+    for gambling, calendar_entry in results:
+        questions = gambling.gambling_questions or {}
+
+        try:
+            total_intended += float(questions.get("money_intended") or 0)
+        except (ValueError, TypeError):
+            pass
+
+        try:
+            total_spent += float(questions.get("money_spent") or 0)
+        except (ValueError, TypeError):
+            pass
+
+        try:
+            total_hours += float(questions.get("time_spent") or 0)
+        except (ValueError, TypeError):
+            pass
+
+        try:
+            day_name = calendar_entry.entry_date.strftime("%A")
+            by_day[day_name] += float(questions.get("money_spent") or 0)
+        except (ValueError, TypeError):
+            pass
+
+    return {
+        "total_intended": round(total_intended, 2),
+        "total_spent": round(total_spent, 2),
+        "total_hours": round(total_hours, 2),
+        "by_day": {day: round(by_day[day], 2) for day in day_labels},
+    }
 
 # This function adds any object to the session and commits it to Postgres
 # Parameters: new_entry -> db.Model object (User, CalendarEntry, Gambling, etc.)

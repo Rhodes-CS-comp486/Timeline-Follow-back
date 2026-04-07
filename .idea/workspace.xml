@@ -6,18 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="947ea0fd-4c61-4f76-b9ea-8ea686bac952" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/db_initialization.py" beforeDir="false" afterPath="$PROJECT_DIR$/database/db_initialization.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/auth.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/insights.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/insights.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/instructions.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/instructions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/personal_expense.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/personal_expense.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/alcohol_instructions.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/alcohol_instructions.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/create_account.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/create_account.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/gambling_instructions.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/gambling_instructions.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/login.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/partials/sidebar_nav.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/partials/sidebar_nav.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/personal_expense.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/personal_expense.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/config_helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/config/config_helper.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/csv_formatting/csv_creator.py" beforeDir="false" afterPath="$PROJECT_DIR$/csv_formatting/csv_creator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/db_helper.py" beforeDir="false" afterPath="$PROJECT_DIR$/database/db_helper.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/routes/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/report.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/report.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,23 +52,11 @@
     </favorite-branches>
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="US27/29/sidebar" />
+        <entry key="$PROJECT_DIR$" value="main" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory">{
-  &quot;lastFilter&quot;: {
-    &quot;state&quot;: &quot;OPEN&quot;,
-    &quot;assignee&quot;: &quot;meganbass&quot;
-  }
-}</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/Rhodes-CS-comp486/Timeline-Follow-back.git&quot;,
-    &quot;accountId&quot;: &quot;41a1e822-cb63-4140-98ce-6c19caddb081&quot;
-  }
-}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 6
 }</component>
@@ -93,14 +74,11 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "feature/us28-order",
-    "junie.onboarding.icon.badge.shown": "true",
+    "git-widget-placeholder": "feature/us30-aggregate-data",
     "node.js.detected.package.eslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
-    "to.speed.mode.migration.done": "true",
     "vue.rearranger.settings.migration": "true"
   },
   "keyToStringList": {
@@ -124,6 +102,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/app.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
@@ -147,6 +126,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tests/conftest.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
@@ -170,6 +150,7 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tests/test_db_helper.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
@@ -192,6 +173,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
       <option name="launchJavascriptDebuger" value="false" />
       <method v="2" />
     </configuration>
@@ -208,6 +190,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
       <option name="launchJavascriptDebuger" value="false" />
       <method v="2" />
     </configuration>
@@ -246,8 +229,6 @@
       <workItem from="1774293666878" duration="922000" />
       <workItem from="1775155986726" duration="1312000" />
       <workItem from="1775159544264" duration="1023000" />
-      <workItem from="1775439922888" duration="1588000" />
-      <workItem from="1775580505022" duration="12000" />
     </task>
     <servers />
   </component>

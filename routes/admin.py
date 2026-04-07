@@ -3,6 +3,7 @@ from csv_formatting.csv_creator import generate_user_csv_report, generate_all_us
 from database.db_initialization import User
 from routes.auth import admin_required
 from routes.insights import compute_insights
+from database.db_helper import get_gambling_aggregates
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -61,6 +62,13 @@ def report():
             num_drinks=filters["num_drinks"],
         )
 
+    # Always compute aggregates regardless of show_table
+    aggregates = get_gambling_aggregates(
+        start_date=filters["start_date"],
+        end_date=filters["end_date"],
+        user_id=filters["all_user_id"],
+    )
+
     return render_template(
         'report.html',
         users=users,
@@ -68,6 +76,7 @@ def report():
         report_rows=report_rows,
         show_table=show_table,
         filters=filters,
+        aggregates=aggregates,
     )
 
 # This function downloads the csv file for a single user
