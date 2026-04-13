@@ -36,7 +36,7 @@ sudo apt install python3 python3-pip python3-venv python3-full git nginx libpq-d
 
 ---
 
-## 3. Add SSH Key for GitHub (Optinal if already done)
+## 3. Add SSH Key for GitHub (Optional if already done)
 
 Generate an SSH key on your server:
 ```bash
