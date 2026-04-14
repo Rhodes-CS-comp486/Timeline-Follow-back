@@ -4,6 +4,8 @@ from database.db_initialization import User
 from routes.auth import admin_required
 from routes.insights import compute_insights
 from database.db_helper import get_gambling_aggregates
+from datetime import datetime, timedelta
+
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -47,13 +49,11 @@ def insights():
 def report():
     users = User.query.filter_by(is_admin=False).all()
     filters = get_report_filters()
-    # Load table rows only after explicit user action.
     show_table = str(request.args.get('show_table', '')).lower() in {"1", "true", "yes", "on"}
 
     report_headers = []
     report_rows = []
     if show_table:
-        # Build on-screen rows from the same filter logic as CSV.
         report_headers, report_rows = build_report_dataset(
             user_id=filters["all_user_id"],
             start_date=filters["start_date"],
@@ -62,7 +62,6 @@ def report():
             num_drinks=filters["num_drinks"],
         )
 
-    # Always compute aggregates regardless of show_table
     aggregates = get_gambling_aggregates(
         start_date=filters["start_date"],
         end_date=filters["end_date"],
@@ -77,6 +76,8 @@ def report():
         show_table=show_table,
         filters=filters,
         aggregates=aggregates,
+        now=datetime.today(),
+        timedelta=timedelta,
     )
 
 # This function downloads the csv file for a single user

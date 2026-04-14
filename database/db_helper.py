@@ -7,7 +7,7 @@ from database.db_initialization import User, Gambling, Drinking, db, CalendarEnt
 """
 
 # This function creates a user in the db and commits it
-# Parameters: email, first_name, last_name, username (maybe), password (maybe) -> str
+# Parameters: email, first_name, last_name, password (maybe) -> str
 #             is_admin -> bool
 # Returns: entry if valid, error if failure
 def create_user(email : str, password, is_admin=False):
@@ -103,21 +103,22 @@ def get_calendar_entries_for_user(user_id: int):
 # Parameters: start_date -> str (optional), end_date -> str (optional), user_id -> int (optional)
 # Returns: dict of aggregated values
 def get_gambling_aggregates(start_date=None, end_date=None, user_id=None):
-    from database.db_initialization import Gambling, CalendarEntry
+    from database.db_initialization import Gambling, Drinking, CalendarEntry
     from datetime import datetime
 
-    query = db.session.query(Gambling, CalendarEntry).join(
+    # --- Gambling aggregates ---
+    gambling_query = db.session.query(Gambling, CalendarEntry).join(
         CalendarEntry, Gambling.entry_id == CalendarEntry.id
     )
 
     if user_id:
-        query = query.filter(Gambling.user_id == user_id)
+        gambling_query = gambling_query.filter(Gambling.user_id == user_id)
     if start_date:
-        query = query.filter(CalendarEntry.entry_date >= datetime.strptime(start_date, "%Y-%m-%d").date())
+        gambling_query = gambling_query.filter(CalendarEntry.entry_date >= datetime.fromisoformat(start_date).date())
     if end_date:
-        query = query.filter(CalendarEntry.entry_date <= datetime.strptime(end_date, "%Y-%m-%d").date())
+        gambling_query = gambling_query.filter(CalendarEntry.entry_date <= datetime.fromisoformat(end_date).date())
 
-    results = query.all()
+    gambling_results = gambling_query.all()
 
     day_labels = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     by_day = {day: 0.0 for day in day_labels}
@@ -125,9 +126,11 @@ def get_gambling_aggregates(start_date=None, end_date=None, user_id=None):
     total_intended = 0.0
     total_spent = 0.0
     total_hours = 0.0
+    gambling_user_ids = set()
 
-    for gambling, calendar_entry in results:
+    for gambling, calendar_entry in gambling_results:
         questions = gambling.gambling_questions or {}
+        gambling_user_ids.add(gambling.user_id)
 
         try:
             total_intended += float(questions.get("money_intended") or 0)
@@ -150,11 +153,41 @@ def get_gambling_aggregates(start_date=None, end_date=None, user_id=None):
         except (ValueError, TypeError):
             pass
 
+    # --- Drinking aggregates ---
+    drinking_query = db.session.query(Drinking, CalendarEntry).join(
+        CalendarEntry, Drinking.entry_id == CalendarEntry.id
+    )
+
+    if user_id:
+        drinking_query = drinking_query.filter(Drinking.user_id == user_id)
+    if start_date:
+        drinking_query = drinking_query.filter(CalendarEntry.entry_date >= datetime.fromisoformat(start_date).date())
+    if end_date:
+        drinking_query = drinking_query.filter(CalendarEntry.entry_date <= datetime.fromisoformat(end_date).date())
+
+    drinking_results = drinking_query.all()
+
+    total_drinks = 0.0
+    drinking_user_ids = set()
+
+    for drinking, calendar_entry in drinking_results:
+        questions = drinking.drinking_questions or {}
+        drinking_user_ids.add(drinking.user_id)
+
+        try:
+            total_drinks += float(questions.get("num_drinks") or 0)
+        except (ValueError, TypeError):
+            pass
+
+    all_user_ids = gambling_user_ids | drinking_user_ids
+
     return {
+        "user_count": len(all_user_ids),
         "total_intended": round(total_intended, 2),
         "total_spent": round(total_spent, 2),
         "total_hours": round(total_hours, 2),
         "by_day": {day: round(by_day[day], 2) for day in day_labels},
+        "total_drinks": round(total_drinks, 2),
     }
 
 # This function adds any object to the session and commits it to Postgres

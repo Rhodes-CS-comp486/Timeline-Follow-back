@@ -8,7 +8,7 @@ class Base(DeclarativeBase):
 
 db = SQLAlchemy(model_class=Base)
 
-# creating user table that stores ID, username, password, items, date borrowed and date due
+# creating user table that stores ID, password, items, date borrowed and date due
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     password = db.Column(db.String)

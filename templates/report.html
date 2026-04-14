@@ -77,10 +77,49 @@
                     </form>
                 </article>
                 <article class="report-card">
-    <h2>Gambling Aggregates</h2>
-    <p class="report-card-copy">Aggregated gambling data across all selected users and date range.</p>
+    <h2>Aggregate Data</h2>
+    <p class="report-card-copy">
+        Aggregated across
+        <strong>{{ aggregates.user_count }} user{{ 's' if aggregates.user_count != 1 else '' }}</strong>
+        for the selected date range.
+    </p>
 
-    <div style="margin-top: 1.25rem; overflow-x: auto; border: 1px solid var(--border); border-radius: 18px; background: #fff;">
+    <!-- Date preset buttons -->
+    <div style="margin-top: 1.25rem; display: flex; flex-wrap: wrap; gap: 10px;">
+        <a class="btn-secondary" href="{{ url_for('admin.report',
+            start_date=(now.replace(day=1) - timedelta(days=1)).replace(day=1) | string,
+            end_date=(now.replace(day=1) - timedelta(days=1)) | string,
+            report_type=filters.report_type,
+            num_drinks=filters.num_drinks,
+            all_user_id=filters.all_user_id or '') }}">Last Month</a>
+
+        <a class="btn-secondary" href="{{ url_for('admin.report',
+            start_date=(now.year - 1) ~ '-01-01',
+            end_date=(now.year - 1) ~ '-12-31',
+            report_type=filters.report_type,
+            num_drinks=filters.num_drinks,
+            all_user_id=filters.all_user_id or '') }}">Last Year</a>
+
+        <a class="btn-secondary" href="{{ url_for('admin.report',
+            start_date=now.year ~ '-' ~ '%02d' | format(now.month) ~ '-01',
+            end_date=now | string,
+            report_type=filters.report_type,
+            num_drinks=filters.num_drinks,
+            all_user_id=filters.all_user_id or '') }}">Current Month</a>
+
+        <a class="btn-secondary" href="{{ url_for('admin.report',
+            start_date=now.year ~ '-01-01',
+            end_date=now | string,
+            report_type=filters.report_type,
+            num_drinks=filters.num_drinks,
+            all_user_id=filters.all_user_id or '') }}">Current Year</a>
+
+        <a class="btn-tertiary" href="{{ url_for('admin.report') }}">Reset</a>
+    </div>
+
+    <!-- Gambling -->
+    <h3 style="margin-top: 1.5rem; font-family: var(--font-heading); font-size: 18px; margin-bottom: 0.75rem;">Gambling</h3>
+    <div style="overflow-x: auto; border: 1px solid var(--border); border-radius: 18px; background: #fff;">
         <table style="width: 100%; border-collapse: collapse;">
             <thead>
                 <tr>
@@ -105,7 +144,7 @@
         </table>
     </div>
 
-    <h3 style="margin-top: 1.5rem; font-family: var(--font-heading); font-size: 18px; margin-bottom: 0.75rem;">Spend by Day of Week</h3>
+    <h3 style="margin-top: 1.25rem; font-family: var(--font-heading); font-size: 16px; margin-bottom: 0.75rem;">Gambling Spend by Day of Week</h3>
     <div style="overflow-x: auto; border: 1px solid var(--border); border-radius: 18px; background: #fff;">
         <table style="width: 100%; border-collapse: collapse;">
             <thead>
@@ -121,6 +160,25 @@
                     <td style="padding: 12px 14px; border-bottom: 1px solid rgba(27,31,35,0.08); font-size: 14px;">${{ amount }}</td>
                 </tr>
                 {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Drinking -->
+    <h3 style="margin-top: 1.5rem; font-family: var(--font-heading); font-size: 18px; margin-bottom: 0.75rem;">Drinking</h3>
+    <div style="overflow-x: auto; border: 1px solid var(--border); border-radius: 18px; background: #fff;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th style="padding: 12px 14px; background: #f5f7f6; font-family: var(--font-heading); font-size: 13px; letter-spacing: 0.03em; text-align: left; border-bottom: 1px solid rgba(27,31,35,0.08);">Metric</th>
+                    <th style="padding: 12px 14px; background: #f5f7f6; font-family: var(--font-heading); font-size: 13px; letter-spacing: 0.03em; text-align: left; border-bottom: 1px solid rgba(27,31,35,0.08);">Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="padding: 12px 14px; font-size: 14px;">Total Standard Drinks</td>
+                    <td style="padding: 12px 14px; font-size: 14px;">{{ aggregates.total_drinks }}</td>
+                </tr>
             </tbody>
         </table>
     </div>
