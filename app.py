@@ -52,7 +52,6 @@ with app.app_context():
     print(f"--- CONNECTION CHECK ---")
     print(f"Database: {db.engine.url.database}")
     print(f"Host: {db.engine.url.host}")
-    print(f"Username: {db.engine.url.username}")
     print("Create new database columns and rows")
 
     db.create_all()
@@ -62,9 +61,6 @@ with app.app_context():
         from sqlalchemy import text
         existing_columns = [col['name'] for col in inspect(db.engine).get_columns('user')]
         migrations = {
-            'username':             'ALTER TABLE "user" ADD COLUMN username VARCHAR UNIQUE',
-            'first_name':           'ALTER TABLE "user" ADD COLUMN first_name VARCHAR',
-            'last_name':            'ALTER TABLE "user" ADD COLUMN last_name VARCHAR',
             'is_admin':             'ALTER TABLE "user" ADD COLUMN is_admin BOOLEAN',
             'email':                'ALTER TABLE "user" ADD COLUMN email VARCHAR',
             'onboarding_complete':  'ALTER TABLE "user" ADD COLUMN onboarding_complete BOOLEAN DEFAULT FALSE',
