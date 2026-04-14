@@ -15,6 +15,7 @@ class User(db.Model):
     is_admin = db.Column(db.Boolean)
     email = db.Column(db.String)
     onboarding_complete = db.Column(db.Boolean, default=False)
+    study_group_code = db.Column(db.VARCHAR(50)) # study group being a mix of char and int stored as str
 
 class CalendarEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)
