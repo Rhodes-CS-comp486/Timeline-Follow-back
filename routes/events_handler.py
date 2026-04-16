@@ -44,9 +44,10 @@ def log_activity():
     if not data:
         return jsonify({"status": "error", "message": "No data received"}), 400
 
-    valid, error_msg = validate_activity_data(data)
-    if not valid:
-        return jsonify({"status": "error", "message": error_msg}), 400
+    if not data.get("no_activity"):
+        valid, error_msg = validate_activity_data(data)
+        if not valid:
+            return jsonify({"status": "error", "message": error_msg}), 400
 
     # save entry to database
     success = save_activity(data)
@@ -83,7 +84,8 @@ def save_activity(activity: dict):
         if not entry_date:
             raise Exception("Missing date")
 
-        if not drinking_logged and not gambling_logged:
+        no_activity = activity.get("no_activity")
+        if not drinking_logged and not gambling_logged and not no_activity:
             raise Exception("No activity selected")
 
         # Keep exactly one logical entry per day. If duplicates exist, operate on the latest.
@@ -255,7 +257,8 @@ def get_calendar_events():
                     "date": iso_date,
                     "type": e.entry_type,
                     "has_drinking": False,
-                    "has_gambling": False
+                    "has_gambling": False,
+                    "has_no_activity": False
                 }
 
             event = events_by_date[iso_date]
@@ -296,6 +299,10 @@ def get_calendar_events():
 
                     # print(f"DEBUG - final event object: {event}")
 
+        for event in events_by_date.values():
+            if not event["has_drinking"] and not event["has_gambling"]:
+                event["has_no_activity"] = True
+
         events = sorted(events_by_date.values(), key=lambda item: item["date"])
 
         return jsonify(events), 200
@@ -317,12 +324,14 @@ def update_activity(entry_id):
 
     drinking_logged = data.get("drinking_logged")
     gambling_logged = data.get("gambling_logged")
-    if not drinking_logged and not gambling_logged:
+    no_activity = data.get("no_activity")
+    if not drinking_logged and not gambling_logged and not no_activity:
         return jsonify({"status": "error", "message": "No activity selected"}), 400
 
-    valid, error_msg = validate_activity_data(data)
-    if not valid:
-        return jsonify({"status": "error", "message": error_msg}), 400
+    if not no_activity:
+        valid, error_msg = validate_activity_data(data)
+        if not valid:
+            return jsonify({"status": "error", "message": error_msg}), 400
 
     entry = CalendarEntry.query.filter_by(id=entry_id, user_id=user_id).first()
     if not entry:

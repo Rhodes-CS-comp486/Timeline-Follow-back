@@ -17,7 +17,7 @@
             <section class="expense-page">
                 <header class="report-header expense-header">
                     <h1>Personal Expense</h1>
-                    <p class="subtitle">Save one monthly expense profile and update it whenever your regular spending changes.</p>
+                    <p class="subtitle">Save one monthly expense profile and update it whenever your regular spending changes</p>
                 </header>
 
                 {% if status == 'saved' %}
@@ -49,11 +49,7 @@
                         <span class="expense-summary-label">Monthly Expenses</span>
                         <strong class="expense-summary-value" data-summary="expense_total">{{ "$%.2f"|format(totals.expense_total) }}</strong>
                     </article>
-                    <article class="expense-summary-card">
-                        <span class="expense-summary-label">Savings</span>
-                        <strong class="expense-summary-value" data-summary="savings">{{ "$%.2f"|format(totals.savings) }}</strong>
-                    </article>
-                    <article class="expense-summary-card">
+<article class="expense-summary-card">
                         <span class="expense-summary-label">Remaining Balance</span>
                         <strong class="expense-summary-value" data-summary="remaining">{{ "$%.2f"|format(totals.remaining) }}</strong>
                     </article>

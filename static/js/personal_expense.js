@@ -45,7 +45,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const summaryTargets = {
         income: document.querySelector('[data-summary="income"]'),
         expenseTotal: document.querySelector('[data-summary="expense_total"]'),
-        savings: document.querySelector('[data-summary="savings"]'),
         remaining: document.querySelector('[data-summary="remaining"]'),
         allocationTotal: document.querySelector('[data-summary="allocation_total"]'),
     };
@@ -69,12 +68,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }))
             .filter((item) => item.value > 0);
 
-        const savings = items.find((item) => item.key === "savings")?.value || 0;
-        const expenseTotal = items
-            .filter((item) => item.key !== "savings")
-            .reduce((sum, item) => sum + item.value, 0);
-        const allocationTotal = items.reduce((sum, item) => sum + item.value, 0);
-        const remaining = income - allocationTotal;
+        const expenseTotal = items.reduce((sum, item) => sum + item.value, 0);
+        const remaining = income - expenseTotal;
 
         if (summaryTargets.income) {
             summaryTargets.income.textContent = formatCurrency(income);
@@ -82,14 +77,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (summaryTargets.expenseTotal) {
             summaryTargets.expenseTotal.textContent = formatCurrency(expenseTotal);
         }
-        if (summaryTargets.savings) {
-            summaryTargets.savings.textContent = formatCurrency(savings);
-        }
         if (summaryTargets.remaining) {
             summaryTargets.remaining.textContent = formatCurrency(remaining);
         }
         if (summaryTargets.allocationTotal) {
-            summaryTargets.allocationTotal.textContent = formatCurrency(allocationTotal);
+            summaryTargets.allocationTotal.textContent = formatCurrency(expenseTotal);
         }
 
         if (!pieChart || !legend) {

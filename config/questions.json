@@ -4,7 +4,8 @@
       "id": "num_drinks",
       "label": "How many standard drinks did you consume?",
       "type": "number",
-      "placeholder": "e.g. 0, 3, 5"
+      "placeholder": "e.g. 0, 3, 5",
+      "min": 1.0
     }
   ],
   "gambling": [
@@ -25,19 +26,22 @@
       "id": "time_spent",
       "label": "How long were you gambling that day? (hours)",
       "type": "number",
-      "placeholder": "e.g. 1.5"
+      "placeholder": "e.g. 1.5",
+      "min": 0.01
     },
     {
       "id": "money_intended",
       "label": "How much did you intend to gamble with?",
       "type": "number",
-      "placeholder": "e.g. 100"
+      "placeholder": "e.g. 100",
+      "min": 0.0
     },
     {
       "id": "money_spent",
       "label": "How much did you actually wager?",
       "type": "number",
-      "placeholder": "e.g. 300"
+      "placeholder": "e.g. 300",
+      "min": 0.01
     },
     {
       "id": "money_earned",
@@ -49,7 +53,8 @@
       "id": "drinks_while_gambling",
       "label": "How many standard drinks did you have while gambling?",
       "type": "number",
-      "placeholder": "e.g. 2"
+      "placeholder": "e.g. 2",
+      "min": 0.0
     }
   ]
 }

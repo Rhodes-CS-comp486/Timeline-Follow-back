@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Researcher Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        .question-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1rem 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .question-card .form-group { margin: 0; }
+        .question-card__row {
+            display: flex;
+            gap: 0.75rem;
+        }
+        .question-card__row .form-group { flex: 1; }
+        .question-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 1.25rem;
+        }
+        .btn-remove {
+            background: none;
+            border: 1px solid #d9534f;
+            color: #d9534f;
+            border-radius: 8px;
+            padding: 4px 12px;
+            font-size: 13px;
+            cursor: pointer;
+            align-self: flex-start;
+        }
+        .btn-remove:hover { background: #fff0f0; }
+        .hidden-field { display: none !important; }
+    </style>
+</head>
+
+<body>
+<div class="app-shell">
+    {% include 'partials/sidebar_nav.html' %}
+
+    <div class="page-content">
+        <section class="report-page">
+            <header class="report-header">
+                <h1>Researcher Panel</h1>
+                <p class="subtitle">Manage calendar questions and input restrictions shown to participants</p>
+            </header>
+
+            {% if saved %}
+                <div style="margin-bottom: 1.5rem; padding: 12px 16px; background: #e6f4ea; border: 1px solid #a8d5b5; border-radius: 10px; color: #1e6b3a; font-size: 14px;">
+                    Questions updated successfully.
+                </div>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('admin.researcher_panel') }}" id="panelForm">
+                <section class="report-grid">
+
+                    <!-- Alcohol Questions -->
+                    <article class="report-card">
+                        <h2>Alcohol Questions</h2>
+                        <p class="report-card-copy">Questions shown when a participant logs an alcohol entry.</p>
+
+                        <div class="question-list" id="list-drinking">
+                            {% for q in questions.drinking %}
+                            <div class="question-card" data-section="drinking">
+                                <input type="hidden" name="drinking_{{ loop.index0 }}_id" value="{{ q.id }}">
+
+                                <label class="form-group">
+                                    <span class="form-label">Question label</span>
+                                    <input class="form-input" type="text" name="drinking_{{ loop.index0 }}_label" value="{{ q.label }}" placeholder="e.g. How many drinks did you have?" required>
+                                </label>
+
+                                <div class="question-card__row">
+                                    <label class="form-group">
+                                        <span class="form-label">Type</span>
+                                        <select class="form-input type-select" name="drinking_{{ loop.index0 }}_type">
+                                            <option value="number" {% if q.type == 'number' %}selected{% endif %}>Number</option>
+                                            <option value="text" {% if q.type == 'text' %}selected{% endif %}>Text</option>
+                                            <option value="select" {% if q.type == 'select' %}selected{% endif %}>Dropdown</option>
+                                        </select>
+                                    </label>
+                                    <label class="form-group{% if q.type == 'select' %} hidden-field{% endif %} placeholder-group">
+                                        <span class="form-label">Placeholder</span>
+                                        <input class="form-input" type="text" name="drinking_{{ loop.index0 }}_placeholder" value="{{ q.placeholder or '' }}" placeholder="e.g. e.g. 3">
+                                    </label>
+                                </div>
+
+                                <label class="form-group{% if q.type != 'select' %} hidden-field{% endif %} options-group">
+                                    <span class="form-label">Options (one per line)</span>
+                                    <textarea class="form-input" name="drinking_{{ loop.index0 }}_options" rows="4" placeholder="Option A&#10;Option B&#10;Option C">{{ (q.options | join('\n')) if q.options else '' }}</textarea>
+                                </label>
+
+                                <div class="question-card__row{% if q.type != 'number' %} hidden-field{% endif %} number-group">
+                                    <label class="form-group">
+                                        <span class="form-label">Min value</span>
+                                        <input class="form-input" type="number" step="any" name="drinking_{{ loop.index0 }}_min" value="{{ q.get('min', '') }}" placeholder="None">
+                                    </label>
+                                    <label class="form-group">
+                                        <span class="form-label">Max value</span>
+                                        <input class="form-input" type="number" step="any" name="drinking_{{ loop.index0 }}_max" value="{{ q.get('max', '') }}" placeholder="None">
+                                    </label>
+                                </div>
+
+                                <button type="button" class="btn-remove" onclick="removeQuestion(this)">Remove</button>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <button type="button" class="btn-secondary" style="margin-top: 1rem;" onclick="addQuestion('drinking')">+ Add Question</button>
+                    </article>
+
+                    <!-- Gambling Questions -->
+                    <article class="report-card">
+                        <h2>Gambling Questions</h2>
+                        <p class="report-card-copy">Questions shown when a participant logs a gambling entry.</p>
+
+                        <div class="question-list" id="list-gambling">
+                            {% for q in questions.gambling %}
+                            <div class="question-card" data-section="gambling">
+                                <input type="hidden" name="gambling_{{ loop.index0 }}_id" value="{{ q.id }}">
+
+                                <label class="form-group">
+                                    <span class="form-label">Question label</span>
+                                    <input class="form-input" type="text" name="gambling_{{ loop.index0 }}_label" value="{{ q.label }}" placeholder="e.g. How much did you spend?" required>
+                                </label>
+
+                                <div class="question-card__row">
+                                    <label class="form-group">
+                                        <span class="form-label">Type</span>
+                                        <select class="form-input type-select" name="gambling_{{ loop.index0 }}_type">
+                                            <option value="number" {% if q.type == 'number' %}selected{% endif %}>Number</option>
+                                            <option value="text" {% if q.type == 'text' %}selected{% endif %}>Text</option>
+                                            <option value="select" {% if q.type == 'select' %}selected{% endif %}>Dropdown</option>
+                                        </select>
+                                    </label>
+                                    <label class="form-group{% if q.type == 'select' %} hidden-field{% endif %} placeholder-group">
+                                        <span class="form-label">Placeholder</span>
+                                        <input class="form-input" type="text" name="gambling_{{ loop.index0 }}_placeholder" value="{{ q.placeholder or '' }}" placeholder="e.g. e.g. 100">
+                                    </label>
+                                </div>
+
+                                <label class="form-group{% if q.type != 'select' %} hidden-field{% endif %} options-group">
+                                    <span class="form-label">Options (one per line)</span>
+                                    <textarea class="form-input" name="gambling_{{ loop.index0 }}_options" rows="4" placeholder="Option A&#10;Option B&#10;Option C">{{ (q.options | join('\n')) if q.options else '' }}</textarea>
+                                </label>
+
+                                <div class="question-card__row{% if q.type != 'number' %} hidden-field{% endif %} number-group">
+                                    <label class="form-group">
+                                        <span class="form-label">Min value</span>
+                                        <input class="form-input" type="number" step="any" name="gambling_{{ loop.index0 }}_min" value="{{ q.get('min', '') }}" placeholder="None">
+                                    </label>
+                                    <label class="form-group">
+                                        <span class="form-label">Max value</span>
+                                        <input class="form-input" type="number" step="any" name="gambling_{{ loop.index0 }}_max" value="{{ q.get('max', '') }}" placeholder="None">
+                                    </label>
+                                </div>
+
+                                <button type="button" class="btn-remove" onclick="removeQuestion(this)">Remove</button>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <button type="button" class="btn-secondary" style="margin-top: 1rem;" onclick="addQuestion('gambling')">+ Add Question</button>
+                    </article>
+
+                </section>
+
+                <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end;">
+                    <button class="btn-primary" type="submit">Save Changes</button>
+                </div>
+            </form>
+
+        </section>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
+<script>
+    function renumber(section) {
+        const list = document.getElementById('list-' + section);
+        list.querySelectorAll('.question-card').forEach((card, i) => {
+            card.querySelectorAll('[name], [id]').forEach(el => {
+                if (el.name) el.name = el.name.replace(/^(drinking|gambling)_\d+_/, section + '_' + i + '_');
+                if (el.id)   el.id   = el.id.replace(/^(drinking|gambling)_\d+_/, section + '_' + i + '_');
+            });
+            card.querySelectorAll('label[for]').forEach(el => {
+                el.htmlFor = el.htmlFor.replace(/^(drinking|gambling)_\d+_/, section + '_' + i + '_');
+            });
+        });
+    }
+
+    function removeQuestion(btn) {
+        const card = btn.closest('.question-card');
+        const section = card.dataset.section;
+        card.remove();
+        renumber(section);
+    }
+
+    function addQuestion(section) {
+        const list = document.getElementById('list-' + section);
+        const idx = list.querySelectorAll('.question-card').length;
+        const card = document.createElement('div');
+        card.className = 'question-card';
+        card.dataset.section = section;
+        card.innerHTML = `
+            <input type="hidden" name="${section}_${idx}_id" value="">
+            <label class="form-group">
+                <span class="form-label">Question label</span>
+                <input class="form-input" type="text" name="${section}_${idx}_label" placeholder="e.g. How many drinks did you have?" required>
+            </label>
+            <div class="question-card__row">
+                <label class="form-group">
+                    <span class="form-label">Type</span>
+                    <select class="form-input type-select" name="${section}_${idx}_type">
+                        <option value="number">Number</option>
+                        <option value="text">Text</option>
+                        <option value="select">Dropdown</option>
+                    </select>
+                </label>
+                <label class="form-group placeholder-group">
+                    <span class="form-label">Placeholder</span>
+                    <input class="form-input" type="text" name="${section}_${idx}_placeholder" placeholder="e.g. e.g. 3">
+                </label>
+            </div>
+            <label class="form-group hidden-field options-group">
+                <span class="form-label">Options (one per line)</span>
+                <textarea class="form-input" name="${section}_${idx}_options" rows="4" placeholder="Option A&#10;Option B&#10;Option C"></textarea>
+            </label>
+            <div class="question-card__row number-group">
+                <label class="form-group">
+                    <span class="form-label">Min value</span>
+                    <input class="form-input" type="number" step="any" name="${section}_${idx}_min" placeholder="None">
+                </label>
+                <label class="form-group">
+                    <span class="form-label">Max value</span>
+                    <input class="form-input" type="number" step="any" name="${section}_${idx}_max" placeholder="None">
+                </label>
+            </div>
+            <button type="button" class="btn-remove" onclick="removeQuestion(this)">Remove</button>
+        `;
+        list.appendChild(card);
+        card.querySelector('.type-select').addEventListener('change', handleTypeChange);
+        card.querySelector('input[type="text"]').focus();
+    }
+
+    function handleTypeChange(e) {
+        const card = e.target.closest('.question-card');
+        const type = e.target.value;
+        card.querySelector('.options-group').classList.toggle('hidden-field', type !== 'select');
+        card.querySelector('.placeholder-group').classList.toggle('hidden-field', type === 'select');
+        card.querySelector('.number-group').classList.toggle('hidden-field', type !== 'number');
+    }
+
+    document.querySelectorAll('.type-select').forEach(sel => {
+        sel.addEventListener('change', handleTypeChange);
+    });
+</script>
+</body>
+</html>

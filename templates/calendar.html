@@ -36,6 +36,10 @@
                                 <span class="activity-marker marker-gambling"></span>
                                 <span>Gambling</span>
                             </div>
+                            <div class="legend-item">
+                                <span class="activity-marker marker-no-activity"></span>
+                                <span>No activity</span>
+                            </div>
                         </div>
                     </div>
                 </aside>
@@ -71,6 +75,9 @@
                         </label>
                         <label>
                             <input type="checkbox" id="chkGambling"> Did you gamble today?
+                        </label>
+                        <label>
+                            <input type="checkbox" id="chkNoActivity"> I didn't drink or gamble today
                         </label>
                     </div>
 
@@ -120,7 +127,7 @@
                     <div class="modal-actions">
                         <button type="button" class="nav-btn" id="closeModal">Cancel</button>
                         <button type="button" class="nav-btn" id="deleteEntryBtn" style="display: none;">Delete Entry</button>
-                        <button type="submit" class="nav-btn is-active" id="saveEntryBtn">Save Entry</button>
+<button type="submit" class="nav-btn is-active" id="saveEntryBtn">Save Entry</button>
                     </div>
                 </form>
             </div>
@@ -129,6 +136,7 @@
 
     <template id="calendar-page"></template>
 
+    <script>const QUESTIONS = {{ questions | tojson }};</script>
     <script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
