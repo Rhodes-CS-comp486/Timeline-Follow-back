@@ -109,6 +109,7 @@ const initCalendar = () => {
     const activityForm = document.getElementById('activityForm');
     const saveEntryBtn = document.getElementById('saveEntryBtn');
     const deleteEntryBtn = document.getElementById('deleteEntryBtn');
+    const chkNoActivity = document.getElementById('chkNoActivity');
     const modalModeText = document.getElementById('modalModeText');
 
     // Toggling Elements
@@ -139,7 +140,9 @@ const initCalendar = () => {
     };
     const resetFormState = () => {
         if (activityForm) activityForm.reset();
-        // Force the sections back to their "locked" state
+        if (chkNoActivity) chkNoActivity.checked = false;
+        chkDrinking.disabled = false;
+        chkGambling.disabled = false;
         toggleSection(chkDrinking, drinkingSection);
         toggleSection(chkGambling, gamblingSection);
     };
@@ -334,7 +337,7 @@ const initCalendar = () => {
 
         const dayEntries = entries[state.selectedISO];
         if (!Array.isArray(dayEntries) || dayEntries.length === 0) {
-            entrySummary.innerHTML = '<p class="entry-empty">No activity logged for this date.</p>';
+            entrySummary.innerHTML = '<p class="entry-empty">There is no entry for this date.</p>';
             return;
         }
 
@@ -359,8 +362,11 @@ const initCalendar = () => {
             }
         });
 
-        if (!html) {
-            entrySummary.innerHTML = '<p class="entry-empty">No activity logged for this date.</p>';
+        const hasNoActivity = dayEntries.some(e => e.has_no_activity);
+        if (!html && hasNoActivity) {
+            entrySummary.innerHTML = '<p class="entry-empty">You didn\'t drink or gamble this day.</p>';
+        } else if (!html) {
+            entrySummary.innerHTML = '<p class="entry-empty">There is no entry for this date.</p>';
         } else {
             entrySummary.innerHTML = html;
         }
@@ -419,8 +425,9 @@ const initCalendar = () => {
             if (Array.isArray(dayEntries) && dayEntries.length > 0) {
                 const hasDrinkingMarker = dayEntries.some((entry) => entryHasDrinking(entry));
                 const hasGamblingMarker = dayEntries.some((entry) => entryHasGambling(entry));
+                const hasNoActivityMarker = !hasDrinkingMarker && !hasGamblingMarker && dayEntries.some((e) => e.has_no_activity);
 
-                if (hasDrinkingMarker || hasGamblingMarker) {
+                if (hasDrinkingMarker || hasGamblingMarker || hasNoActivityMarker) {
                     button.classList.add('day--has-markers');
                     const markerWrap = document.createElement('div');
                     markerWrap.className = 'activity-markers';
@@ -437,6 +444,13 @@ const initCalendar = () => {
                         gamblingMarker.className = 'activity-marker marker-gambling';
                         gamblingMarker.title = 'Gambling entry';
                         markerWrap.appendChild(gamblingMarker);
+                    }
+
+                    if (hasNoActivityMarker) {
+                        const noActivityMarker = document.createElement('span');
+                        noActivityMarker.className = 'activity-marker marker-no-activity';
+                        noActivityMarker.title = 'No activity';
+                        markerWrap.appendChild(noActivityMarker);
                     }
 
                     button.appendChild(markerWrap);
@@ -497,6 +511,20 @@ const initCalendar = () => {
         });
     }
 
+    if (chkNoActivity) {
+        chkNoActivity.addEventListener('change', () => {
+            const checked = chkNoActivity.checked;
+            if (checked) {
+                chkDrinking.checked = false;
+                chkGambling.checked = false;
+                toggleSection(chkDrinking, drinkingSection);
+                toggleSection(chkGambling, gamblingSection);
+            }
+            chkDrinking.disabled = checked;
+            chkGambling.disabled = checked;
+        });
+    }
+
     // Close modal when clicking outside the form
     if (modal) {
         modal.addEventListener('click', (e) => {
@@ -508,11 +536,17 @@ const initCalendar = () => {
 
     // Listen for clicks on the Drinking checkbox
     if (chkDrinking) {
-        chkDrinking.addEventListener('change', () => toggleSection(chkDrinking, drinkingSection));
+        chkDrinking.addEventListener('change', () => {
+            if (chkDrinking.checked && chkNoActivity) { chkNoActivity.checked = false; }
+            toggleSection(chkDrinking, drinkingSection);
+        });
     }
     // Listen for clicks on the Gambling checkbox
     if (chkGambling) {
-        chkGambling.addEventListener('change', () => toggleSection(chkGambling, gamblingSection));
+        chkGambling.addEventListener('change', () => {
+            if (chkGambling.checked && chkNoActivity) { chkNoActivity.checked = false; }
+            toggleSection(chkGambling, gamblingSection);
+        });
     }
     // Added: Event listener for the Activity Form submission
     // Handle saving the event
@@ -526,6 +560,19 @@ const initCalendar = () => {
             date: state.selectedISO
         };
 
+
+        if (chkNoActivity && chkNoActivity.checked) {
+            payload.no_activity = true;
+            const endpoint = activeEntryId ? `/api/activity/${activeEntryId}` : '/api/log-activity';
+            const method = activeEntryId ? 'PUT' : 'POST';
+            try {
+                const response = await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if (!response.ok) { alert('Unable to save. Please try again.'); return; }
+                closeModal();
+                await loadEvents();
+            } catch (err) { console.error(err); alert('Unable to save. Please try again.'); }
+            return;
+        }
 
         if (!chkDrinking.checked && !chkGambling.checked) {
             alert("Please select drinking and/or gambling.");
@@ -547,45 +594,48 @@ const initCalendar = () => {
             payload[input.name] = input.value;
         });
 
-        // Validate numeric fields before submitting
-        const nonNegativeFields = {
-            num_drinks: 'Number of drinks',
-            time_spent: 'Time spent gambling',
-            money_intended: 'Money intended to gamble',
-            money_spent: 'Money wagered',
-            drinks_while_gambling: 'Drinks while gambling',
-        };
-        const anyNumberFields = {
-            money_earned: 'Money won/lost',
-        };
-
-        for (const [field, label] of Object.entries(nonNegativeFields)) {
-            const val = payload[field];
-            if (val === undefined || val === null || String(val).trim() === '') continue;
-            if (isNaN(Number(val))) {
-                alert(`${label} must be a number.`);
-                return;
-            }
-            if (Number(val) < 0) {
-                alert(`${label} cannot be negative.`);
-                return;
-            }
-            const dotIndex = String(val).indexOf('.');
-            if (dotIndex !== -1 && String(val).length - dotIndex - 1 > 2) {
-                alert(`${label} can have at most 2 decimal places.`);
-                return;
+        // Validate fields dynamically from schema
+        const sectionChecks = [
+            { questions: (QUESTIONS.drinking || []), checked: chkDrinking.checked },
+            { questions: (QUESTIONS.gambling || []), checked: chkGambling.checked },
+        ];
+        for (const { questions, checked } of sectionChecks) {
+            if (!checked) continue;
+            for (const q of questions) {
+                const raw = String(payload[q.id] ?? '').trim();
+                if (!raw) {
+                    alert(`"${q.label}" is required.`);
+                    return;
+                }
+                if (q.type === 'number' && raw !== '') {
+                    const num = Number(raw);
+                    if (isNaN(num)) {
+                        alert(`"${q.label}" must be a number.`);
+                        return;
+                    }
+                    if (q.min !== undefined && num < q.min) {
+                        alert(`"${q.label}" must be at least ${q.min}.`);
+                        return;
+                    }
+                    if (q.max !== undefined && num > q.max) {
+                        alert(`"${q.label}" must be no more than ${q.max}.`);
+                        return;
+                    }
+                    const dot = raw.indexOf('.');
+                    if (dot !== -1 && raw.length - dot - 1 > 2) {
+                        alert(`"${q.label}" can have at most 2 decimal places.`);
+                        return;
+                    }
+                }
             }
         }
-        for (const [field, label] of Object.entries(anyNumberFields)) {
-            const val = payload[field];
-            if (val === undefined || val === null || String(val).trim() === '') continue;
-            if (isNaN(Number(val))) {
-                alert(`${label} must be a number.`);
-                return;
-            }
-            const dotIndex = String(val).indexOf('.');
-            if (dotIndex !== -1 && String(val).length - dotIndex - 1 > 2) {
-                alert(`${label} can have at most 2 decimal places.`);
+
+        // Drinks while gambling cannot exceed total drinks logged for the day
+        if (chkDrinking.checked && chkGambling.checked) {
+            const numDrinks = Number(payload.num_drinks);
+            const drinksDuringGambling = Number(payload.drinks_while_gambling);
+            if (!isNaN(drinksDuringGambling) && payload.drinks_while_gambling !== '' && drinksDuringGambling > numDrinks) {
+                alert('Drinks while gambling cannot be greater than the total number of drinks for the day.');
                 return;
             }
         }

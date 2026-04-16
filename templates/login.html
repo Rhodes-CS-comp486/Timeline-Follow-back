@@ -40,7 +40,6 @@
                             type="email"
                             id="email"
                             name="email"
-                            placeholder="jane@example.com"
                             required
                             autocomplete="email"
                         >
@@ -53,10 +52,15 @@
                             type="password"
                             id="password"
                             name="password"
-                            placeholder="••••••••"
                             required
                             autocomplete="current-password"
                         >
+                        <button
+                            type="button"
+                            aria-label="Show password"
+                            style="background: none; border: none; cursor: pointer; color: #888; font-size: 13px; padding: 4px 0 0 2px; text-align: left;"
+                            onclick="const p=document.getElementById('password'); const show=p.type==='password'; p.type=show?'text':'password'; this.textContent=show?'Hide password':'Show password';"
+                        >Show password</button>
                     </div>
 
                     <button class="btn-primary" type="submit">Log In</button>

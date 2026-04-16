@@ -26,7 +26,6 @@ FIELD_DEFINITIONS = [
     {"key": "medical_expenses", "label": "Medical expenses", "color": "#e63946"},
     {"key": "school_books_class_fees_tuition", "label": "School (books, class fees, tuition)", "color": "#6d597a"},
     {"key": "debt_repayment", "label": "Debt repayment", "color": "#b56576"},
-    {"key": "savings", "label": "Savings", "color": "#43aa8b"},
 ]
 
 EXPENSE_FIELDS = [field for field in FIELD_DEFINITIONS if field["key"] != "income"]
@@ -53,7 +52,6 @@ FIELD_ALIASES = {
         "books_fees_tuition",
     ],
     "debt_repayment": ["debt_repayment", "debt", "loan_repayment", "repayment"],
-    "savings": ["savings", "saving"],
 }
 
 
@@ -548,15 +546,12 @@ def save_expense_snapshot(table, user_id, payload):
 
 def calculate_totals(payload):
     income = payload["income"]
-    savings = payload["savings"]
-    expense_total = sum(payload[field["key"]] for field in EXPENSE_FIELDS if field["key"] != "savings")
-    allocation_total = sum(payload[field["key"]] for field in EXPENSE_FIELDS)
-    remaining = income - allocation_total
+    expense_total = sum(payload[field["key"]] for field in EXPENSE_FIELDS)
+    remaining = income - expense_total
     return {
         "income": income,
         "expense_total": expense_total,
-        "savings": savings,
-        "allocation_total": allocation_total,
+        "allocation_total": expense_total,
         "remaining": remaining,
     }
 

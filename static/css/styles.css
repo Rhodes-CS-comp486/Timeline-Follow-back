@@ -617,6 +617,10 @@ button {
     background: #d97706;
 }
 
+.marker-no-activity {
+    background: #9ca3af;
+}
+
 /* No-activity X indicators on calendar days */
 .no-drink-x {
     font-size: 12px;
@@ -769,6 +773,12 @@ button:focus-visible {
     justify-content: center;
     align-items: center;
     z-index: 1000;
+}
+
+.category-toggles {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 /* Modal Box */

@@ -32,8 +32,11 @@
                    {% if endpoint == 'admin.insights' %}aria-current="page"{% endif %}>
                     Insights
                 </a>
-                <a class="site-nav-link site-nav-link--muted" href="#">Dashboard</a>
-                <a class="site-nav-link{% if endpoint == 'user_settings' %} is-active{% endif %}" href="{{ url_for('user_settings') }}"
+                <a class="site-nav-link{% if endpoint == 'admin.researcher_panel' %} is-active{% endif %}" href="{{ url_for('admin.researcher_panel') }}"
+                   {% if endpoint == 'admin.researcher_panel' %}aria-current="page"{% endif %}>
+                    Researcher Panel
+                </a>
+<a class="site-nav-link{% if endpoint == 'user_settings' %} is-active{% endif %}" href="{{ url_for('user_settings') }}"
                    {% if endpoint == 'user_settings' %}aria-current="page"{% endif %}>
                     Settings
                 </a>
