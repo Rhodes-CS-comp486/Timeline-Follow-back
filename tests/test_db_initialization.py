@@ -43,7 +43,7 @@ class TestUserModel:
         """User model should have expected columns."""
         mapper = User.__mapper__
         column_names = [c.key for c in mapper.columns]
-        expected = ["id", "username", "password", "first_name", "last_name", "is_admin", "email"]
+        expected = ["id", "password", "is_admin", "email"]
         for col in expected:
             assert col in column_names, f"User missing column: {col}"
 
@@ -51,10 +51,7 @@ class TestUserModel:
         """User can be instantiated and persisted."""
         user = User(
                 email="test@example.com",
-                first_name="Test",
-                last_name="User",
                 password="hashed",
-                username="testuser",
                 is_admin=False,
             )
         db.session.add(user)
@@ -98,10 +95,7 @@ class TestGamblingModel:
         """Gambling.gambling_questions should accept dict/JSON."""
         user = User(
                 email="g@example.com",
-                first_name="G",
-                last_name="User",
                 password="x",
-                username="gambler",
                 is_admin=False,
             )
         db.session.add(user)

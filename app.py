@@ -52,28 +52,9 @@ with app.app_context():
     print(f"--- CONNECTION CHECK ---")
     print(f"Database: {db.engine.url.database}")
     print(f"Host: {db.engine.url.host}")
-    print(f"Username: {db.engine.url.username}")
     print("Create new database columns and rows")
 
     db.create_all()
-
-    # Add any missing columns that weren't present when the table was first created
-    with db.engine.connect() as conn:
-        from sqlalchemy import text
-        existing_columns = [col['name'] for col in inspect(db.engine).get_columns('user')]
-        migrations = {
-            'username':             'ALTER TABLE "user" ADD COLUMN username VARCHAR UNIQUE',
-            'first_name':           'ALTER TABLE "user" ADD COLUMN first_name VARCHAR',
-            'last_name':            'ALTER TABLE "user" ADD COLUMN last_name VARCHAR',
-            'is_admin':             'ALTER TABLE "user" ADD COLUMN is_admin BOOLEAN',
-            'email':                'ALTER TABLE "user" ADD COLUMN email VARCHAR',
-            'onboarding_complete':  'ALTER TABLE "user" ADD COLUMN onboarding_complete BOOLEAN DEFAULT FALSE',
-        }
-        for col, sql in migrations.items():
-            if col not in existing_columns:
-                conn.execute(text(sql))
-                print(f"Migrated: added '{col}' column to user table.")
-        conn.commit()
 
     # This reflects the database schema and prints table names
     inspector = inspect(db.engine)

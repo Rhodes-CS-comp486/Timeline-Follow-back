@@ -8,13 +8,14 @@ class Base(DeclarativeBase):
 
 db = SQLAlchemy(model_class=Base)
 
-# creating user table that stores ID, username, password, items, date borrowed and date due
+# creating user table that stores ID, password, items, date borrowed and date due
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     password = db.Column(db.String)
     is_admin = db.Column(db.Boolean)
     email = db.Column(db.String)
     onboarding_complete = db.Column(db.Boolean, default=False)
+    study_group_code = db.Column(db.VARCHAR(50)) # study group being a mix of char and int stored as str
 
 class CalendarEntry(db.Model):
     id = db.Column(db.Integer, primary_key=True)

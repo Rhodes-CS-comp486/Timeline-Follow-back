@@ -22,26 +22,19 @@ class TestCreateUser:
         with app.app_context():
             user = create_user(
                 email="helper@test.com",
-                first_name="Helper",
-                last_name="User",
                 password="secret",
-                username="helperuser",
                 is_admin=False,
             )
             assert user is not None
             assert user.id is not None
             assert user.email == "helper@test.com"
-            assert user.username == "helperuser"
 
     def test_create_user_admin_flag(self, app_context, app):
         """create_user should respect is_admin parameter."""
         with app.app_context():
             admin = create_user(
                 email="admin@test.com",
-                first_name="Admin",
-                last_name="User",
                 password="secret",
-                username="adminuser",
                 is_admin=True,
             )
             assert admin is not None
@@ -56,10 +49,7 @@ class TestCreateCalendarEntry:
         with app.app_context():
             user = create_user(
                 email="cal@test.com",
-                first_name="Cal",
-                last_name="User",
                 password="x",
-                username="caluser",
             )
             assert user is not None
 
@@ -73,10 +63,7 @@ class TestCreateCalendarEntry:
         with app.app_context():
             user = create_user(
                 email="cal2@test.com",
-                first_name="Cal2",
-                last_name="User",
                 password="x",
-                username="cal2user",
             )
             entry = create_calendar_entry(user.id, date(2025, 3, 20))
             assert entry is not None
@@ -91,10 +78,7 @@ class TestAddGamblingEntry:
         with app.app_context():
             user = create_user(
                 email="gamb@test.com",
-                first_name="G",
-                last_name="User",
                 password="x",
-                username="gambuser",
             )
             entry = create_calendar_entry(user.id, datetime.utcnow())
             activity_data = {"amount": 50, "type": "slots"}
@@ -109,10 +93,7 @@ class TestAddGamblingEntry:
         with app.app_context():
             user = create_user(
                 email="gamb2@test.com",
-                first_name="G2",
-                last_name="User",
                 password="x",
-                username="gamb2user",
             )
             entry = create_calendar_entry(user.id, datetime.utcnow())
             activity_data = {"amount": 10}
@@ -130,10 +111,7 @@ class TestAddAlcoholEntry:
         with app.app_context():
             user = create_user(
                 email="drink@test.com",
-                first_name="D",
-                last_name="User",
                 password="x",
-                username="drinkuser",
             )
             entry = create_calendar_entry(user.id, datetime.utcnow())
             activity_data = {"drinks": 2, "type": "beer"}
@@ -148,10 +126,7 @@ class TestAddAlcoholEntry:
         with app.app_context():
             user = create_user(
                 email="drink2@test.com",
-                first_name="D2",
-                last_name="User",
                 password="x",
-                username="drink2user",
             )
             entry = create_calendar_entry(user.id, datetime.utcnow())
             alcohol = add_alcohol_entry(user.id, entry, {"drinks": 1})
@@ -167,10 +142,7 @@ class TestGetCalendarEntriesForUser:
         with app.app_context():
             user = create_user(
                 email="empty@test.com",
-                first_name="E",
-                last_name="User",
                 password="x",
-                username="emptyuser",
             )
             entries = get_calendar_entries_for_user(user.id)
             assert entries == []
@@ -180,10 +152,7 @@ class TestGetCalendarEntriesForUser:
         with app.app_context():
             user = create_user(
                 email="multi@test.com",
-                first_name="M",
-                last_name="User",
                 password="x",
-                username="multiuser",
             )
             create_calendar_entry(user.id, datetime(2025, 3, 1))
             create_calendar_entry(user.id, datetime(2025, 3, 15))
@@ -199,17 +168,11 @@ class TestGetCalendarEntriesForUser:
         with app.app_context():
             user1 = create_user(
                 email="u1@test.com",
-                first_name="U1",
-                last_name="User",
                 password="x",
-                username="user1",
             )
             user2 = create_user(
                 email="u2@test.com",
-                first_name="U2",
-                last_name="User",
                 password="x",
-                username="user2",
             )
             create_calendar_entry(user1.id, datetime.utcnow())
             create_calendar_entry(user2.id, datetime.utcnow())
@@ -230,10 +193,7 @@ class TestCommitToDb:
         with app.app_context():
             user = User(
                 email="commit@test.com",
-                first_name="C",
-                last_name="User",
                 password="x",
-                username="commituser",
                 is_admin=False,
             )
             result = commit_to_db(user)
@@ -245,20 +205,14 @@ class TestCommitToDb:
         with app.app_context():
             user1 = create_user(
                 email="dup@test.com",
-                first_name="Dup",
-                last_name="User",
                 password="x",
-                username="dupuser",
             )
             assert user1 is not None
 
             # Duplicate username should fail (unique constraint)
             user2 = User(
                 email="dup2@test.com",
-                first_name="Dup2",
-                last_name="User",
                 password="x",
-                username="dupuser",
                 is_admin=False,
             )
             result = commit_to_db(user2)
