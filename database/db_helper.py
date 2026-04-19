@@ -102,7 +102,7 @@ def get_calendar_entries_for_user(user_id: int):
 # This function aggregates gambling data across users for the admin report
 # Parameters: start_date -> str (optional), end_date -> str (optional), user_id -> int (optional)
 # Returns: dict of aggregated values
-def get_gambling_aggregates(start_date=None, end_date=None, user_id=None):
+def get_gambling_aggregates(start_date=None, end_date=None, user_id=None, user_ids=None):
     from database.db_initialization import Gambling, Drinking, CalendarEntry
     from datetime import datetime
 
@@ -113,6 +113,8 @@ def get_gambling_aggregates(start_date=None, end_date=None, user_id=None):
 
     if user_id:
         gambling_query = gambling_query.filter(Gambling.user_id == user_id)
+    elif user_ids is not None:
+        gambling_query = gambling_query.filter(Gambling.user_id.in_(user_ids))
     if start_date:
         gambling_query = gambling_query.filter(CalendarEntry.entry_date >= datetime.fromisoformat(start_date).date())
     if end_date:
@@ -160,6 +162,8 @@ def get_gambling_aggregates(start_date=None, end_date=None, user_id=None):
 
     if user_id:
         drinking_query = drinking_query.filter(Drinking.user_id == user_id)
+    elif user_ids is not None:
+        drinking_query = drinking_query.filter(Drinking.user_id.in_(user_ids))
     if start_date:
         drinking_query = drinking_query.filter(CalendarEntry.entry_date >= datetime.fromisoformat(start_date).date())
     if end_date:
