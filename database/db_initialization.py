@@ -43,5 +43,13 @@ class PersonalExpense(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     personal_expense_questions = db.Column(db.JSON)
 
+class StudyCode(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(8), unique=True, nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    researcher_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    questions = db.Column(db.JSON, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 
 

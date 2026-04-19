@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 from flask import Flask, render_template, redirect, url_for, session
 from database.db_initialization import db
 import os
-from database.db_initialization import User
+from database.db_initialization import User, StudyCode
 from sqlalchemy import inspect
 
 # helper function to load questions from JSON
@@ -73,7 +73,16 @@ def index():
 # Returns: The rendered calendar.html file
 @app.route('/calendar.html')
 def calendar():
-    questions = load_questions()
+    questions = None
+    user_id = session.get('user_id')
+    if user_id:
+        user = User.query.get(user_id)
+        if user and user.study_group_code:
+            study = StudyCode.query.filter_by(code=user.study_group_code).first()
+            if study and (study.questions.get('drinking') or study.questions.get('gambling')):
+                questions = study.questions
+    if questions is None:
+        questions = load_questions()
     return render_template('calendar.html', questions=questions)
 
 @app.route('/settings.html')

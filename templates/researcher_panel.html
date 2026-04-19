@@ -4,10 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Researcher Panel</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+
     <style>
         .question-card {
             background: #fff;
@@ -18,18 +21,21 @@
             flex-direction: column;
             gap: 0.75rem;
         }
-        .question-card .form-group { margin: 0; }
-        .question-card__row {
-            display: flex;
-            gap: 0.75rem;
-        }
-        .question-card__row .form-group { flex: 1; }
+
         .question-list {
             display: flex;
             flex-direction: column;
             gap: 0.75rem;
             margin-top: 1.25rem;
         }
+
+        .question-card__row {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .question-card__row .form-group { flex: 1; }
+
         .btn-remove {
             background: none;
             border: 1px solid #d9534f;
@@ -40,8 +46,85 @@
             cursor: pointer;
             align-self: flex-start;
         }
+
         .btn-remove:hover { background: #fff0f0; }
-        .hidden-field { display: none !important; }
+
+        /* Study selector row */
+        .study-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.25rem;
+        }
+
+        .study-selector select {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .study-code-badge {
+            font-family: monospace;
+            font-size: 13px;
+            color: var(--muted);
+            padding: 4px 10px;
+            background: #f5f7f6;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+
+        /* Feedback banner */
+        .save-banner {
+            margin-bottom: 1.5rem;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .save-banner.success {
+            background: #e6f4ea;
+            border: 1px solid #a8d5b5;
+            color: #1e6b3a;
+        }
+
+        .save-banner.error {
+            background: #fde8e8;
+            border: 1px solid #f5c6c6;
+            color: #9b2c2c;
+        }
+
+        /* Create study modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-box {
+            background: #fff;
+            border-radius: 18px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+        }
+
+        .modal-box h3 {
+            font-family: var(--font-heading);
+            font-size: 20px;
+            margin-bottom: 1.25rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            margin-top: 1.25rem;
+        }
     </style>
 </head>
 
@@ -51,219 +134,337 @@
 
     <div class="page-content">
         <section class="report-page">
+
             <header class="report-header">
                 <h1>Researcher Panel</h1>
-                <p class="subtitle">Manage calendar questions and input restrictions shown to participants</p>
+                <p class="subtitle">Manage questions for each of your studies</p>
             </header>
 
-            {% if saved %}
-                <div style="margin-bottom: 1.5rem; padding: 12px 16px; background: #e6f4ea; border: 1px solid #a8d5b5; border-radius: 10px; color: #1e6b3a; font-size: 14px;">
-                    Questions updated successfully.
-                </div>
-            {% endif %}
+            <!-- Study selector -->
+            <div class="study-selector">
+                <select class="form-input" id="studySelect" onchange="onStudySelect()">
+                    <option value="">— Select a study —</option>
+                </select>
+                <span class="study-code-badge" id="studyCodeBadge" style="display:none"></span>
+                <button type="button" class="btn-primary" onclick="openCreateModal()">+ New Study</button>
+                <button type="button" class="btn-remove" id="btnDeleteStudy" disabled onclick="deleteStudy()">Delete Study</button>
+            </div>
 
-            <form method="POST" action="{{ url_for('admin.researcher_panel') }}" id="panelForm">
-                <section class="report-grid">
+            <!-- Feedback banner -->
+            <div class="save-banner" id="saveBanner" style="display:none"></div>
 
-                    <!-- Alcohol Questions -->
-                    <article class="report-card">
-                        <h2>Alcohol Questions</h2>
-                        <p class="report-card-copy">Questions shown when a participant logs an alcohol entry.</p>
+            <!-- Questions section — hidden until a study is selected -->
+            <div id="questionsSection" style="display:none">
+                <form id="panelForm" onsubmit="saveQuestions(event)">
 
-                        <div class="question-list" id="list-drinking">
-                            {% for q in questions.drinking %}
-                            <div class="question-card" data-section="drinking">
-                                <input type="hidden" name="drinking_{{ loop.index0 }}_id" value="{{ q.id }}">
+                    <section class="report-grid">
 
-                                <label class="form-group">
-                                    <span class="form-label">Question label</span>
-                                    <input class="form-input" type="text" name="drinking_{{ loop.index0 }}_label" value="{{ q.label }}" placeholder="e.g. How many drinks did you have?" required>
-                                </label>
+                        <!-- Alcohol Questions -->
+                        <article class="report-card">
+                            <h2>Alcohol Questions</h2>
+                            <p class="report-card-copy">Questions shown when a participant logs an alcohol entry.</p>
+                            <div class="question-list" id="list-drinking"></div>
+                            <button type="button" class="btn-secondary" style="margin-top: 1rem;" onclick="addQuestion('drinking')">
+                                + Add Question
+                            </button>
+                        </article>
 
-                                <div class="question-card__row">
-                                    <label class="form-group">
-                                        <span class="form-label">Type</span>
-                                        <select class="form-input type-select" name="drinking_{{ loop.index0 }}_type">
-                                            <option value="number" {% if q.type == 'number' %}selected{% endif %}>Number</option>
-                                            <option value="text" {% if q.type == 'text' %}selected{% endif %}>Text</option>
-                                            <option value="select" {% if q.type == 'select' %}selected{% endif %}>Dropdown</option>
-                                        </select>
-                                    </label>
-                                    <label class="form-group{% if q.type == 'select' %} hidden-field{% endif %} placeholder-group">
-                                        <span class="form-label">Placeholder</span>
-                                        <input class="form-input" type="text" name="drinking_{{ loop.index0 }}_placeholder" value="{{ q.placeholder or '' }}" placeholder="e.g. e.g. 3">
-                                    </label>
-                                </div>
+                        <!-- Gambling Questions -->
+                        <article class="report-card">
+                            <h2>Gambling Questions</h2>
+                            <p class="report-card-copy">Questions shown when a participant logs a gambling entry.</p>
+                            <div class="question-list" id="list-gambling"></div>
+                            <button type="button" class="btn-secondary" style="margin-top: 1rem;" onclick="addQuestion('gambling')">
+                                + Add Question
+                            </button>
+                        </article>
 
-                                <label class="form-group{% if q.type != 'select' %} hidden-field{% endif %} options-group">
-                                    <span class="form-label">Options (one per line)</span>
-                                    <textarea class="form-input" name="drinking_{{ loop.index0 }}_options" rows="4" placeholder="Option A&#10;Option B&#10;Option C">{{ (q.options | join('\n')) if q.options else '' }}</textarea>
-                                </label>
+                    </section>
 
-                                <div class="question-card__row{% if q.type != 'number' %} hidden-field{% endif %} number-group">
-                                    <label class="form-group">
-                                        <span class="form-label">Min value</span>
-                                        <input class="form-input" type="number" step="any" name="drinking_{{ loop.index0 }}_min" value="{{ q.get('min', '') }}" placeholder="None">
-                                    </label>
-                                    <label class="form-group">
-                                        <span class="form-label">Max value</span>
-                                        <input class="form-input" type="number" step="any" name="drinking_{{ loop.index0 }}_max" value="{{ q.get('max', '') }}" placeholder="None">
-                                    </label>
-                                </div>
+                    <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end;">
+                        <button class="btn-primary" type="submit">Save Questions</button>
+                    </div>
 
-                                <button type="button" class="btn-remove" onclick="removeQuestion(this)">Remove</button>
-                            </div>
-                            {% endfor %}
-                        </div>
-
-                        <button type="button" class="btn-secondary" style="margin-top: 1rem;" onclick="addQuestion('drinking')">+ Add Question</button>
-                    </article>
-
-                    <!-- Gambling Questions -->
-                    <article class="report-card">
-                        <h2>Gambling Questions</h2>
-                        <p class="report-card-copy">Questions shown when a participant logs a gambling entry.</p>
-
-                        <div class="question-list" id="list-gambling">
-                            {% for q in questions.gambling %}
-                            <div class="question-card" data-section="gambling">
-                                <input type="hidden" name="gambling_{{ loop.index0 }}_id" value="{{ q.id }}">
-
-                                <label class="form-group">
-                                    <span class="form-label">Question label</span>
-                                    <input class="form-input" type="text" name="gambling_{{ loop.index0 }}_label" value="{{ q.label }}" placeholder="e.g. How much did you spend?" required>
-                                </label>
-
-                                <div class="question-card__row">
-                                    <label class="form-group">
-                                        <span class="form-label">Type</span>
-                                        <select class="form-input type-select" name="gambling_{{ loop.index0 }}_type">
-                                            <option value="number" {% if q.type == 'number' %}selected{% endif %}>Number</option>
-                                            <option value="text" {% if q.type == 'text' %}selected{% endif %}>Text</option>
-                                            <option value="select" {% if q.type == 'select' %}selected{% endif %}>Dropdown</option>
-                                        </select>
-                                    </label>
-                                    <label class="form-group{% if q.type == 'select' %} hidden-field{% endif %} placeholder-group">
-                                        <span class="form-label">Placeholder</span>
-                                        <input class="form-input" type="text" name="gambling_{{ loop.index0 }}_placeholder" value="{{ q.placeholder or '' }}" placeholder="e.g. e.g. 100">
-                                    </label>
-                                </div>
-
-                                <label class="form-group{% if q.type != 'select' %} hidden-field{% endif %} options-group">
-                                    <span class="form-label">Options (one per line)</span>
-                                    <textarea class="form-input" name="gambling_{{ loop.index0 }}_options" rows="4" placeholder="Option A&#10;Option B&#10;Option C">{{ (q.options | join('\n')) if q.options else '' }}</textarea>
-                                </label>
-
-                                <div class="question-card__row{% if q.type != 'number' %} hidden-field{% endif %} number-group">
-                                    <label class="form-group">
-                                        <span class="form-label">Min value</span>
-                                        <input class="form-input" type="number" step="any" name="gambling_{{ loop.index0 }}_min" value="{{ q.get('min', '') }}" placeholder="None">
-                                    </label>
-                                    <label class="form-group">
-                                        <span class="form-label">Max value</span>
-                                        <input class="form-input" type="number" step="any" name="gambling_{{ loop.index0 }}_max" value="{{ q.get('max', '') }}" placeholder="None">
-                                    </label>
-                                </div>
-
-                                <button type="button" class="btn-remove" onclick="removeQuestion(this)">Remove</button>
-                            </div>
-                            {% endfor %}
-                        </div>
-
-                        <button type="button" class="btn-secondary" style="margin-top: 1rem;" onclick="addQuestion('gambling')">+ Add Question</button>
-                    </article>
-
-                </section>
-
-                <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end;">
-                    <button class="btn-primary" type="submit">Save Changes</button>
-                </div>
-            </form>
+                </form>
+            </div>
 
         </section>
     </div>
 </div>
 
+<!-- Create Study Modal -->
+<div class="modal-overlay" id="createModal" style="display:none" onclick="handleModalClick(event)">
+    <div class="modal-box">
+        <h3>New Study</h3>
+        <label class="form-group">
+            <span class="form-label">Study title</span>
+            <input class="form-input" type="text" id="studyTitleInput"
+                   placeholder="e.g. Spring 2026 Cohort" maxlength="200">
+        </label>
+        <div class="modal-actions">
+            <button type="button" class="btn-tertiary" onclick="closeModal()">Cancel</button>
+            <button type="button" class="btn-primary" onclick="createStudy()">Create</button>
+        </div>
+    </div>
+</div>
+
 <script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
+
 <script>
-    function renumber(section) {
-        const list = document.getElementById('list-' + section);
-        list.querySelectorAll('.question-card').forEach((card, i) => {
-            card.querySelectorAll('[name], [id]').forEach(el => {
-                if (el.name) el.name = el.name.replace(/^(drinking|gambling)_\d+_/, section + '_' + i + '_');
-                if (el.id)   el.id   = el.id.replace(/^(drinking|gambling)_\d+_/, section + '_' + i + '_');
-            });
-            card.querySelectorAll('label[for]').forEach(el => {
-                el.htmlFor = el.htmlFor.replace(/^(drinking|gambling)_\d+_/, section + '_' + i + '_');
-            });
+    document.addEventListener('DOMContentLoaded', loadStudies);
+
+    // ── Load studies into dropdown ───────────────────────────────────────────
+
+    async function loadStudies() {
+        const res = await fetch('/admin/api/studies');
+        const studies = await res.json();
+        const select = document.getElementById('studySelect');
+        studies.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.id;
+            opt.dataset.code = s.code;
+            opt.textContent = `${s.title} (${s.code})`;
+            select.appendChild(opt);
         });
+    }
+
+    // ── Study selection ──────────────────────────────────────────────────────
+
+    async function onStudySelect() {
+        const select = document.getElementById('studySelect');
+        const studyId = select.value;
+        const deleteBtn = document.getElementById('btnDeleteStudy');
+        const questionsSection = document.getElementById('questionsSection');
+        const codeBadge = document.getElementById('studyCodeBadge');
+
+        deleteBtn.disabled = !studyId;
+        hideBanner();
+
+        if (!studyId) {
+            questionsSection.style.display = 'none';
+            codeBadge.style.display = 'none';
+            return;
+        }
+
+        const opt = select.options[select.selectedIndex];
+        codeBadge.textContent = opt.dataset.code;
+        codeBadge.style.display = '';
+
+        const res = await fetch(`/admin/api/studies/${studyId}/questions`);
+        const questions = await res.json();
+        renderQuestions(questions);
+        questionsSection.style.display = '';
+    }
+
+    // ── Render questions ─────────────────────────────────────────────────────
+
+    function renderQuestions(questions) {
+        renderSection('drinking', questions.drinking || []);
+        renderSection('gambling', questions.gambling || []);
+    }
+
+    function renderSection(section, questions) {
+        const list = document.getElementById('list-' + section);
+        list.innerHTML = '';
+        questions.forEach((q, i) => list.appendChild(buildCard(section, i, q)));
+    }
+
+    function buildCard(section, idx, q) {
+        const type = q.type || 'number';
+        const optionsVal = (q.options || []).join('\n');
+
+        const card = document.createElement('div');
+        card.className = 'question-card';
+        card.dataset.section = section;
+        card.innerHTML = `
+            <input type="hidden" name="${section}_${idx}_id" value="${escHtml(q.id || '')}">
+
+            <label class="form-group">
+                <span class="form-label">Question label</span>
+                <input class="form-input" type="text" name="${section}_${idx}_label"
+                       value="${escHtml(q.label || '')}" required>
+            </label>
+
+            <label class="form-group">
+                <span class="form-label">Response type</span>
+                <select class="form-input" name="${section}_${idx}_type"
+                        onchange="toggleTypeFields(this)">
+                    <option value="number" ${type === 'number' ? 'selected' : ''}>Number</option>
+                    <option value="text"   ${type === 'text'   ? 'selected' : ''}>Text</option>
+                    <option value="select" ${type === 'select' ? 'selected' : ''}>Dropdown</option>
+                </select>
+            </label>
+
+            <label class="form-group field-placeholder" style="${type === 'select' ? 'display:none' : ''}">
+                <span class="form-label">Placeholder</span>
+                <input class="form-input" type="text" name="${section}_${idx}_placeholder"
+                       value="${escHtml(q.placeholder || '')}">
+            </label>
+
+            <div class="question-card__row field-minmax" style="${type !== 'number' ? 'display:none' : ''}">
+                <label class="form-group">
+                    <span class="form-label">Min</span>
+                    <input class="form-input" type="number" step="any"
+                           name="${section}_${idx}_min" value="${q.min ?? ''}">
+                </label>
+                <label class="form-group">
+                    <span class="form-label">Max</span>
+                    <input class="form-input" type="number" step="any"
+                           name="${section}_${idx}_max" value="${q.max ?? ''}">
+                </label>
+            </div>
+
+            <label class="form-group field-options" style="${type !== 'select' ? 'display:none' : ''}">
+                <span class="form-label">Options (one per line)</span>
+                <textarea class="form-input" name="${section}_${idx}_options"
+                          rows="3">${escHtml(optionsVal)}</textarea>
+            </label>
+
+            <button type="button" class="btn-remove" onclick="removeQuestion(this)">Remove</button>
+        `;
+        return card;
+    }
+
+    function toggleTypeFields(select) {
+        const card = select.closest('.question-card');
+        const type = select.value;
+        card.querySelector('.field-placeholder').style.display = type === 'select' ? 'none' : '';
+        card.querySelector('.field-minmax').style.display     = type === 'number'  ? ''     : 'none';
+        card.querySelector('.field-options').style.display    = type === 'select'  ? ''     : 'none';
+    }
+
+    function escHtml(s) {
+        return String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    // ── Add / remove questions ───────────────────────────────────────────────
+
+    function addQuestion(section) {
+        const list = document.getElementById('list-' + section);
+        list.appendChild(buildCard(section, list.children.length, {}));
     }
 
     function removeQuestion(btn) {
         const card = btn.closest('.question-card');
         const section = card.dataset.section;
         card.remove();
-        renumber(section);
+        renumberSection(section);
     }
 
-    function addQuestion(section) {
-        const list = document.getElementById('list-' + section);
-        const idx = list.querySelectorAll('.question-card').length;
-        const card = document.createElement('div');
-        card.className = 'question-card';
-        card.dataset.section = section;
-        card.innerHTML = `
-            <input type="hidden" name="${section}_${idx}_id" value="">
-            <label class="form-group">
-                <span class="form-label">Question label</span>
-                <input class="form-input" type="text" name="${section}_${idx}_label" placeholder="e.g. How many drinks did you have?" required>
-            </label>
-            <div class="question-card__row">
-                <label class="form-group">
-                    <span class="form-label">Type</span>
-                    <select class="form-input type-select" name="${section}_${idx}_type">
-                        <option value="number">Number</option>
-                        <option value="text">Text</option>
-                        <option value="select">Dropdown</option>
-                    </select>
-                </label>
-                <label class="form-group placeholder-group">
-                    <span class="form-label">Placeholder</span>
-                    <input class="form-input" type="text" name="${section}_${idx}_placeholder" placeholder="e.g. e.g. 3">
-                </label>
-            </div>
-            <label class="form-group hidden-field options-group">
-                <span class="form-label">Options (one per line)</span>
-                <textarea class="form-input" name="${section}_${idx}_options" rows="4" placeholder="Option A&#10;Option B&#10;Option C"></textarea>
-            </label>
-            <div class="question-card__row number-group">
-                <label class="form-group">
-                    <span class="form-label">Min value</span>
-                    <input class="form-input" type="number" step="any" name="${section}_${idx}_min" placeholder="None">
-                </label>
-                <label class="form-group">
-                    <span class="form-label">Max value</span>
-                    <input class="form-input" type="number" step="any" name="${section}_${idx}_max" placeholder="None">
-                </label>
-            </div>
-            <button type="button" class="btn-remove" onclick="removeQuestion(this)">Remove</button>
-        `;
-        list.appendChild(card);
-        card.querySelector('.type-select').addEventListener('change', handleTypeChange);
-        card.querySelector('input[type="text"]').focus();
+    function renumberSection(section) {
+        document.querySelectorAll(`[data-section="${section}"]`).forEach((card, i) => {
+            card.querySelectorAll('[name]').forEach(el => {
+                el.name = el.name.replace(/^[^_]+_\d+_/, `${section}_${i}_`);
+            });
+        });
     }
 
-    function handleTypeChange(e) {
-        const card = e.target.closest('.question-card');
-        const type = e.target.value;
-        card.querySelector('.options-group').classList.toggle('hidden-field', type !== 'select');
-        card.querySelector('.placeholder-group').classList.toggle('hidden-field', type === 'select');
-        card.querySelector('.number-group').classList.toggle('hidden-field', type !== 'number');
+    // ── Save questions ───────────────────────────────────────────────────────
+
+    async function saveQuestions(e) {
+        e.preventDefault();
+        const studyId = document.getElementById('studySelect').value;
+        if (!studyId) return;
+
+        const res = await fetch(`/admin/api/studies/${studyId}/questions`, {
+            method: 'POST',
+            body: new FormData(document.getElementById('panelForm')),
+        });
+
+        showBanner(
+            res.ok ? 'Questions saved successfully.' : 'Failed to save questions.',
+            res.ok ? 'success' : 'error'
+        );
     }
 
-    document.querySelectorAll('.type-select').forEach(sel => {
-        sel.addEventListener('change', handleTypeChange);
+    // ── Create study ─────────────────────────────────────────────────────────
+
+    function openCreateModal() {
+        document.getElementById('studyTitleInput').value = '';
+        document.getElementById('createModal').style.display = 'flex';
+        setTimeout(() => document.getElementById('studyTitleInput').focus(), 50);
+    }
+
+    function closeModal() {
+        document.getElementById('createModal').style.display = 'none';
+    }
+
+    function handleModalClick(e) {
+        if (e.target === e.currentTarget) closeModal();
+    }
+
+    async function createStudy() {
+        const title = document.getElementById('studyTitleInput').value.trim();
+        if (!title) return;
+
+        const res = await fetch('/admin/api/create_study', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title }),
+        });
+
+        if (!res.ok) {
+            closeModal();
+            showBanner('Failed to create study.', 'error');
+            return;
+        }
+
+        const study = await res.json();
+        const select = document.getElementById('studySelect');
+        const opt = document.createElement('option');
+        opt.value = study.id;
+        opt.dataset.code = study.code;
+        opt.textContent = `${study.title} (${study.code})`;
+        // Insert after the placeholder option so newest appears first
+        select.insertBefore(opt, select.options[1] || null);
+        select.value = study.id;
+
+        closeModal();
+        await onStudySelect();
+    }
+
+    document.getElementById('studyTitleInput').addEventListener('keydown', e => {
+        if (e.key === 'Enter') createStudy();
     });
+
+    // ── Delete study ─────────────────────────────────────────────────────────
+
+    async function deleteStudy() {
+        const select = document.getElementById('studySelect');
+        const studyId = select.value;
+        if (!studyId) return;
+
+        const label = select.options[select.selectedIndex].textContent;
+        if (!confirm(`Delete "${label}"? This cannot be undone.`)) return;
+
+        const res = await fetch(`/admin/api/delete_study/${studyId}`, { method: 'DELETE' });
+
+        if (!res.ok) {
+            showBanner('Failed to delete study.', 'error');
+            return;
+        }
+
+        select.remove(select.selectedIndex);
+        select.value = '';
+        await onStudySelect();
+    }
+
+    // ── Banner helpers ───────────────────────────────────────────────────────
+
+    function showBanner(msg, type) {
+        const b = document.getElementById('saveBanner');
+        b.textContent = msg;
+        b.className = `save-banner ${type}`;
+        b.style.display = 'block';
+    }
+
+    function hideBanner() {
+        document.getElementById('saveBanner').style.display = 'none';
+    }
 </script>
 </body>
 </html>

@@ -20,6 +20,20 @@
                 <h1>Reports</h1>
             </header>
 
+            <!-- Study selector -->
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:1.5rem; flex-wrap:wrap;">
+                <form method="get" action="{{ url_for('admin.report') }}" style="display:flex; align-items:center; gap:10px;">
+                    <select class="form-input" name="study_id" style="min-width:220px;" onchange="this.form.submit()">
+                        <option value="">— Select a study —</option>
+                        {% for s in studies %}
+                            <option value="{{ s.id }}" {% if selected_study and selected_study.id == s.id %}selected{% endif %}>
+                                {{ s.title }} ({{ s.code }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </form>
+            </div>
+
             <section class="report-grid">
                 <article class="report-card">
                     <h2>Participant Reports</h2>
@@ -27,6 +41,7 @@
 <!-- Shared filters for table view and CSV download -->
                     <form action="{{ url_for('admin.download_report_full') }}" method="get" class="report-form">
                         <input type="hidden" name="scope" value="all">
+                        <input type="hidden" name="study_id" value="{{ selected_study.id if selected_study else '' }}">
 
                         <label class="form-group">
                             <span class="form-label">Start date</span>
@@ -61,7 +76,7 @@
 
                         <div class="report-actions">
                             <!-- Clears query params and restores full dataset -->
-                            <a class="btn-tertiary" href="{{ url_for('admin.report') }}">Reset Filters</a>
+                            <a class="btn-tertiary" href="{{ url_for('admin.report', study_id=selected_study.id if selected_study else '') }}">Reset Filters</a>
                             <!-- Sends show_table so backend can lazy-load rows -->
                             <button class="btn-secondary" formaction="{{ url_for('admin.report') }}" name="show_table" value="1">View Table</button>
                             <button class="btn-primary" type="submit">Download Full Report</button>
@@ -78,6 +93,7 @@
 
     <!-- Date range inputs -->
     <form method="get" action="{{ url_for('admin.report') }}" style="margin-top: 1.25rem; display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: flex-end;">
+        <input type="hidden" name="study_id" value="{{ selected_study.id if selected_study else '' }}">
         <input type="hidden" name="report_type" value="{{ filters.report_type }}">
         <input type="hidden" name="all_user_id" value="{{ filters.all_user_id or '' }}">
         <label class="form-group" style="margin: 0; flex: 1; min-width: 140px;">
@@ -94,36 +110,41 @@
     <!-- Date preset buttons -->
     <div style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 10px;">
         <a class="btn-secondary" href="{{ url_for('admin.report',
+            study_id=selected_study.id if selected_study else '',
             start_date=now.year ~ '-' ~ '%02d' | format(now.month) ~ '-01',
             end_date=now | string,
             report_type=filters.report_type,
             all_user_id=filters.all_user_id or '') }}">Current Month</a>
 
         <a class="btn-secondary" href="{{ url_for('admin.report',
+            study_id=selected_study.id if selected_study else '',
             start_date=(now.replace(day=1) - timedelta(days=1)).replace(day=1) | string,
             end_date=(now.replace(day=1) - timedelta(days=1)) | string,
             report_type=filters.report_type,
             all_user_id=filters.all_user_id or '') }}">Last Month</a>
 
         <a class="btn-secondary" href="{{ url_for('admin.report',
+            study_id=selected_study.id if selected_study else '',
             start_date=(now - timedelta(days=90)) | string,
             end_date=now | string,
             report_type=filters.report_type,
             all_user_id=filters.all_user_id or '') }}">Last Three Months</a>
 
         <a class="btn-secondary" href="{{ url_for('admin.report',
+            study_id=selected_study.id if selected_study else '',
             start_date=now.year ~ '-01-01',
             end_date=now | string,
             report_type=filters.report_type,
             all_user_id=filters.all_user_id or '') }}">Current Year</a>
 
         <a class="btn-secondary" href="{{ url_for('admin.report',
+            study_id=selected_study.id if selected_study else '',
             start_date=(now.year - 1) ~ '-01-01',
             end_date=(now.year - 1) ~ '-12-31',
             report_type=filters.report_type,
             all_user_id=filters.all_user_id or '') }}">Last Year</a>
 
-        <a class="btn-tertiary" href="{{ url_for('admin.report') }}">Reset</a>
+        <a class="btn-tertiary" href="{{ url_for('admin.report', study_id=selected_study.id if selected_study else '') }}">Reset</a>
     </div>
 
     <!-- Gambling -->

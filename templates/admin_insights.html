@@ -226,11 +226,34 @@
                     <p class="subtitle">View gambling and drinking patterns for a selected study participant over the past 3 months</p>
                 </header>
 
+                <!-- Study selector -->
+                <article class="report-card user-picker-card">
+                    <span class="insights-section-label">Select Study</span>
+                    <h2>Choose a Study</h2>
+                    <form class="user-picker-form" method="get" action="{{ url_for('admin.insights') }}">
+                        <div>
+                            <label for="study_id">Study</label>
+                            <select id="study_id" name="study_id" class="form-select" onchange="this.form.submit()">
+                                <option value="">— Select a study —</option>
+                                {% for s in studies %}
+                                    <option value="{{ s.id }}" {% if selected_study and selected_study.id == s.id %}selected{% endif %}>
+                                        {{ s.title }} ({{ s.code }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </form>
+                </article>
+
                 <!-- User picker -->
                 <article class="report-card user-picker-card">
                     <span class="insights-section-label">Select User</span>
                     <h2>Choose a User</h2>
+                    {% if not selected_study %}
+                        <p class="user-picker-prompt">Select a study above to see its participants.</p>
+                    {% else %}
                     <form class="user-picker-form" method="get" action="{{ url_for('admin.insights') }}">
+                        <input type="hidden" name="study_id" value="{{ selected_study.id }}">
                         <div>
                             <label for="user_id">User</label>
                             <select id="user_id" name="user_id" class="form-select">
@@ -244,6 +267,7 @@
                         </div>
                         <button type="submit" class="btn-primary">View Insights</button>
                     </form>
+                    {% endif %}
                 </article>
 
                 {% if not selected_user %}
