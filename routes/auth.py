@@ -1,6 +1,6 @@
 import re
 
-from flask import Blueprint, render_template, request, redirect, url_for, session
+from flask import Blueprint, render_template, request, redirect, url_for, session, abort
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from database.db_initialization import User
@@ -28,14 +28,14 @@ def validate_password(password):
 @auth_bp.route('/create-account', methods=['GET', 'POST'])
 def create_account():
     if request.method == 'POST':
-        email = request.form.get('email', '').strip().lower()
+        username = request.form.get('username', '').strip().lower()
         password = request.form.get('password', '')
         confirm_password = request.form.get('confirm_password', '')
 
         errors = []
 
         # All fields required
-        if not all([email, password, confirm_password]):
+        if not all([username, password, confirm_password]):
             errors.append("All fields are required.")
 
         # Passwords must match
@@ -48,11 +48,11 @@ def create_account():
             if not valid:
                 errors.append(pw_error)
 
-        # Email uniqueness
-        if email and User.query.filter_by(email=email).first():
-            errors.append("An account with this email already exists.")
+        # Username uniqueness
+        if username and User.query.filter_by(username=username).first():
+            errors.append("An account with this username already exists.")
 
-        form_data = {'email': email}
+        form_data = {'username': username}
 
         if errors:
             return render_template('create_account.html', errors=errors, form_data=form_data)
@@ -60,7 +60,7 @@ def create_account():
         hashed_password = generate_password_hash(password)
 
         user = create_user(
-            email=email,
+            username=username,
             password=hashed_password,
             is_admin=False,
         )
@@ -78,17 +78,17 @@ def create_account():
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form.get('email', '').strip().lower()
+        username = request.form.get('username', '').strip().lower()
         password = request.form.get('password', '')
 
         error = None
 
-        if not email or not password:
-            error = "Email and password are required."
+        if not username or not password:
+            error = "Username and password are required."
         else:
-            user = User.query.filter_by(email=email).first()
+            user = User.query.filter_by(username=username).first()
             if user is None or not check_password_hash(user.password, password):
-                error = "Invalid email or password."
+                error = "Invalid username or password."
 
         if error:
             return render_template('login.html', error=error)

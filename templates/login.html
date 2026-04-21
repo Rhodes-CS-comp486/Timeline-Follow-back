@@ -34,14 +34,14 @@
 
                 <form method="POST" action="{{ url_for('auth.login') }}" novalidate>
                     <div class="form-group">
-                        <label class="form-label" for="email">Email</label>
+                        <label class="form-label" for="username">Username</label>
                         <input
                             class="form-input"
-                            type="email"
-                            id="email"
-                            name="email"
+                            type="text"
+                            id="username"
+                            name="username"
                             required
-                            autocomplete="email"
+                            autocomplete="username"
                         >
                     </div>
 

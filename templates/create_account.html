@@ -36,15 +36,15 @@
 
                 <form method="POST" action="{{ url_for('auth.create_account') }}" novalidate>
                     <div class="form-group">
-                        <label class="form-label" for="email">Email</label>
+                        <label class="form-label" for="username">Username</label>
                         <input
                             class="form-input"
-                            type="email"
-                            id="email"
-                            name="email"
-                            value="{{ form_data.get('email', '') }}"
+                            type="text"
+                            id="username"
+                            name="username"
+                            value="{{ form_data.get('username', '') }}"
                             required
-                            autocomplete="email"
+                            autocomplete="username"
                         >
                     </div>
 

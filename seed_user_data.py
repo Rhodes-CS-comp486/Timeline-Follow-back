@@ -1,6 +1,6 @@
 """
 Seed script: populates 3 months of daily gambling + drinking data
-for the user with email m@gmail.com.
+for the user with username m@gmail.com.
 
 Run from the project root:
     python seed_user_data.py
@@ -93,9 +93,9 @@ def drink_today(dt):
 
 def seed():
     with app.app_context():
-        user = User.query.filter_by(email="m@gmail.com").first()
+        user = User.query.filter_by(username="m@gmail.com").first()
         if not user:
-            print("ERROR: No user found with email m@gmail.com")
+            print("ERROR: No user found with username m@gmail.com")
             return
 
         print(f"Seeding data for: {user.first_name} {user.last_name} (id={user.id})")
