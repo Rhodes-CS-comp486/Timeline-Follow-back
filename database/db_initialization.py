@@ -13,7 +13,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     password = db.Column(db.String)
     is_admin = db.Column(db.Boolean)
-    email = db.Column(db.String)
+    username = db.Column(db.String)
     onboarding_complete = db.Column(db.Boolean, default=False)
     study_group_code = db.Column(db.VARCHAR(50)) # study group being a mix of char and int stored as str
 

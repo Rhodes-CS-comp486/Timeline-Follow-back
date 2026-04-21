@@ -172,7 +172,7 @@ def insights():
     if selected_study:
         users = (User.query
                  .filter(User.is_admin.is_(False), User.study_group_code == selected_study.code)
-                 .order_by(User.email)
+                 .order_by(User.username)
                  .all())
         allowed_ids = {u.id for u in users}
     else:

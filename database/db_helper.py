@@ -7,13 +7,13 @@ from database.db_initialization import User, Gambling, Drinking, db, CalendarEnt
 """
 
 # This function creates a user in the db and commits it
-# Parameters: email, first_name, last_name, password (maybe) -> str
+# Parameters: username, first_name, last_name, password (maybe) -> str
 #             is_admin -> bool
 # Returns: entry if valid, error if failure
-def create_user(email : str, password, is_admin=False):
+def create_user(username: str, password, is_admin=False):
     # Create a user
     new_user = User(
-        email=email,
+        username=username,
         password=password,
         is_admin=is_admin
     )

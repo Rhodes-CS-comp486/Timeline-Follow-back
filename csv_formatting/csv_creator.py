@@ -82,16 +82,16 @@ def build_report_dataset(user_id=None, user_ids=None, start_date=None, end_date=
     users_query = User.query.filter(User.is_admin.is_(False))
     if user_id is not None:
         # Single-user mode.
-        users = users_query.filter_by(id=user_id).order_by(User.email.asc()).all()
+        users = users_query.filter_by(id=user_id).order_by(User.username.asc()).all()
     elif user_ids is not None:
         # Selected users mode.
         if user_ids:
-            users = users_query.filter(User.id.in_(user_ids)).order_by(User.email.asc()).all()
+            users = users_query.filter(User.id.in_(user_ids)).order_by(User.username.asc()).all()
         else:
             users = []
     else:
         # Default all-users mode.
-        users = users_query.order_by(User.email.asc()).all()
+        users = users_query.order_by(User.username.asc()).all()
 
     rows = []
 
