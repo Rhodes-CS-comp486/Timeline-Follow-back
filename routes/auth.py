@@ -3,7 +3,7 @@ import re
 from flask import Blueprint, render_template, request, redirect, url_for, session, abort
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from database.db_initialization import User
+from database.db_initialization import StudyCode, User
 from database.db_helper import create_user
 
 from functools import wraps
@@ -31,12 +31,26 @@ def create_account():
         username = request.form.get('username', '').strip().lower()
         password = request.form.get('password', '')
         confirm_password = request.form.get('confirm_password', '')
+        account_type = request.form.get('account_type', '').strip()
+        study_code = request.form.get('study_code', '').strip()
 
         errors = []
+        study = None
 
         # All fields required
-        if not all([username, password, confirm_password]):
+        if not all([username, password, confirm_password, account_type]):
             errors.append("All fields are required.")
+
+        if account_type not in {'participant', 'researcher'}:
+            errors.append("Select whether this account is for a study participant or researcher.")
+
+        if account_type == 'participant':
+            if not study_code:
+                errors.append("Study code is required for participant accounts.")
+            else:
+                study = StudyCode.query.filter_by(code=study_code).first()
+                if not study:
+                    errors.append("Study code was not found.")
 
         # Passwords must match
         if password != confirm_password:
@@ -52,7 +66,11 @@ def create_account():
         if username and User.query.filter_by(username=username).first():
             errors.append("An account with this username already exists.")
 
-        form_data = {'username': username}
+        form_data = {
+            'username': username,
+            'account_type': account_type,
+            'study_code': study_code,
+        }
 
         if errors:
             return render_template('create_account.html', errors=errors, form_data=form_data)
@@ -62,7 +80,8 @@ def create_account():
         user = create_user(
             username=username,
             password=hashed_password,
-            is_admin=False,
+            is_admin=account_type == 'researcher',
+            study_group_code=study.code if study else None,
         )
 
         if user is None:

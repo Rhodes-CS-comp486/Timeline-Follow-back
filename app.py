@@ -87,7 +87,22 @@ def calendar():
 
 @app.route('/settings.html')
 def user_settings():
-    return render_template('user_settings.html')
+    study = None
+    researcher = None
+
+    user_id = session.get('user_id')
+    if user_id:
+        user = User.query.get(user_id)
+        if user and user.study_group_code:
+            study = StudyCode.query.filter_by(code=user.study_group_code).first()
+            if study:
+                researcher = User.query.get(study.researcher_id)
+
+    return render_template(
+        'user_settings.html',
+        study=study,
+        researcher=researcher,
+    )
 
 # This function defines current_user=user in the context of our flask app
 # Parameters: N/A

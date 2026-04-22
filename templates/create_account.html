@@ -49,6 +49,33 @@
                     </div>
 
                     <div class="form-group">
+                        <label class="form-label" for="account_type">Account Type</label>
+                        <select
+                            class="form-input"
+                            id="account_type"
+                            name="account_type"
+                            required
+                        >
+                            <option value="">Select account type</option>
+                            <option value="participant" {% if form_data.get('account_type') == 'participant' %}selected{% endif %}>Study Participant</option>
+                            <option value="researcher" {% if form_data.get('account_type') == 'researcher' %}selected{% endif %}>Researcher</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="studyCodeGroup">
+                        <label class="form-label" for="study_code">Study Code</label>
+                        <input
+                            class="form-input"
+                            type="text"
+                            id="study_code"
+                            name="study_code"
+                            value="{{ form_data.get('study_code', '') }}"
+                            autocomplete="off"
+                        >
+                        <p class="form-hint">Required for study participant accounts.</p>
+                    </div>
+
+                    <div class="form-group">
                         <label class="form-label" for="password">Password</label>
                         <input
                             class="form-input"
@@ -97,5 +124,22 @@
             </div>
         </div>
     </div>
+    <script>
+        const accountType = document.getElementById('account_type');
+        const studyCodeGroup = document.getElementById('studyCodeGroup');
+        const studyCode = document.getElementById('study_code');
+
+        function updateStudyCodeField() {
+            const isParticipant = accountType.value === 'participant';
+            studyCodeGroup.style.display = isParticipant ? '' : 'none';
+            studyCode.required = isParticipant;
+            if (!isParticipant) {
+                studyCode.value = '';
+            }
+        }
+
+        accountType.addEventListener('change', updateStudyCodeField);
+        updateStudyCodeField();
+    </script>
 </body>
 </html>

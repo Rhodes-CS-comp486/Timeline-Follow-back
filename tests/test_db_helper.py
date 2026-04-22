@@ -40,6 +40,17 @@ class TestCreateUser:
             assert admin is not None
             assert admin.is_admin is True
 
+    def test_create_user_stores_study_group_code(self, app_context, app):
+        """create_user should store an optional study group code."""
+        with app.app_context():
+            user = create_user(
+                username="study-user@test.com",
+                password="secret",
+                study_group_code="abc12345",
+            )
+            assert user is not None
+            assert user.study_group_code == "abc12345"
+
 
 class TestCreateCalendarEntry:
     """Tests for create_calendar_entry helper."""
