@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, send_file, request, session, redirect, url_for
 from csv_formatting.csv_creator import generate_user_csv_report, build_report_dataset
+from database.db_initialization import StudyCode, User
 
 user_report_bp = Blueprint('user_report', __name__)
 
@@ -11,6 +12,18 @@ def get_report_filters():
         "report_type": request.args.get('report_type', ''),
         "num_drinks": request.args.get('num_drinks', ''),
     }
+
+
+def get_user_study_schema(user_id):
+    user = User.query.get(user_id)
+    if not user or not user.study_group_code:
+        return None
+    study = StudyCode.query.filter_by(code=user.study_group_code).first()
+    if not study or not study.questions:
+        return None
+    if study.questions.get('drinking') or study.questions.get('gambling'):
+        return study.questions
+    return None
 
 
 @user_report_bp.route('/report')
@@ -30,6 +43,7 @@ def report():
             end_date=filters["end_date"],
             report_type=filters["report_type"] or None,
             num_drinks=filters["num_drinks"],
+            schema=get_user_study_schema(user_id),
         )
 
     return render_template(
@@ -54,5 +68,6 @@ def download_report():
         filters["end_date"],
         filters["report_type"] or None,
         filters["num_drinks"],
+        schema=get_user_study_schema(user_id),
     )
     return send_file(file_path, as_attachment=True)

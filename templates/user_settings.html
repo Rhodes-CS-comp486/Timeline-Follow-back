@@ -33,6 +33,50 @@
                         >
                     </div>
 
+                    <div class="form-group">
+                        <label class="form-label" for="study_code">Study Code</label>
+                        <input
+                            type="text"
+                            id="study_code"
+                            class="form-input"
+                            value="{{ study.code if study else 'Not assigned' }}"
+                            readonly
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="study_name">Study Name</label>
+                        <input
+                            type="text"
+                            id="study_name"
+                            class="form-input"
+                            value="{{ study.title if study else 'Not assigned' }}"
+                            readonly
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="researcher_name">Researcher Name</label>
+                        <input
+                            type="text"
+                            id="researcher_name"
+                            class="form-input"
+                            value="{{ researcher.username if researcher else 'Not assigned' }}"
+                            readonly
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="researcher_contact">Researcher Contact</label>
+                        <input
+                            type="text"
+                            id="researcher_contact"
+                            class="form-input"
+                            value="{{ researcher.username if researcher else 'Not assigned' }}"
+                            readonly
+                        >
+                    </div>
+
                     <p class="form-hint">Contact your administrator to update your account information.</p>
                 </div>
             </main>

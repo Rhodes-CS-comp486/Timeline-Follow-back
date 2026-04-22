@@ -10,12 +10,13 @@ from database.db_initialization import User, Gambling, Drinking, db, CalendarEnt
 # Parameters: username, first_name, last_name, password (maybe) -> str
 #             is_admin -> bool
 # Returns: entry if valid, error if failure
-def create_user(username: str, password, is_admin=False):
+def create_user(username: str, password, is_admin=False, study_group_code=None):
     # Create a user
     new_user = User(
         username=username,
         password=password,
-        is_admin=is_admin
+        is_admin=is_admin,
+        study_group_code=study_group_code,
     )
 
     # Add and Commit to Postgres
@@ -209,4 +210,3 @@ def commit_to_db(new_entry):
         db.session.rollback()
         print(f"Error creating user: {e}")
         return None
-
