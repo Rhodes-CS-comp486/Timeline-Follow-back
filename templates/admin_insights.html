@@ -260,7 +260,7 @@
                                 <option value="">-- Select a user --</option>
                                 {% for u in users %}
                                     <option value="{{ u.id }}" {% if selected_user and selected_user.id == u.id %}selected{% endif %}>
-                                        {{ u.email }}
+                                        {{ u.username }}
                                     </option>
                                 {% endfor %}
                             </select>
@@ -332,18 +332,18 @@
 
                     {% if d.total_sessions == 0 %}
                         <article class="report-card">
-                            <p class="insights-no-data">No gambling episodes were recorded for <strong>{{ selected_user.email }}</strong> in the past 3 months.</p>
+                            <p class="insights-no-data">No gambling episodes were recorded for <strong>{{ selected_user.username }}</strong> in the past 3 months.</p>
                         </article>
                     {% else %}
 
                     <!-- Overall Card -->
                     <article class="report-card insights-chart-card" style="margin-bottom: 24px;">
                         <span class="insights-section-label">Past 3 Months</span>
-                        <h2>Overall Summary — {{ selected_user.email }}</h2>
+                        <h2>Overall Summary — {{ selected_user.username }}</h2>
 
                         <div class="insights-card-body">
                             <p>
-                                Over the past 3 months {{ selected_user.email }} gambled
+                                Over the past 3 months {{ selected_user.username }} gambled
                                 <span class="insights-highlight">{{ d.total_sessions }} time{% if d.total_sessions != 1 %}s{% endif %}</span>,
                                 intending to wager <span class="insights-highlight">${{ "{:,.2f}".format(d.total_intended) }}</span>
                                 and actually wagering <span class="insights-highlight">${{ "{:,.2f}".format(d.total_wagered) }}</span>.

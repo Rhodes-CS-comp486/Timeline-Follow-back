@@ -59,7 +59,7 @@
                                 <option value="" {% if not filters.all_user_id %}selected{% endif %}>All users</option>
                                 {% for user in users %}
                                     <option value="{{ user.id }}" {% if filters.all_user_id == user.id %}selected{% endif %}>
-                                        {{ user.email }} (ID: {{ user.id }})
+                                        {{ user.username }} (ID: {{ user.id }})
                                     </option>
                                 {% endfor %}
                             </select>

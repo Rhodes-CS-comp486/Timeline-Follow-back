@@ -69,9 +69,10 @@ def row_matches_filters(row, report_type=None, num_drinks=None, gambling_without
     return True
 
 
-def build_report_dataset(user_id=None, user_ids=None, start_date=None, end_date=None, report_type=None, num_drinks=None, gambling_without_drinks=False):
+def build_report_dataset(user_id=None, user_ids=None, start_date=None, end_date=None, report_type=None, num_drinks=None, gambling_without_drinks=False, schema=None):
     # Build one normalized dataset for table rendering and CSV export.
-    schema = load_questions()
+    if schema is None:
+        schema = load_questions()
     headers = get_csv_headers(schema)
     dynamic_fields = get_all_field_ids(schema)
 
@@ -82,16 +83,16 @@ def build_report_dataset(user_id=None, user_ids=None, start_date=None, end_date=
     users_query = User.query.filter(User.is_admin.is_(False))
     if user_id is not None:
         # Single-user mode.
-        users = users_query.filter_by(id=user_id).order_by(User.email.asc()).all()
+        users = users_query.filter_by(id=user_id).order_by(User.username.asc()).all()
     elif user_ids is not None:
         # Selected users mode.
         if user_ids:
-            users = users_query.filter(User.id.in_(user_ids)).order_by(User.email.asc()).all()
+            users = users_query.filter(User.id.in_(user_ids)).order_by(User.username.asc()).all()
         else:
             users = []
     else:
         # Default all-users mode.
-        users = users_query.order_by(User.email.asc()).all()
+        users = users_query.order_by(User.username.asc()).all()
 
     rows = []
 
@@ -154,7 +155,7 @@ def build_report_dataset(user_id=None, user_ids=None, start_date=None, end_date=
 # This function generates the csv file for a single user
 # Parameters: N/A
 # Returns: the output path for the csv to be saved
-def generate_user_csv_report(user_id: int, start_date=None, end_date=None, report_type=None, num_drinks=None, gambling_without_drinks=False, output_path: str = None):
+def generate_user_csv_report(user_id: int, start_date=None, end_date=None, report_type=None, num_drinks=None, gambling_without_drinks=False, output_path: str = None, schema=None):
     user = User.query.get(user_id)
     if not user:
         raise Exception(f"User {user_id} not found")
@@ -166,6 +167,7 @@ def generate_user_csv_report(user_id: int, start_date=None, end_date=None, repor
         report_type=report_type,
         num_drinks=num_drinks,
         gambling_without_drinks=gambling_without_drinks,
+        schema=schema,
     )
 
     if not output_path:
@@ -186,7 +188,7 @@ def generate_user_csv_report(user_id: int, start_date=None, end_date=None, repor
 # This function generates the csv file for all users
 # Parameters: N/A
 # Returns: the output path for the csv to be saved
-def generate_all_users_csv(start_date=None, end_date=None, report_type=None, num_drinks=None, gambling_without_drinks=False, user_ids=None, output_path=None):
+def generate_all_users_csv(start_date=None, end_date=None, report_type=None, num_drinks=None, gambling_without_drinks=False, user_ids=None, output_path=None, schema=None):
     if output_path is None:
         os.makedirs(EXPORTS_DIR, exist_ok=True)
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -199,6 +201,7 @@ def generate_all_users_csv(start_date=None, end_date=None, report_type=None, num
         report_type=report_type,
         num_drinks=num_drinks,
         gambling_without_drinks=gambling_without_drinks,
+        schema=schema,
     )
 
     with open(output_path, mode="w", newline="", encoding="utf-8") as f:

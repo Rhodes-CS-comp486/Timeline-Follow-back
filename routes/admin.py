@@ -44,6 +44,22 @@ def _researcher_user_ids():
     ]
 
 
+def _selected_researcher_study():
+    researcher_id = session.get('user_id')
+    study_id = request.args.get('study_id', type=int)
+    if not study_id:
+        return None
+    return StudyCode.query.filter_by(id=study_id, researcher_id=researcher_id).first()
+
+
+def _study_report_schema(study):
+    if not study or not study.questions:
+        return None
+    if study.questions.get('drinking') or study.questions.get('gambling'):
+        return study.questions
+    return None
+
+
 def _parse_questions_from_form():
     """Extract ordered question lists for drinking and gambling from request.form."""
     updated = {}
@@ -172,7 +188,7 @@ def insights():
     if selected_study:
         users = (User.query
                  .filter(User.is_admin.is_(False), User.study_group_code == selected_study.code)
-                 .order_by(User.email)
+                 .order_by(User.username)
                  .all())
         allowed_ids = {u.id for u in users}
     else:
@@ -242,6 +258,7 @@ def report():
             end_date=filters["end_date"],
             report_type=filters["report_type"] or None,
             num_drinks=filters["num_drinks"],
+            schema=_study_report_schema(selected_study),
         )
 
     aggregates = get_gambling_aggregates(
@@ -271,7 +288,17 @@ def report():
 @admin_bp.route('/download_report_user')
 @admin_required
 def download_report_user():
-    allowed_ids = _researcher_user_ids()
+    selected_study = _selected_researcher_study()
+    if selected_study:
+        allowed_ids = [
+            u.id for u in
+            User.query.filter(User.is_admin.is_(False), User.study_group_code == selected_study.code).all()
+        ]
+        schema = _study_report_schema(selected_study)
+    else:
+        allowed_ids = _researcher_user_ids()
+        schema = None
+
     user_id = request.args.get('user_id', type=int)
     filters = get_report_filters()
 
@@ -284,6 +311,7 @@ def download_report_user():
         filters["end_date"],
         filters["report_type"] or None,
         filters["num_drinks"],
+        schema=schema,
     )
     return send_file(file_path, as_attachment=True)
 
@@ -291,7 +319,17 @@ def download_report_user():
 @admin_bp.route('/download_report_full')
 @admin_required
 def download_report_full():
-    allowed_ids = _researcher_user_ids()
+    selected_study = _selected_researcher_study()
+    if selected_study:
+        allowed_ids = [
+            u.id for u in
+            User.query.filter(User.is_admin.is_(False), User.study_group_code == selected_study.code).all()
+        ]
+        schema = _study_report_schema(selected_study)
+    else:
+        allowed_ids = _researcher_user_ids()
+        schema = None
+
     filters = get_report_filters()
 
     scoped_user_id = filters["all_user_id"] if filters["all_user_id"] in allowed_ids else None
@@ -302,5 +340,6 @@ def download_report_full():
         report_type=filters["report_type"] or None,
         num_drinks=filters["num_drinks"],
         user_ids=[scoped_user_id] if scoped_user_id else allowed_ids,
+        schema=schema,
     )
     return send_file(file_path, as_attachment=True)

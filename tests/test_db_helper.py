@@ -21,24 +21,35 @@ class TestCreateUser:
         """create_user should create and persist a user."""
         with app.app_context():
             user = create_user(
-                email="helper@test.com",
+                username="helper@test.com",
                 password="secret",
                 is_admin=False,
             )
             assert user is not None
             assert user.id is not None
-            assert user.email == "helper@test.com"
+            assert user.username == "helper@test.com"
 
     def test_create_user_admin_flag(self, app_context, app):
         """create_user should respect is_admin parameter."""
         with app.app_context():
             admin = create_user(
-                email="admin@test.com",
+                username="admin@test.com",
                 password="secret",
                 is_admin=True,
             )
             assert admin is not None
             assert admin.is_admin is True
+
+    def test_create_user_stores_study_group_code(self, app_context, app):
+        """create_user should store an optional study group code."""
+        with app.app_context():
+            user = create_user(
+                username="study-user@test.com",
+                password="secret",
+                study_group_code="abc12345",
+            )
+            assert user is not None
+            assert user.study_group_code == "abc12345"
 
 
 class TestCreateCalendarEntry:
@@ -48,7 +59,7 @@ class TestCreateCalendarEntry:
         """create_calendar_entry should create and persist an entry."""
         with app.app_context():
             user = create_user(
-                email="cal@test.com",
+                username="cal@test.com",
                 password="x",
             )
             assert user is not None
@@ -62,7 +73,7 @@ class TestCreateCalendarEntry:
         """create_calendar_entry should accept date object."""
         with app.app_context():
             user = create_user(
-                email="cal2@test.com",
+                username="cal2@test.com",
                 password="x",
             )
             entry = create_calendar_entry(user.id, date(2025, 3, 20))
@@ -77,7 +88,7 @@ class TestAddGamblingEntry:
         """add_gambling_entry should create and persist a gambling entry."""
         with app.app_context():
             user = create_user(
-                email="gamb@test.com",
+                username="gamb@test.com",
                 password="x",
             )
             entry = create_calendar_entry(user.id, datetime.utcnow())
@@ -92,7 +103,7 @@ class TestAddGamblingEntry:
         """add_gambling_entry should accept entry object (with .id) or int."""
         with app.app_context():
             user = create_user(
-                email="gamb2@test.com",
+                username="gamb2@test.com",
                 password="x",
             )
             entry = create_calendar_entry(user.id, datetime.utcnow())
@@ -110,7 +121,7 @@ class TestAddAlcoholEntry:
         """add_alcohol_entry should create and persist a drinking entry."""
         with app.app_context():
             user = create_user(
-                email="drink@test.com",
+                username="drink@test.com",
                 password="x",
             )
             entry = create_calendar_entry(user.id, datetime.utcnow())
@@ -125,7 +136,7 @@ class TestAddAlcoholEntry:
         """add_alcohol_entry should accept entry object or int."""
         with app.app_context():
             user = create_user(
-                email="drink2@test.com",
+                username="drink2@test.com",
                 password="x",
             )
             entry = create_calendar_entry(user.id, datetime.utcnow())
@@ -141,7 +152,7 @@ class TestGetCalendarEntriesForUser:
         """get_calendar_entries_for_user returns empty list for user with no entries."""
         with app.app_context():
             user = create_user(
-                email="empty@test.com",
+                username="empty@test.com",
                 password="x",
             )
             entries = get_calendar_entries_for_user(user.id)
@@ -151,7 +162,7 @@ class TestGetCalendarEntriesForUser:
         """get_calendar_entries_for_user returns entries ordered by date."""
         with app.app_context():
             user = create_user(
-                email="multi@test.com",
+                username="multi@test.com",
                 password="x",
             )
             create_calendar_entry(user.id, datetime(2025, 3, 1))
@@ -167,11 +178,11 @@ class TestGetCalendarEntriesForUser:
         """get_calendar_entries_for_user only returns entries for that user."""
         with app.app_context():
             user1 = create_user(
-                email="u1@test.com",
+                username="u1@test.com",
                 password="x",
             )
             user2 = create_user(
-                email="u2@test.com",
+                username="u2@test.com",
                 password="x",
             )
             create_calendar_entry(user1.id, datetime.utcnow())
@@ -192,7 +203,7 @@ class TestCommitToDb:
         """commit_to_db should persist valid model and return it."""
         with app.app_context():
             user = User(
-                email="commit@test.com",
+                username="commit@test.com",
                 password="x",
                 is_admin=False,
             )
@@ -204,14 +215,15 @@ class TestCommitToDb:
         """commit_to_db should rollback and return None on constraint violation."""
         with app.app_context():
             user1 = create_user(
-                email="dup@test.com",
+                username="dup@test.com",
                 password="x",
             )
             assert user1 is not None
 
-            # Duplicate username should fail (unique constraint)
+            # Reusing an existing primary key must fail and trigger rollback.
             user2 = User(
-                email="dup2@test.com",
+                id=user1.id,
+                username="dup2@test.com",
                 password="x",
                 is_admin=False,
             )
