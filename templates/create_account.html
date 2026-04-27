@@ -25,6 +25,7 @@
             <div class="auth-card panel">
                 <h2 class="auth-title">Create Account</h2>
                 <p class="auth-subtitle">Sign up to start tracking your habits.</p>
+                <p class="form-hint" style="margin-bottom: 1rem;">Your data is confidential and will only be visible to your researcher.</p>
 
                 {% if errors %}
                 <ul class="error-list" role="alert">
@@ -57,8 +58,8 @@
                             required
                         >
                             <option value="">Select account type</option>
-                            <option value="participant" {% if form_data.get('account_type') == 'participant' %}selected{% endif %}>Study Participant</option>
-                            <option value="researcher" {% if form_data.get('account_type') == 'researcher' %}selected{% endif %}>Researcher</option>
+                            <option value="participant" {{ 'selected' if form_data.get('account_type') == 'participant' }}>Study Participant</option>
+                            <option value="researcher" {{ 'selected' if form_data.get('account_type') == 'researcher' }}>Researcher</option>
                         </select>
                     </div>
 

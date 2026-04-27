@@ -89,11 +89,17 @@ def calendar():
 def user_settings():
     study = None
     researcher = None
+    researcher_studies = []
 
     user_id = session.get('user_id')
     if user_id:
         user = User.query.get(user_id)
-        if user and user.study_group_code:
+        if user and user.is_admin:
+            researcher_studies = (StudyCode.query
+                                  .filter_by(researcher_id=user_id)
+                                  .order_by(StudyCode.created_at.desc())
+                                  .all())
+        elif user and user.study_group_code:
             study = StudyCode.query.filter_by(code=user.study_group_code).first()
             if study:
                 researcher = User.query.get(study.researcher_id)
@@ -102,6 +108,7 @@ def user_settings():
         'user_settings.html',
         study=study,
         researcher=researcher,
+        researcher_studies=researcher_studies,
     )
 
 # This function defines current_user=user in the context of our flask app

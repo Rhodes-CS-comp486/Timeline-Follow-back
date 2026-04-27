@@ -5,7 +5,8 @@ from flask import Blueprint, redirect, render_template, session, url_for
 from sqlalchemy.exc import NoSuchTableError
 from sqlalchemy import asc
 
-from database.db_initialization import CalendarEntry, Drinking, Gambling, User, db
+from database.db_initialization import CalendarEntry, Drinking, Gambling, User, StudyCode, db
+from config.config_helper import field_map_from_schema
 
 insights_bp = Blueprint("insights", __name__)
 
@@ -65,8 +66,19 @@ def _get_three_month_income(user_id):
     return total_income
 
 
+def _get_field_map(user_id):
+    user = User.query.get(user_id)
+    if not user or not user.study_group_code:
+        return field_map_from_schema(None)
+    study = StudyCode.query.filter_by(code=user.study_group_code).first()
+    if not study or not study.questions:
+        return field_map_from_schema(None)
+    return field_map_from_schema(study.questions)
+
+
 def compute_insights(user_id):
     """Compute all insights data for a given user_id. Returns a dict of template variables."""
+    fm = _get_field_map(user_id)
     three_months_ago = datetime.utcnow() - timedelta(days=91)
     current_month_start = datetime.utcnow().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     last_month_end = current_month_start
@@ -101,12 +113,12 @@ def compute_insights(user_id):
 
     for gambling, entry_date in rows:
         questions = gambling.gambling_questions or {}
-        intended = float(questions.get("money_intended") or 0)
-        wagered = float(questions.get("money_spent") or 0)
+        intended = float(questions.get(fm['money_intended']) or 0)
+        wagered = float(questions.get(fm['money_spent']) or 0)
         total_intended += intended
         total_wagered += wagered
-        total_hours += float(questions.get("time_spent") or 0)
-        total_net_earned += float(questions.get("money_earned") or 0)
+        total_hours += float(questions.get(fm['time_spent']) or 0)
+        total_net_earned += float(questions.get(fm['money_earned']) or 0)
         if wagered > intended:
             sessions_over_intent += 1
 
@@ -153,7 +165,7 @@ def compute_insights(user_id):
         dow = entry_date.weekday()  # 0=Mon … 6=Sun
         questions = gambling.gambling_questions or {}
         dow_gambling[dow]["sessions"] += 1
-        dow_gambling[dow]["wagered"] += float(questions.get("money_spent") or 0)
+        dow_gambling[dow]["wagered"] += float(questions.get(fm['money_spent']) or 0)
 
     dow_drinking_rows = (
         db.session.query(Drinking, CalendarEntry.entry_date)
@@ -170,7 +182,7 @@ def compute_insights(user_id):
         dow = entry_date.weekday()
         questions = drinking.drinking_questions or {}
         dow_drinking[dow]["sessions"] += 1
-        dow_drinking[dow]["drinks"] += float(questions.get("num_drinks") or 0)
+        dow_drinking[dow]["drinks"] += float(questions.get(fm['num_drinks']) or 0)
 
     # round wagered/drinks totals
     for d in dow_gambling:

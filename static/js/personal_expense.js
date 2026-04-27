@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        if (!items.length || allocationTotal === 0) {
+        if (!items.length || expenseTotal === 0) {
             pieChart.style.background = "linear-gradient(135deg, #eef3f1, #dce8e2)";
             legend.innerHTML = '<p class="entry-empty">Enter values to see the breakdown.</p>';
             return;
@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let start = 0;
         const segments = items.map((item) => {
-            const percent = (item.value / allocationTotal) * 100;
+            const percent = (item.value / expenseTotal) * 100;
             const segment = `${item.color} ${start.toFixed(2)}% ${(start + percent).toFixed(2)}%`;
             start += percent;
             return segment;
@@ -105,7 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         legend.innerHTML = "";
         items.forEach((item) => {
-            const percent = allocationTotal ? (item.value / allocationTotal) * 100 : 0;
+            const percent = (item.value / expenseTotal) * 100;
             legend.appendChild(buildLegendRow({ ...item, percent }));
         });
     };

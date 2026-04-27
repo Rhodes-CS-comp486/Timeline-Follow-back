@@ -18,7 +18,7 @@
 
     <aside class="site-sidebar" id="siteSidebar" aria-label="Primary navigation" aria-hidden="true">
         <div class="site-sidebar__header">
-            <a class="site-sidebar__brand" href="{{ url_for('calendar') }}">Timeline Follow-Back</a>
+            <span class="site-sidebar__brand">Timeline Follow-Back</span>
             <button type="button" class="site-sidebar__close" aria-label="Close navigation menu" data-sidebar-close>&times;</button>
         </div>
 
@@ -31,6 +31,10 @@
                 <a class="site-nav-link{% if endpoint == 'admin.insights' %} is-active{% endif %}" href="{{ url_for('admin.insights') }}"
                    {% if endpoint == 'admin.insights' %}aria-current="page"{% endif %}>
                     Insights
+                </a>
+                <a class="site-nav-link{% if endpoint == 'admin.participant_calendar' %} is-active{% endif %}" href="{{ url_for('admin.participant_calendar') }}"
+                   {% if endpoint == 'admin.participant_calendar' %}aria-current="page"{% endif %}>
+                    Calendar
                 </a>
                 <a class="site-nav-link{% if endpoint == 'admin.researcher_panel' %} is-active{% endif %}" href="{{ url_for('admin.researcher_panel') }}"
                    {% if endpoint == 'admin.researcher_panel' %}aria-current="page"{% endif %}>

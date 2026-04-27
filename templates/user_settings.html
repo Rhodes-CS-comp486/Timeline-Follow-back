@@ -15,7 +15,7 @@
 
             <header class="page-header">
                 <h1>Account Settings</h1>
-                <p class="subtitle">Manage your account information</p>
+                <p class="subtitle">View your account information</p>
             </header>
 
             <main class="auth-wrapper">
@@ -33,51 +33,65 @@
                         >
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="study_code">Study Code</label>
-                        <input
-                            type="text"
-                            id="study_code"
-                            class="form-input"
-                            value="{{ study.code if study else 'Not assigned' }}"
-                            readonly
-                        >
-                    </div>
+                    {% if current_user and current_user.is_admin %}
+                        <h2 class="auth-title" style="margin-top: 1.5rem;">My Studies</h2>
+                        {% if researcher_studies %}
+                            <div style="overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; background: #fff;">
+                                <table style="width: 100%; border-collapse: collapse;">
+                                    <thead>
+                                        <tr>
+                                            <th style="padding: 10px 14px; background: #f5f7f6; font-size: 13px; font-family: var(--font-heading); text-align: left; border-bottom: 1px solid var(--border);">Study Name</th>
+                                            <th style="padding: 10px 14px; background: #f5f7f6; font-size: 13px; font-family: var(--font-heading); text-align: left; border-bottom: 1px solid var(--border);">Study Code</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for s in researcher_studies %}
+                                            <tr>
+                                                <td style="padding: 10px 14px; font-size: 14px; border-bottom: 1px solid var(--border);">{{ s.title }}</td>
+                                                <td style="padding: 10px 14px; font-size: 14px; font-family: monospace; border-bottom: 1px solid var(--border);">{{ s.code }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="form-hint">You have not created any studies yet.</p>
+                        {% endif %}
+                    {% else %}
+                        <div class="form-group">
+                            <label class="form-label" for="study_code">Study Code</label>
+                            <input
+                                type="text"
+                                id="study_code"
+                                class="form-input"
+                                value="{{ study.code if study else 'Not assigned' }}"
+                                readonly
+                            >
+                        </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="study_name">Study Name</label>
-                        <input
-                            type="text"
-                            id="study_name"
-                            class="form-input"
-                            value="{{ study.title if study else 'Not assigned' }}"
-                            readonly
-                        >
-                    </div>
+                        <div class="form-group">
+                            <label class="form-label" for="study_name">Study Name</label>
+                            <input
+                                type="text"
+                                id="study_name"
+                                class="form-input"
+                                value="{{ study.title if study else 'Not assigned' }}"
+                                readonly
+                            >
+                        </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="researcher_name">Researcher Name</label>
-                        <input
-                            type="text"
-                            id="researcher_name"
-                            class="form-input"
-                            value="{{ researcher.username if researcher else 'Not assigned' }}"
-                            readonly
-                        >
-                    </div>
+                        <div class="form-group">
+                            <label class="form-label" for="researcher_name">Researcher Username</label>
+                            <input
+                                type="text"
+                                id="researcher_name"
+                                class="form-input"
+                                value="{{ researcher.username if researcher else 'Not assigned' }}"
+                                readonly
+                            >
+                        </div>
+                    {% endif %}
 
-                    <div class="form-group">
-                        <label class="form-label" for="researcher_contact">Researcher Contact</label>
-                        <input
-                            type="text"
-                            id="researcher_contact"
-                            class="form-input"
-                            value="{{ researcher.username if researcher else 'Not assigned' }}"
-                            readonly
-                        >
-                    </div>
-
-                    <p class="form-hint">Contact your administrator to update your account information.</p>
                 </div>
             </main>
         </div>

@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, session
 from database.db_helper import create_calendar_entry, get_calendar_entries_for_user
-from database.db_initialization import CalendarEntry, Drinking, Gambling, db
+from database.db_initialization import CalendarEntry, Drinking, Gambling, User, StudyCode, db
 from pathlib import Path
 import json
 from datetime import datetime, timedelta
@@ -244,8 +244,36 @@ def get_calendar_events():
         user_id = request.args.get('user_id', default=1, type=int)
 
     try:
+        # Use the user's study schema if available, otherwise fall back to questions.json
+        user_obj = User.query.get(user_id)
+        if user_obj and user_obj.study_group_code:
+            study = StudyCode.query.filter_by(code=user_obj.study_group_code).first()
+            if study and study.questions and (study.questions.get('drinking') or study.questions.get('gambling')):
+                effective_drinking_schema = study.questions.get('drinking', [])
+                effective_gambling_schema = study.questions.get('gambling', [])
+            else:
+                effective_drinking_schema = qSchema.get('drinking', [])
+                effective_gambling_schema = qSchema.get('gambling', [])
+        else:
+            effective_drinking_schema = qSchema.get('drinking', [])
+            effective_gambling_schema = qSchema.get('gambling', [])
+
         entries = get_calendar_entries_for_user(user_id)
         entries = sorted(entries, key=lambda row: (row.entry_date, row.id))
+
+        if not entries:
+            return jsonify([]), 200
+
+        # Bulk-load all drinking and gambling records in two queries instead of one per entry.
+        entry_ids = [e.id for e in entries]
+        drinking_by_entry = {
+            d.entry_id: d
+            for d in Drinking.query.filter(Drinking.entry_id.in_(entry_ids)).all()
+        }
+        gambling_by_entry = {
+            g.entry_id: g
+            for g in Gambling.query.filter(Gambling.entry_id.in_(entry_ids)).all()
+        }
 
         # Collapse multiple DB rows from the same date into one API event.
         events_by_date = {}
@@ -263,49 +291,29 @@ def get_calendar_events():
 
             event = events_by_date[iso_date]
             if e.id > event["id"]:
-                # Keep highest id so frontend edits/deletes target the newest row.
                 event["id"] = e.id
 
-            # Fetch drinking details if it's a drinking entry
             if not e.entry_type or e.entry_type == "drinking":
-                drinking = Drinking.query.filter_by(entry_id=e.id).first()
+                drinking = drinking_by_entry.get(e.id)
                 if drinking:
                     event["has_drinking"] = True
                 if drinking and drinking.drinking_questions:
-                    # print(f"DEBUG - drinking_questions: {drinking.drinking_questions}")
-                    extracted = extract_fields(qSchema["drinking"], drinking.drinking_questions)
-                    # print(f"DEBUG - extracted fields: {extracted}")
-                    event.update(extracted)
-                    # print(f"DEBUG - final event object: {event}")
-
+                    event.update(extract_fields(effective_drinking_schema, drinking.drinking_questions))
 
             if not e.entry_type or e.entry_type == "gambling":
-
-                gambling = Gambling.query.filter_by(entry_id=e.id).first()
+                gambling = gambling_by_entry.get(e.id)
                 if gambling:
                     event["has_gambling"] = True
-
-                # print(f"DEBUG - Found gambling record: {gambling}")
-
-                # print(f"DEBUG - gambling.gambling_questions: {gambling.gambling_questions if gambling else 'N/A'}")
-
                 if gambling and gambling.gambling_questions:
-                    # print(f"DEBUG - gambling_questions: {gambling.gambling_questions}")
-                    extracted = extract_fields(qSchema["gambling"], gambling.gambling_questions)
-                    # print(f"DEBUG - extracted fields: {extracted}")
-                    event.update(extracted)
-                    if not  e.entry_type:
+                    event.update(extract_fields(effective_gambling_schema, gambling.gambling_questions))
+                    if not e.entry_type:
                         event["type"] = "gambling"
-
-                    # print(f"DEBUG - final event object: {event}")
 
         for event in events_by_date.values():
             if not event["has_drinking"] and not event["has_gambling"]:
                 event["has_no_activity"] = True
 
-        events = sorted(events_by_date.values(), key=lambda item: item["date"])
-
-        return jsonify(events), 200
+        return jsonify(sorted(events_by_date.values(), key=lambda item: item["date"])), 200
 
     except Exception as exc:
         print(f"Error retrieving calendar events: {exc}")

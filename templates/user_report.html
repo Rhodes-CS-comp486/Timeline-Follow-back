@@ -75,8 +75,8 @@
                             <table class="report-table">
                                 <thead>
                                     <tr>
-                                        {% for header in report_headers %}
-                                            <th>{{ header.replace('_', ' ').title() }}</th>
+                                        {% for label in report_header_labels %}
+                                            <th>{{ label }}</th>
                                         {% endfor %}
                                     </tr>
                                 </thead>

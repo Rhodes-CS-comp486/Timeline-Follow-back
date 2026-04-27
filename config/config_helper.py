@@ -50,6 +50,62 @@ def extract_answers(schema_section: list, answers_dict: dict):
     return result
 
 
+def field_map_from_schema(schema: dict) -> dict:
+    """
+    Return a dict mapping canonical role names to the actual stored question IDs
+    for the given schema.  Positional order mirrors questions.json:
+      drinking[0]  → num_drinks
+      gambling[0]  → gambling_type
+      gambling[1]  → time_spent
+      gambling[2]  → money_intended
+      gambling[3]  → money_spent
+      gambling[4]  → money_earned
+      gambling[5]  → drinks_while_gambling
+    Falls back to the canonical name when a position is absent.
+    """
+    defaults = {
+        'num_drinks':            'num_drinks',
+        'gambling_type':         'gambling_type',
+        'time_spent':            'time_spent',
+        'money_intended':        'money_intended',
+        'money_spent':           'money_spent',
+        'money_earned':          'money_earned',
+        'drinks_while_gambling': 'drinks_while_gambling',
+    }
+    if not schema:
+        return defaults
+    d_qs = schema.get('drinking', [])
+    g_qs = schema.get('gambling', [])
+    if not d_qs and not g_qs:
+        return defaults
+    return {
+        'num_drinks':            d_qs[0]['id'] if len(d_qs) > 0 else defaults['num_drinks'],
+        'gambling_type':         g_qs[0]['id'] if len(g_qs) > 0 else defaults['gambling_type'],
+        'time_spent':            g_qs[1]['id'] if len(g_qs) > 1 else defaults['time_spent'],
+        'money_intended':        g_qs[2]['id'] if len(g_qs) > 2 else defaults['money_intended'],
+        'money_spent':           g_qs[3]['id'] if len(g_qs) > 3 else defaults['money_spent'],
+        'money_earned':          g_qs[4]['id'] if len(g_qs) > 4 else defaults['money_earned'],
+        'drinks_while_gambling': g_qs[5]['id'] if len(g_qs) > 5 else defaults['drinks_while_gambling'],
+    }
+
+
+def get_header_label_map(schema: dict) -> dict:
+    """
+    Maps each report column ID to a human-readable display label.
+    Base columns get clean fixed labels; question columns use their schema label.
+    """
+    label_map = {
+        "user_id":      "User ID",
+        "date":         "Date",
+        "has_drinking": "Drinking",
+        "has_gambling": "Gambling",
+    }
+    for section in ["drinking", "gambling"]:
+        for q in (schema or {}).get(section, []):
+            label_map[q["id"]] = q["label"]
+    return label_map
+
+
 def merge_activity_data(schema: dict, drinking_data: dict, gambling_data: dict):
     """
     Combine drinking + gambling into one flat row.

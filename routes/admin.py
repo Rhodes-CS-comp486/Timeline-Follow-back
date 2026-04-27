@@ -4,10 +4,12 @@ import string
 
 from flask import Blueprint, render_template, send_file, request, redirect, url_for, session, jsonify
 from csv_formatting.csv_creator import generate_user_csv_report, generate_all_users_csv, build_report_dataset
-from database.db_initialization import User, StudyCode, db
+from database.db_initialization import User, StudyCode, CalendarEntry, Drinking, Gambling, db
 from routes.auth import admin_required
 from routes.insights import compute_insights
-from database.db_helper import get_gambling_aggregates
+from database.db_helper import get_gambling_aggregates, get_calendar_entries_for_user
+from routes.events_handler import extract_fields, qSchema
+from config.config_helper import get_header_label_map
 from datetime import datetime, timedelta
 
 admin_bp = Blueprint('admin', __name__)
@@ -250,6 +252,7 @@ def report():
 
     report_headers = []
     report_rows = []
+    study_schema = _study_report_schema(selected_study)
     if show_table and selected_study:
         report_headers, report_rows = build_report_dataset(
             user_id=scoped_user_id,
@@ -258,20 +261,27 @@ def report():
             end_date=filters["end_date"],
             report_type=filters["report_type"] or None,
             num_drinks=filters["num_drinks"],
-            schema=_study_report_schema(selected_study),
+            schema=study_schema,
         )
+
+    label_map = get_header_label_map(study_schema)
+    report_header_labels = [
+        label_map.get(h, h.replace('_', ' ').title()) for h in report_headers
+    ]
 
     aggregates = get_gambling_aggregates(
         start_date=filters["start_date"],
         end_date=filters["end_date"],
         user_id=scoped_user_id,
         user_ids=None if scoped_user_id else list(allowed_ids),
+        schema=study_schema,
     ) if selected_study else _EMPTY_AGGREGATES
 
     return render_template(
         'report.html',
         users=users,
         report_headers=report_headers,
+        report_header_labels=report_header_labels,
         report_rows=report_rows,
         show_table=show_table,
         filters=filters,
@@ -314,6 +324,135 @@ def download_report_user():
         schema=schema,
     )
     return send_file(file_path, as_attachment=True)
+
+
+@admin_bp.route('/participant-calendar')
+@admin_required
+def participant_calendar():
+    researcher_id = session.get('user_id')
+    studies = (StudyCode.query
+               .filter_by(researcher_id=researcher_id)
+               .order_by(StudyCode.created_at.desc())
+               .all())
+
+    selected_study_id = request.args.get('study_id', type=int)
+    selected_study = next((s for s in studies if s.id == selected_study_id), None)
+
+    users = []
+    selected_user = None
+
+    if selected_study:
+        users = (User.query
+                 .filter(User.is_admin.is_(False), User.study_group_code == selected_study.code)
+                 .order_by(User.username)
+                 .all())
+        allowed_ids = {u.id for u in users}
+        selected_user_id = request.args.get('user_id', type=int)
+        if selected_user_id and selected_user_id in allowed_ids:
+            selected_user = User.query.get(selected_user_id)
+
+    return render_template(
+        'researcher_calendar.html',
+        studies=studies,
+        selected_study=selected_study,
+        users=users,
+        selected_user=selected_user,
+    )
+
+
+@admin_bp.route('/participant-calendar-events')
+@admin_required
+def participant_calendar_events():
+    researcher_id = session.get('user_id')
+    user_id = request.args.get('user_id', type=int)
+
+    if not user_id:
+        return jsonify({'error': 'user_id required'}), 400
+
+    codes = [
+        sc.code for sc in
+        StudyCode.query.filter_by(researcher_id=researcher_id).with_entities(StudyCode.code).all()
+    ]
+    if not codes:
+        return jsonify([]), 200
+
+    participant = User.query.filter(
+        User.id == user_id,
+        User.is_admin.is_(False),
+        User.study_group_code.in_(codes)
+    ).first()
+
+    if not participant:
+        return jsonify({'error': 'Not found'}), 404
+
+    try:
+        # Use the participant's study schema so custom question IDs are returned correctly
+        p_study = StudyCode.query.filter_by(code=participant.study_group_code).first() if participant.study_group_code else None
+        if p_study and p_study.questions and (p_study.questions.get('drinking') or p_study.questions.get('gambling')):
+            p_drinking_schema = p_study.questions.get('drinking', [])
+            p_gambling_schema = p_study.questions.get('gambling', [])
+        else:
+            p_drinking_schema = qSchema.get('drinking', [])
+            p_gambling_schema = qSchema.get('gambling', [])
+
+        db_entries = get_calendar_entries_for_user(user_id)
+        db_entries = sorted(db_entries, key=lambda row: (row.entry_date, row.id))
+
+        if not db_entries:
+            return jsonify([]), 200
+
+        entry_ids = [e.id for e in db_entries]
+        drinking_by_entry = {
+            d.entry_id: d
+            for d in Drinking.query.filter(Drinking.entry_id.in_(entry_ids)).all()
+        }
+        gambling_by_entry = {
+            g.entry_id: g
+            for g in Gambling.query.filter(Gambling.entry_id.in_(entry_ids)).all()
+        }
+
+        events_by_date = {}
+        for e in db_entries:
+            iso_date = e.entry_date.isoformat().split('T')[0]
+            if iso_date not in events_by_date:
+                events_by_date[iso_date] = {
+                    'id': e.id,
+                    'date': iso_date,
+                    'type': e.entry_type,
+                    'has_drinking': False,
+                    'has_gambling': False,
+                    'has_no_activity': False,
+                }
+
+            event = events_by_date[iso_date]
+            if e.id > event['id']:
+                event['id'] = e.id
+
+            if not e.entry_type or e.entry_type == 'drinking':
+                drinking = drinking_by_entry.get(e.id)
+                if drinking:
+                    event['has_drinking'] = True
+                if drinking and drinking.drinking_questions:
+                    event.update(extract_fields(p_drinking_schema, drinking.drinking_questions))
+
+            if not e.entry_type or e.entry_type == 'gambling':
+                gambling = gambling_by_entry.get(e.id)
+                if gambling:
+                    event['has_gambling'] = True
+                if gambling and gambling.gambling_questions:
+                    event.update(extract_fields(p_gambling_schema, gambling.gambling_questions))
+                    if not e.entry_type:
+                        event['type'] = 'gambling'
+
+        for event in events_by_date.values():
+            if not event['has_drinking'] and not event['has_gambling']:
+                event['has_no_activity'] = True
+
+        return jsonify(sorted(events_by_date.values(), key=lambda x: x['date'])), 200
+
+    except Exception as exc:
+        print(f'Error retrieving participant calendar events: {exc}')
+        return jsonify({'error': 'Failed to retrieve events'}), 500
 
 
 @admin_bp.route('/download_report_full')

@@ -141,8 +141,8 @@ const initCalendar = () => {
     const resetFormState = () => {
         if (activityForm) activityForm.reset();
         if (chkNoActivity) chkNoActivity.checked = false;
-        chkDrinking.disabled = false;
-        chkGambling.disabled = false;
+        if (chkDrinking) chkDrinking.disabled = false;
+        if (chkGambling) chkGambling.disabled = false;
         toggleSection(chkDrinking, drinkingSection);
         toggleSection(chkGambling, gamblingSection);
     };
@@ -153,20 +153,19 @@ const initCalendar = () => {
         String(value).trim() !== ''
     );
 
-    const gamblingFieldNames = [
-        'gambling_type',
-        'time_spent',
-        'money_intended',
-        'money_spent',
-        'money_earned',
-        'drinks_while_gambling',
-    ];
+    const getQs = () => {
+        const q = (typeof QUESTIONS !== 'undefined') ? QUESTIONS : {};
+        return { drinking: q.drinking || [], gambling: q.gambling || [] };
+    };
 
-    const entryHasDrinking = (entry) => Boolean(entry?.has_drinking) || hasValue(entry?.num_drinks);
-    const entryHasGambling = (entry) => (
-        Boolean(entry?.has_gambling) ||
-        gamblingFieldNames.some((field) => hasValue(entry?.[field]))
-    );
+    const entryHasDrinking = (entry) => {
+        if (Boolean(entry?.has_drinking)) return true;
+        return getQs().drinking.some((q) => hasValue(entry?.[q.id]));
+    };
+    const entryHasGambling = (entry) => {
+        if (Boolean(entry?.has_gambling)) return true;
+        return getQs().gambling.some((q) => hasValue(entry?.[q.id]));
+    };
 
     const setModalMode = (mode, iso) => {
         if (mode === 'edit') {
@@ -209,13 +208,8 @@ const initCalendar = () => {
         if (chkDrinking) chkDrinking.checked = entryHasDrinking(entry);
         if (chkGambling) chkGambling.checked = entryHasGambling(entry);
 
-        fillInput('num_drinks', entry.num_drinks);
-        fillInput('gambling_type', entry.gambling_type);
-        fillInput('time_spent', entry.time_spent);
-        fillInput('money_intended', entry.money_intended);
-        fillInput('money_spent', entry.money_spent);
-        fillInput('money_earned', entry.money_earned);
-        fillInput('drinks_while_gambling', entry.drinks_while_gambling);
+        const { drinking, gambling } = getQs();
+        [...drinking, ...gambling].forEach((q) => fillInput(q.id, entry[q.id]));
 
         toggleSection(chkDrinking, drinkingSection);
         toggleSection(chkGambling, gamblingSection);
@@ -252,7 +246,8 @@ const initCalendar = () => {
 
     const loadEvents = async () => {
         try {
-            const response = await fetch(`/api/calendar-events?ts=${Date.now()}`, {
+            const eventsUrl = window.CALENDAR_EVENTS_URL || '/api/calendar-events';
+            const response = await fetch(`${eventsUrl}${eventsUrl.includes('?') ? '&' : '?'}ts=${Date.now()}`, {
                 cache: 'no-store'
             });
             const events = await response.json();
@@ -264,6 +259,9 @@ const initCalendar = () => {
             }
 
             Object.keys(entries).forEach((key) => delete entries[key]);
+
+            const { drinking: dqs, gambling: gqs } = getQs();
+            const allFieldIds = [...dqs, ...gqs].map((q) => q.id);
 
             events.forEach((event) => {
                 const dateKey = event.date;
@@ -277,15 +275,7 @@ const initCalendar = () => {
                 merged.has_drinking = Boolean(merged.has_drinking) || Boolean(event.has_drinking);
                 merged.has_gambling = Boolean(merged.has_gambling) || Boolean(event.has_gambling);
 
-                [
-                    'num_drinks',
-                    'gambling_type',
-                    'time_spent',
-                    'money_intended',
-                    'money_spent',
-                    'money_earned',
-                    'drinks_while_gambling',
-                ].forEach((field) => {
+                allFieldIds.forEach((field) => {
                     if (hasValue(event[field])) merged[field] = event[field];
                 });
             });
@@ -341,28 +331,33 @@ const initCalendar = () => {
             return;
         }
 
+        const { drinking: dqs, gambling: gqs } = getQs();
+
         let html = '';
-        dayEntries.forEach(entry => {
-            if (hasValue(entry.num_drinks)) {
+        dayEntries.forEach((entry) => {
+            if (entry.has_drinking) {
                 html += `<div class="entry-section">`;
                 html += `<div class="entry-section-title" style="color: var(--primary);">Drinking</div>`;
-                html += `<div class="entry-row"><span class="entry-label">Drinks:</span> ${entry.num_drinks}</div>`;
+                dqs.forEach((q) => {
+                    if (hasValue(entry[q.id])) {
+                        html += `<div class="entry-row"><span class="entry-label">${q.label}:</span> ${entry[q.id]}</div>`;
+                    }
+                });
                 html += `</div>`;
             }
-            if (entryHasGambling(entry)) {
+            if (entry.has_gambling) {
                 html += `<div class="entry-section">`;
                 html += `<div class="entry-section-title">Gambling</div>`;
-                if (hasValue(entry.gambling_type)) html += `<div class="entry-row"><span class="entry-label">Type:</span> ${entry.gambling_type}</div>`;
-                if (hasValue(entry.time_spent)) html += `<div class="entry-row"><span class="entry-label">Time Spent:</span> ${entry.time_spent}</div>`;
-                if (hasValue(entry.money_intended)) html += `<div class="entry-row"><span class="entry-label">Intended:</span> $${entry.money_intended}</div>`;
-                if (hasValue(entry.money_spent)) html += `<div class="entry-row"><span class="entry-label">Wagered:</span> $${entry.money_spent}</div>`;
-                if (hasValue(entry.money_earned)) html += `<div class="entry-row"><span class="entry-label">Won/Lost:</span> $${entry.money_earned}</div>`;
-                if (hasValue(entry.drinks_while_gambling)) html += `<div class="entry-row"><span class="entry-label">Drinks While Gambling:</span> ${entry.drinks_while_gambling}</div>`;
+                gqs.forEach((q) => {
+                    if (hasValue(entry[q.id])) {
+                        html += `<div class="entry-row"><span class="entry-label">${q.label}:</span> ${entry[q.id]}</div>`;
+                    }
+                });
                 html += `</div>`;
             }
         });
 
-        const hasNoActivity = dayEntries.some(e => e.has_no_activity);
+        const hasNoActivity = dayEntries.some((e) => e.has_no_activity);
         if (!html && hasNoActivity) {
             entrySummary.innerHTML = '<p class="entry-empty">You didn\'t drink or gamble this day.</p>';
         } else if (!html) {
@@ -479,8 +474,10 @@ const initCalendar = () => {
                     selectedLabel.textContent = formatReadable(cellDate);
                     renderSidebar();
 
-                    // Open the modal when a valid day is clicked
-                    openModalForDate(iso);
+                    // Open the modal when a valid day is clicked (suppressed in read-only mode)
+                    if (!window.READONLY) {
+                        openModalForDate(iso);
+                    }
 
                     renderGrid();
                 });

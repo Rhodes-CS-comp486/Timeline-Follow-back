@@ -103,9 +103,11 @@ def get_calendar_entries_for_user(user_id: int):
 # This function aggregates gambling data across users for the admin report
 # Parameters: start_date -> str (optional), end_date -> str (optional), user_id -> int (optional)
 # Returns: dict of aggregated values
-def get_gambling_aggregates(start_date=None, end_date=None, user_id=None, user_ids=None):
+def get_gambling_aggregates(start_date=None, end_date=None, user_id=None, user_ids=None, schema=None):
     from database.db_initialization import Gambling, Drinking, CalendarEntry
     from datetime import datetime
+    from config.config_helper import field_map_from_schema
+    fm = field_map_from_schema(schema)
 
     # --- Gambling aggregates ---
     gambling_query = db.session.query(Gambling, CalendarEntry).join(
@@ -136,23 +138,23 @@ def get_gambling_aggregates(start_date=None, end_date=None, user_id=None, user_i
         gambling_user_ids.add(gambling.user_id)
 
         try:
-            total_intended += float(questions.get("money_intended") or 0)
+            total_intended += float(questions.get(fm['money_intended']) or 0)
         except (ValueError, TypeError):
             pass
 
         try:
-            total_spent += float(questions.get("money_spent") or 0)
+            total_spent += float(questions.get(fm['money_spent']) or 0)
         except (ValueError, TypeError):
             pass
 
         try:
-            total_hours += float(questions.get("time_spent") or 0)
+            total_hours += float(questions.get(fm['time_spent']) or 0)
         except (ValueError, TypeError):
             pass
 
         try:
             day_name = calendar_entry.entry_date.strftime("%A")
-            by_day[day_name] += float(questions.get("money_spent") or 0)
+            by_day[day_name] += float(questions.get(fm['money_spent']) or 0)
         except (ValueError, TypeError):
             pass
 
@@ -180,7 +182,7 @@ def get_gambling_aggregates(start_date=None, end_date=None, user_id=None, user_i
         drinking_user_ids.add(drinking.user_id)
 
         try:
-            total_drinks += float(questions.get("num_drinks") or 0)
+            total_drinks += float(questions.get(fm['num_drinks']) or 0)
         except (ValueError, TypeError):
             pass
 

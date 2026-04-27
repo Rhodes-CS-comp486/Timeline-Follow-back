@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Participant Calendar – Timeline Follow-Back</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        .user-picker-card { margin-bottom: 24px; }
+        .user-picker-form {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+        .user-picker-form label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            display: block;
+            margin-bottom: 6px;
+        }
+        .user-picker-form select { min-width: 220px; }
+        .user-picker-prompt { color: var(--muted); font-style: italic; margin-top: 8px; }
+        .calendar-viewer-block {
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 14px;
+        }
+        .calendar-viewer-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 4px;
+        }
+        .calendar-viewer-name {
+            font-family: var(--font-heading);
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+        .calendar-viewer-link {
+            font-size: 13px;
+            color: var(--primary);
+            text-decoration: none;
+        }
+        .calendar-viewer-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+{% if not selected_user %}
+    <div class="app-shell">
+        {% include 'partials/sidebar_nav.html' %}
+
+        <div class="page-content">
+            <header class="report-header">
+                <h1>Participant Calendar</h1>
+                <p class="subtitle">Select a study and participant to view their calendar.</p>
+            </header>
+
+            <article class="report-card user-picker-card">
+                <h2>Choose a Study</h2>
+                <form class="user-picker-form" method="get" action="{{ url_for('admin.participant_calendar') }}">
+                    <div>
+                        <label for="study_id">Study</label>
+                        <select id="study_id" name="study_id" class="form-select" onchange="this.form.submit()">
+                            <option value="">— Select a study —</option>
+                            {% for s in studies %}
+                                <option value="{{ s.id }}" {{ 'selected' if selected_study and selected_study.id == s.id }}>
+                                    {{ s.title }} ({{ s.code }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </article>
+
+            <article class="report-card user-picker-card">
+                <h2>Choose a Participant</h2>
+                {% if not selected_study %}
+                    <p class="user-picker-prompt">Select a study above to see its participants.</p>
+                {% elif not users %}
+                    <p class="user-picker-prompt">No participants enrolled in this study yet.</p>
+                {% else %}
+                    <form class="user-picker-form" method="get" action="{{ url_for('admin.participant_calendar') }}">
+                        <input type="hidden" name="study_id" value="{{ selected_study.id }}">
+                        <div>
+                            <label for="user_id">Participant</label>
+                            <select id="user_id" name="user_id" class="form-select">
+                                <option value="">— Select a participant —</option>
+                                {% for u in users %}
+                                    <option value="{{ u.id }}">{{ u.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-primary">View Calendar</button>
+                    </form>
+                {% endif %}
+            </article>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
+
+{% else %}
+    <div id="app"></div>
+
+    <template id="base-layout">
+        <div class="app-shell">
+            {% include 'partials/sidebar_nav.html' %}
+
+            <main class="app-main">
+                <aside class="sidebar">
+                    <div class="panel">
+                        <div class="calendar-viewer-block">
+                            <div class="calendar-viewer-label">Viewing</div>
+                            <div class="calendar-viewer-name">{{ selected_user.username }}</div>
+                            <a class="calendar-viewer-link"
+                               href="{{ url_for('admin.participant_calendar', study_id=selected_study.id) }}">
+                                Change participant
+                            </a>
+                        </div>
+                        <div class="panel-title" id="selectedDateLabel">Pick a day</div>
+                        <div class="entry-summary" id="entrySummary">
+                            <p class="entry-empty">Select a date to view its entry.</p>
+                        </div>
+                        <div class="marker-legend" aria-label="Marker legend">
+                            <div class="legend-title">Marker Legend</div>
+                            <div class="legend-item">
+                                <span class="activity-marker marker-drinking"></span>
+                                <span>Drinking</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="activity-marker marker-gambling"></span>
+                                <span>Gambling</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="activity-marker marker-no-activity"></span>
+                                <span>No activity</span>
+                            </div>
+                        </div>
+                    </div>
+                </aside>
+
+                <section class="calendar-area">
+                    <div class="calendar-card">
+                        <div class="calendar-toolbar">
+                            <div class="month-controls">
+                                <button class="icon-btn" id="prevMonth" type="button" aria-label="Previous month">&larr;</button>
+                                <div class="month-label" id="monthLabel" aria-live="polite"></div>
+                                <button class="icon-btn" id="nextMonth" type="button" aria-label="Next month">&rarr;</button>
+                            </div>
+                        </div>
+                        <div class="weekday-row">
+                            <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                        </div>
+                        <div class="calendar-grid" id="calendarGrid"></div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </template>
+
+    <template id="calendar-page"></template>
+
+    <script>
+        window.READONLY = true;
+        window.CALENDAR_EVENTS_URL = '{{ url_for("admin.participant_calendar_events", user_id=selected_user.id) }}';
+    </script>
+    <script>const QUESTIONS = {{ selected_study.questions | tojson }};</script>
+    <script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% endif %}
+</body>
+</html>

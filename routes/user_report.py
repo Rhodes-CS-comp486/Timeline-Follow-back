@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, send_file, request, session, redirect, url_for
 from csv_formatting.csv_creator import generate_user_csv_report, build_report_dataset
 from database.db_initialization import StudyCode, User
+from config.config_helper import get_header_label_map
 
 user_report_bp = Blueprint('user_report', __name__)
 
@@ -36,6 +37,7 @@ def report():
 
     report_headers = []
     report_rows = []
+    study_schema = get_user_study_schema(user_id)
     if show_table:
         report_headers, report_rows = build_report_dataset(
             user_id=user_id,
@@ -43,12 +45,18 @@ def report():
             end_date=filters["end_date"],
             report_type=filters["report_type"] or None,
             num_drinks=filters["num_drinks"],
-            schema=get_user_study_schema(user_id),
+            schema=study_schema,
         )
+
+    label_map = get_header_label_map(study_schema)
+    report_header_labels = [
+        label_map.get(h, h.replace('_', ' ').title()) for h in report_headers
+    ]
 
     return render_template(
         'user_report.html',
         report_headers=report_headers,
+        report_header_labels=report_header_labels,
         report_rows=report_rows,
         show_table=show_table,
         filters=filters,
