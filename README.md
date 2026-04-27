@@ -17,7 +17,7 @@ Sprints
 
 Slideshows
 - [Mid-Semester Slideshow](https://docs.google.com/presentation/d/1oa4ge7Kv9xXsgHoBk9u0-2Guwie36OXVhX3_5XdY81g/edit?usp=sharing)
-
+- [Final Slideshow](https://docs.google.com/presentation/d/133DUUM4ZAQ2XI9xX2_NaO8pNLlqyLtPKD8LTBuDHOWA/edit?usp=sharing)
 
 # Flask + Gunicorn + Nginx Deployment Guide
 
