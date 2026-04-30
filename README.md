@@ -20,6 +20,23 @@ Slideshows
 - [Mid-Semester Slideshow](https://docs.google.com/presentation/d/1oa4ge7Kv9xXsgHoBk9u0-2Guwie36OXVhX3_5XdY81g/edit?usp=sharing)
 - [Final Slideshow](https://docs.google.com/presentation/d/133DUUM4ZAQ2XI9xX2_NaO8pNLlqyLtPKD8LTBuDHOWA/edit?usp=sharing)
 
+# Install dependencies
+Either install dependencies manually through your local IDE or use the following command. Make sure the virtual env has been set up for running this command. 
+```bash
+pip install -r requirements.txt
+```
+# How to run the website on local hosting
+Make sure you are in the root directory of the project and run the following command. This is the main entry point for local hosting.
+```bash
+python app.py
+```
+# How to run all test cases
+
+Run the following command in the terminal console
+```bash
+python -m pytest tests/ -v
+```
+
 # Flask + Gunicorn + Nginx Deployment Guide
 
 ## 1. Connect to Your Server
