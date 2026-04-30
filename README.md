@@ -21,7 +21,7 @@ Slideshows
 - [Final Slideshow](https://docs.google.com/presentation/d/133DUUM4ZAQ2XI9xX2_NaO8pNLlqyLtPKD8LTBuDHOWA/edit?usp=sharing)
 
 # Install dependencies
-Either install dependencies manually through your local IDE or use the following command. Make sure the virtual env has been set up for running this command. 
+Either install dependencies manually through your local IDE or use the following command. Make sure the virtual env has been set up before running this command. 
 ```bash
 pip install -r requirements.txt
 ```
