@@ -20,21 +20,28 @@ Slideshows
 - [Mid-Semester Slideshow](https://docs.google.com/presentation/d/1oa4ge7Kv9xXsgHoBk9u0-2Guwie36OXVhX3_5XdY81g/edit?usp=sharing)
 - [Final Slideshow](https://docs.google.com/presentation/d/133DUUM4ZAQ2XI9xX2_NaO8pNLlqyLtPKD8LTBuDHOWA/edit?usp=sharing)
 
-# Repository Organization
+## Project Structure
 
-**config:** Related to question modification and addition.
+- **config/**  
+  Handles question configuration, including modification and addition logic.
 
-**csv_formatting:** Related to csv file modifications, primiarly for researchers.
+- **csv_formatting/**  
+  Utilities for working with CSV files, primarily used for research-related data processing.
 
-**database:** Database creation and helper functions.
+- **database/**  
+  Database initialization, management, and helper functions.
 
-**routes:** Flask style organization, each route is a backend python file related to a specific function of the website.
+- **routes/**  
+  Backend route handlers organized in a Flask-style structure. Each file corresponds to a specific feature or endpoint.
 
-**static:** CSS files.
+- **static/**  
+  Static assets such as CSS files.
 
-**templates:** HTML files. 
+- **templates/**  
+  HTML templates used for rendering the frontend.
 
-**tests:** Test cases files.
+- **tests/**  
+  Test cases and testing utilities.
 
 # Install dependencies
 Either install dependencies manually through your local IDE or use the following command. Make sure the virtual env has been set up before running this command. 
